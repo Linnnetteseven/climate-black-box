@@ -164,6 +164,19 @@ def get_alerts(project_id: str | None = Query(default=None)) -> list[Alert]:
     return repository.list_alerts(project_id)
 
 
+@api.get("/projects/{project_id}/latest-alert", tags=["alerts"])
+def get_latest_alert(project_id: str):
+    """The alert the demo opens on, or an explicit null.
+
+    A project with no alert is a result, not an error: it means the detector
+    looked and found nothing, which is exactly what the control site shows.
+    """
+    alert = repository.latest_alert(project_id)
+    return {"alert": alert, "detector_ran": True,
+            "note": None if alert else
+                    "No divergence detected. The rule ran and stayed quiet."}
+
+
 @api.get("/alerts/{alert_id}", response_model=Alert, tags=["alerts"])
 def get_alert(alert_id: str, request: Request):
     alert = repository.get_alert(alert_id)

@@ -44,8 +44,10 @@ db-migrate: ## apply migrations (drop first; errors on a clean db are expected)
 	@$(PY) scripts/run_sql.py database/migrations/002_spatial.sql --tolerant
 	@$(PY) scripts/run_sql.py database/views/010_views.sql
 
-db-seed: ## load the Kiambu demo project
+db-seed: ## load the demo projects and derive spatial geometry
 	@$(PY) scripts/run_sql.py database/seed/010_project.sql
+	@$(PY) scripts/run_sql.py database/seed/020_mau_project.sql
+	@$(PY) scripts/run_sql.py database/seed/030_spatial_backfill.sql --tolerant
 
 test: ## run every test
 	$(PYTEST)

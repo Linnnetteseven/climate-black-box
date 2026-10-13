@@ -25,10 +25,8 @@ VALUES ('PROJECTS', 'BOUNDARY',
 
 CREATE INDEX ix_projects_boundary ON projects (boundary) INDEXTYPE IS MDSYS.SPATIAL_INDEX_V2;
 
--- Derive the geometry from the GeoJSON we already hold, so the two never
--- disagree about where the project is.
-UPDATE projects
-   SET boundary = SDO_UTIL.FROM_GEOJSON(boundary_geojson)
- WHERE boundary_geojson IS NOT NULL;
+-- NOTE: the geometry itself is derived in database/seed/030_spatial_backfill.sql,
+-- which runs AFTER the seed. Doing it here would be a no-op on an empty table
+-- and would leave boundary NULL with no error to notice.
 
 COMMIT;

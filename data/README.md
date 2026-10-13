@@ -32,7 +32,7 @@ If a figure cannot be traced to a row here, it should not be on screen.
 - **Access:** free, no API key. Non-commercial use.
 - **Resolution:** **~25 km grid.**
 - **Limitations we state out loud:** at ~25 km a single grid cell covers far
-  more than our ~210 ha site. This is **district-level context**, useful for
+  more than our ~314 ha site. This is **district-level context**, useful for
   answering "was the whole area dry that season", and it **cannot** resolve
   conditions at the project site. We never present it as site rainfall.
 

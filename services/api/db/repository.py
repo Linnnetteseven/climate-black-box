@@ -201,6 +201,11 @@ def get_alert(alert_id: str) -> Alert | None:
         return _to_alert(row) if row else None
 
 
+def latest_alert(project_id: str) -> Alert | None:
+    alerts = list_alerts(project_id)
+    return alerts[0] if alerts else None
+
+
 # --- audit trail -----------------------------------------------------------
 
 def list_audit_events(project_id: str) -> list[AuditEvent]:

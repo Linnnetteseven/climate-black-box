@@ -30,7 +30,7 @@ INSERT INTO projects (
   'Kiambu County',
   'Demonstration implementer -- not a real organisation',
   'active',
-  -- Approximate demonstration polygon, WGS84. ~210 ha on the Kiambu
+  -- Approximate demonstration polygon, WGS84. 313.8 ha (computed by SDO_GEOM on ADB) on the Kiambu
   -- highlands. boundary_is_survey = 0, and the UI labels it "approximate
   -- demo polygon" wherever it is drawn. We do not imply survey accuracy.
   '{"type":"Polygon","coordinates":[[

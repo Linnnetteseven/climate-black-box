@@ -28,7 +28,7 @@ LANDSAT_COLLECTION = "landsat-c2-l2"
 OPEN_METEO_ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 
 #: ERA5's grid spacing. Stated everywhere this data is displayed, because a
-#: ~25 km cell cannot resolve a 210 ha site and we must not imply it can.
+#: ~25 km cell cannot resolve a ~314 ha site and we must not imply it can.
 ERA5_RESOLUTION_NOTE = (
     "ERA5 reanalysis, ~25 km grid -- district-level context, not site rainfall"
 )
@@ -64,7 +64,7 @@ def search_landsat(
     """Find Landsat 8/9 L2 scenes overlapping ``bbox``.
 
     ``max_cloud_pct`` is a scene-level filter and is deliberately generous:
-    scene cloud cover says little about our 210 ha polygon, and the real
+    scene cloud cover says little about our ~314 ha polygon, and the real
     decision is made per-pixel by the QA mask. Filtering hard here would
     throw away months that are perfectly clear over the site.
     """
