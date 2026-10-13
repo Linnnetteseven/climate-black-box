@@ -1,0 +1,4 @@
+# secp256k1 is a native addon used for transaction signing; its build script
+# must run or signing falls back to an unavailable binding.
+allowBuilds:
+  secp256k1: true

@@ -1,0 +1,10 @@
+{
+  "name": "@cbb/ckb",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence anchoring on Nervos CKB testnet.",
+  "dependencies": {
+    "@ckb-ccc/core": "^1.23.0"
+  }
+}
