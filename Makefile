@@ -62,6 +62,12 @@ web: ## run the frontend
 ingest: ## re-run the Landsat + rainfall pipeline and diff against the fixture
 	$(PY) -m services.analytics.ingest --check
 
+ingest-write: ## re-run the pipeline and overwrite the fixture
+	$(PY) -m services.analytics.ingest
+
+load: ## load the observation fixture into Oracle (idempotent)
+	$(PY) scripts/load_observations.py
+
 anchor: ## anchor unanchored evidence to CKB testnet
 	$(PY) -m services.ckb.anchor
 

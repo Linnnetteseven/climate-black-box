@@ -21,8 +21,22 @@ the repo. Work top to bottom; each step says what to send back.
 2. Settings:
    - **Display name:** `climate-black-box`
    - **Database name:** `CBB` (no hyphens allowed here)
-   - **Workload type:** **Data Warehouse** — APEX and Spatial are both
-     included, and DW gives the better default for our read-heavy queries.
+   - **Workload type:** **Transaction Processing.**
+
+     The console may list these as *Data Lakehouse* (the renamed Data
+     Warehouse), *Transaction Processing*, *JSON* and *APEX*.
+
+     **Do not pick APEX.** That workload type has **no SQL*Net connectivity** —
+     every interaction must go over HTTPS. Our FastAPI service connects with
+     `oracledb` over SQL*Net, so the APEX type would break the repository
+     layer, the migration runner and the loader. It is cheaper because it is
+     restricted to APEX/ORDS access only.
+
+     Transaction Processing suits our shape: many small reads and writes
+     (observations, interventions, audit events, chain anchors) rather than
+     large analytical scans. Data Lakehouse would also work but is tuned for a
+     problem we do not have — the whole dataset is tens of rows. APEX, ORDS and
+     Spatial are all included either way.
    - **Deployment:** Serverless
    - **Always Free:** toggle **ON** if offered. It is enough for this, and it
      protects the $300 from a runaway. If the shape you want is not Always

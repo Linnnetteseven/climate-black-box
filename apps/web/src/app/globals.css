@@ -1,0 +1,85 @@
+/* ---------------------------------------------------------------------------
+   Climate Black Box -- design tokens.
+
+   Frozen at Phase 1. The chart series colours are NOT free choices: they are
+   validated steps (aqua #199e70, blue #3987e5) that pass lightness band,
+   chroma floor, CVD separation, normal-vision separation and contrast against
+   a dark surface. Status amber is reserved for alerts and never used as a
+   series colour. Re-run the palette validator before changing any of them.
+
+   The look is cinematic deep-space / Earth observation: near-black grounds,
+   restrained teal, amber only where something needs attention.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* surfaces, darkest first -- this design commits to dark */
+  --ground:        #070c0f;
+  --surface-1:     #0d1418;
+  --surface-2:     #131d22;
+  --surface-3:     #1b272d;
+  --line:          #23323a;
+  --line-strong:   #354953;
+
+  /* ink */
+  --ink:           #eef4f6;
+  --ink-2:         #b9c8ce;
+  --ink-muted:     #7b8f98;
+  --ink-faint:     #54666f;
+
+  /* validated chart series */
+  --series-ndvi:   #199e70;
+  --series-rain:   #3987e5;
+
+  /* reserved status -- never a series colour, always paired with a label */
+  --status-good:     #0ca30c;
+  --status-warning:  #fab219;
+  --status-serious:  #ec835a;
+  --status-critical: #d03b3b;
+
+  /* provenance badge colours, deliberately low-chroma so they read as
+     metadata rather than competing with the data */
+  --prov-real:      #199e70;
+  --prov-simulated: #c98500;
+  --prov-fallback:  #9085e9;
+
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+  --radius: 4px;
+  --motion-fast: 140ms;
+  --motion: 320ms;
+  --motion-slow: 900ms;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--series-ndvi); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--series-ndvi); outline-offset: 3px; border-radius: 2px; }
+
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* An orbital drift behind the hero. Motion that says "observation from
+   above", not decoration for its own sake. */
+@keyframes drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-40px, 18px, 0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
