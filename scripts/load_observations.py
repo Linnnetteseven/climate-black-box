@@ -27,7 +27,10 @@ from services.api.db.connection import cursor  # noqa: E402
 load_dotenv()
 log = logging.getLogger("cbb.load")
 
-FIXTURE = Path("data/sample/observations_ndvi-v1.json")
+FIXTURES = {
+    "kiambu-restoration-demo": Path("data/sample/observations_ndvi-v1.json"),
+    "mau-transmara-demo": Path("data/sample/observations_mau_ndvi-v1.json"),
+}
 
 
 def _evidence_id(project_id: str, scene_id: str, period_key: str) -> str:
@@ -43,7 +46,11 @@ def _observation_id(project_id: str, metric: str, period_key: str, version: str)
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    payload = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--project", default="kiambu-restoration-demo", choices=sorted(FIXTURES))
+    args = ap.parse_args()
+    payload = json.loads(FIXTURES[args.project].read_text(encoding="utf-8"))
     project_id = payload["project_id"]
     metric = payload["metric"]
     rows = payload["observations"]
