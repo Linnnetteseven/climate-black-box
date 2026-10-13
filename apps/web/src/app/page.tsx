@@ -1,18 +1,36 @@
+import Link from "next/link";
 import { api } from "@/lib/api";
+import { AlertCard } from "@/components/AlertCard";
 import { NdviChart } from "@/components/NdviChart";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+import { VerifyPanel } from "@/components/VerifyPanel";
 
 export const dynamic = "force-dynamic";
 
-const PROJECT_ID = "kiambu-restoration-demo";
+const SITES = [
+  { id: "mau-transmara-demo", short: "Transmara, SW Mau" },
+  { id: "kiambu-restoration-demo", short: "Kiambu (control)" },
+];
 
-export default async function Page() {
-  const [projectResult, commitmentsResult, observationsResult, healthResult] =
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ project?: string }>;
+}) {
+  const params = await searchParams;
+  const PROJECT_ID = SITES.some((s) => s.id === params.project)
+    ? params.project!
+    : SITES[0].id;
+
+  const [projectResult, commitmentsResult, observationsResult, healthResult,
+         alertResult, auditResult] =
     await Promise.all([
       api.project(PROJECT_ID),
       api.commitments(PROJECT_ID),
       api.observations(PROJECT_ID),
       api.health(),
+      api.latestAlert(PROJECT_ID),
+      api.audit(PROJECT_ID),
     ]);
 
   // Every surface degrades independently. If the API is down the page still
@@ -22,6 +40,8 @@ export default async function Page() {
   const commitments = commitmentsResult.ok ? commitmentsResult.data : [];
   const observations = observationsResult.ok ? observationsResult.data : [];
   const health = healthResult.ok ? healthResult.data : null;
+  const latestAlert = alertResult.ok ? alertResult.data : null;
+  const auditEvents = auditResult.ok ? auditResult.data : [];
 
   const usable = observations.filter((o) => o.value !== null);
   const latest = [...usable].sort((a, b) => b.period_start.localeCompare(a.period_start))[0];
@@ -60,6 +80,39 @@ export default async function Page() {
           you what is happening now.
         </p>
       </header>
+
+      <nav
+        aria-label="Demonstration sites"
+        style={{ display: "flex", gap: 8, padding: "24px 0 0", flexWrap: "wrap" }}
+      >
+        <span
+          className="mono"
+          style={{
+            fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase",
+            color: "var(--ink-muted)", alignSelf: "center", marginRight: 4,
+          }}
+        >
+          Site
+        </span>
+        {SITES.map((s) => {
+          const active = s.id === PROJECT_ID;
+          return (
+            <Link
+              key={s.id}
+              href={`/?project=${s.id}`}
+              style={{
+                fontFamily: "var(--font-mono)", fontSize: 12.5, padding: "6px 12px",
+                borderRadius: 2, textDecoration: "none",
+                background: active ? "var(--series-ndvi)" : "var(--surface-1)",
+                color: active ? "#04120d" : "var(--ink-2)",
+                border: `1px solid ${active ? "var(--series-ndvi)" : "var(--line-strong)"}`,
+              }}
+            >
+              {s.short}
+            </Link>
+          );
+        })}
+      </nav>
 
       {!projectResult.ok && (
         <Degraded message={projectResult.error.message} requestId={projectResult.error.request_id} />
@@ -140,6 +193,46 @@ export default async function Page() {
             message={observationsResult.error.message}
             requestId={observationsResult.error.request_id}
           />
+        )}
+      </section>
+
+      <section style={{ padding: "8px 0 56px" }}>
+        <h2 style={{ fontSize: 22, marginBottom: 6 }}>Detection</h2>
+        <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
+          Each month is compared with the same calendar month in the approved
+          baseline window, so the dry season is not mistaken for decline.
+        </p>
+        {latestAlert ? (
+          <AlertCard latest={latestAlert} />
+        ) : (
+          <Degraded
+            message={alertResult.ok ? "No detector result." : alertResult.error.message}
+            requestId={alertResult.ok ? "—" : alertResult.error.request_id}
+          />
+        )}
+      </section>
+
+      <section style={{ padding: "8px 0 56px" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap", marginBottom: 6 }}>
+          <h2 style={{ fontSize: 22 }}>Integrity</h2>
+          <span className="mono" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
+            {auditEvents.length} evidence records ·{" "}
+            {auditEvents.filter((e) => e.anchor?.status === "confirmed").length} anchored on CKB testnet
+          </span>
+        </div>
+        <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
+          Each record&apos;s manifest is hashed and committed on chain, with every
+          manifest carrying the hash of the one before it. The chain is an
+          application-level structure anchored on CKB — it is not enforced by an
+          on-chain script.
+        </p>
+        {auditEvents.length ? (
+          <VerifyPanel events={auditEvents} />
+        ) : (
+          <p style={{ color: "var(--ink-muted)" }}>
+            No evidence chain yet. Run{" "}
+            <span className="mono">scripts/build_evidence_chain.py</span>.
+          </p>
         )}
       </section>
 

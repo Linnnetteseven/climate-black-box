@@ -23,6 +23,7 @@ from fastapi import APIRouter, FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from services.ckb.verifier import verify_event
 from services.api.db import repository
 from services.api.db.connection import DatabaseUnavailable, describe_backend
 from services.api.schemas.contracts import (
@@ -183,6 +184,34 @@ def get_alert(alert_id: str, request: Request):
     if alert is None:
         return _error(request, "not_found", f"No alert with id {alert_id!r}.", 404)
     return alert
+
+
+@api.get("/evidence/{event_id}/verify", tags=["integrity"])
+def get_verify(event_id: str, request: Request):
+    """Re-hash the stored manifest and compare with the on-chain commitment."""
+    result = verify_event(event_id)
+    if result is None:
+        return _error(request, "not_found", f"No audit event {event_id!r}.", 404)
+    return result
+
+
+@api.post("/evidence/{event_id}/tamper-check", tags=["integrity"])
+def post_tamper_check(
+    event_id: str,
+    request: Request,
+    field: str = Query(default="metric_value",
+                       description="manifest field to alter before verifying"),
+):
+    """Demonstrate the failure path by altering one field before verifying.
+
+    Nothing is written. The stored manifest is untouched; only this response
+    reflects the mutation. This exists so the failure can be shown live rather
+    than asserted.
+    """
+    result = verify_event(event_id, tamper_field=field)
+    if result is None:
+        return _error(request, "not_found", f"No audit event {event_id!r}.", 404)
+    return result
 
 
 app.include_router(api)

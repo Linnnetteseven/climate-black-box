@@ -64,6 +64,75 @@ export interface Observation {
   simulation_status: SimulationStatus;
 }
 
+export interface Alert {
+  id: string;
+  project_id: string;
+  metric: string;
+  rule_version: string;
+  method: string;
+  severity: "info" | "review" | "urgent";
+  status: "open" | "investigating" | "resolved" | "dismissed";
+  observed_value: number | null;
+  expected_value: number | null;
+  expected_low: number | null;
+  expected_high: number | null;
+  deviation_abs: number | null;
+  deviation_pct: number | null;
+  consecutive_periods: number;
+  quality_flags: string[];
+  evidence_ids: string[];
+  explanation: string;
+  limitations: string;
+  created_at: string;
+  simulation_status: SimulationStatus;
+}
+
+export interface AnchorRef {
+  network: string;
+  tx_hash: string | null;
+  output_index: number | null;
+  status: "pending" | "confirmed" | "failed";
+  explorer_url: string | null;
+  anchored_at: string | null;
+}
+
+export interface AuditEvent {
+  id: string;
+  project_id: string;
+  event_type: string;
+  subject_table: string | null;
+  subject_id: string | null;
+  actor: string | null;
+  manifest_sha256: string | null;
+  previous_event_sha256: string | null;
+  anchor: AnchorRef | null;
+  created_at: string;
+  simulation_status: SimulationStatus;
+}
+
+export type VerificationState =
+  | "verified" | "modified" | "not_anchored" | "pending" | "chain_unavailable";
+
+export interface VerificationResult {
+  evidence_id: string;
+  verified: boolean;
+  state: VerificationState;
+  manifest_hash_recomputed: string | null;
+  manifest_hash_onchain: string | null;
+  network: string | null;
+  tx_hash: string | null;
+  output_index: number | null;
+  anchored_at: string | null;
+  explorer_url: string | null;
+  detail: string | null;
+}
+
+export interface LatestAlert {
+  alert: Alert | null;
+  detector_ran: boolean;
+  note: string | null;
+}
+
 export interface ApiError {
   code: string;
   message: string;
@@ -128,4 +197,7 @@ export const api = {
   observations: (id: string, metric = "ndvi_mean") =>
     get<Observation[]>(`/api/projects/${id}/observations?metric=${encodeURIComponent(metric)}`),
   health: () => get<{ status: string; backend: string }>("/api/health"),
+  latestAlert: (id: string) => get<LatestAlert>(`/api/projects/${id}/latest-alert`),
+  audit: (id: string) => get<AuditEvent[]>(`/api/projects/${id}/audit`),
+  verify: (eventId: string) => get<VerificationResult>(`/api/evidence/${eventId}/verify`),
 };
