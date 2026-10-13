@@ -126,12 +126,20 @@ def persist_alert(project_id: str, decision, clim) -> str | None:
     return alert_id
 
 
-def anchor(hash_hex: str) -> dict:
-    """Shell out to the CCC signer. The private key never enters this process."""
+def anchor(hashes: list[str]) -> dict:
+    """Anchor a batch of manifest hashes in one transaction.
+
+    One call, one transaction, one output cell per hash. Anchoring them
+    separately fails: each would spend the same unconfirmed input and CKB
+    rejects the rest as replace-by-fee conflicts.
+
+    The private key never enters this process -- it is read by the Node signer
+    from the environment.
+    """
     try:
         result = subprocess.run(
-            ["node", "anchor.mjs", f"0x{hash_hex}"],
-            cwd=CKB_DIR, capture_output=True, text=True, timeout=120,
+            ["node", "anchor.mjs", *(f"0x{h}" for h in hashes)],
+            cwd=CKB_DIR, capture_output=True, text=True, timeout=180,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         return {"ok": False, "code": "anchor_unavailable", "message": str(exc)}
@@ -234,32 +242,42 @@ def _anchor_pending(project_id: str) -> None:
                 WHERE project_id = :p ORDER BY created_at""", p=project_id)
         events = cur.fetchall()
 
-    for event_id, digest in events:
-        result = anchor(digest)
-        anchor_id = _id("anc", event_id)
-        if result.get("ok"):
-            with cursor() as cur:
-                cur.execute(
-                    """INSERT INTO chain_anchors
-                         (id, event_id, network, tx_hash, output_index, manifest_sha256,
-                          status, explorer_url, anchored_at)
-                       VALUES (:id, :ev, 'ckb-testnet', :tx, :idx, :sha, 'confirmed',
-                               :url, :ts)""",
-                    id=anchor_id, ev=event_id, tx=result["tx_hash"],
-                    idx=result["output_index"], sha=digest,
-                    url=result["explorer_url"], ts=datetime.now(timezone.utc),
-                )
-            log.info("  anchored %s -> %s", event_id, result["tx_hash"])
-        else:
+    if not events:
+        return
+
+    result = anchor([digest for _, digest in events])
+
+    if not result.get("ok"):
+        # Every event is recorded as pending, with nothing invented. A pending
+        # anchor is displayed as pending.
+        for event_id, digest in events:
             with cursor() as cur:
                 cur.execute(
                     """INSERT INTO chain_anchors
                          (id, event_id, network, manifest_sha256, status)
                        VALUES (:id, :ev, 'ckb-testnet', :sha, 'pending')""",
-                    id=anchor_id, ev=event_id, sha=digest,
+                    id=_id("anc", event_id), ev=event_id, sha=digest,
                 )
-            log.warning("  NOT anchored (%s): %s", result.get("code"),
-                        str(result.get("message"))[:120])
+        log.warning("  NOT anchored (%s): %s", result.get("code"),
+                    str(result.get("message"))[:160])
+        return
+
+    tx_hash = result["tx_hash"]
+    by_hash = {a["manifest_sha256"].lower(): a["output_index"] for a in result["anchors"]}
+    for event_id, digest in events:
+        index = by_hash[f"0x{digest}".lower()]
+        with cursor() as cur:
+            cur.execute(
+                """INSERT INTO chain_anchors
+                     (id, event_id, network, tx_hash, output_index, manifest_sha256,
+                      status, explorer_url, anchored_at)
+                   VALUES (:id, :ev, 'ckb-testnet', :tx, :idx, :sha, 'confirmed',
+                           :url, :ts)""",
+                id=_id("anc", event_id), ev=event_id, tx=tx_hash, idx=index,
+                sha=digest, url=result["explorer_url"], ts=datetime.now(timezone.utc),
+            )
+    log.info("  anchored %d events in one transaction: %s", len(events), tx_hash)
+    log.info("  %s", result["explorer_url"])
 
 
 if __name__ == "__main__":
