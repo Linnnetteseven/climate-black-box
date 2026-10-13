@@ -128,6 +128,28 @@ def main() -> int:
             else:
                 inserted += 1
 
+            # Rainfall is evidence too. The alert's reasoning cites it, so it
+            # has to exist as a row with its own id and provenance -- otherwise
+            # we are asserting context we cannot show.
+            if row.get("precipitation_mm") is not None:
+                rain_id = _observation_id(project_id, "precipitation_mm",
+                                          row["period_key"], "era5-v1")
+                cur.execute(
+                    """MERGE INTO observations t
+                       USING (SELECT :id AS id FROM dual) s ON (t.id = s.id)
+                       WHEN MATCHED THEN UPDATE SET value = :value
+                       WHEN NOT MATCHED THEN INSERT
+                         (id, project_id, metric, value, unit, period_key,
+                          period_start, period_end, processing_version,
+                          quality_flags, simulation_status)
+                       VALUES (:id, :pid, 'precipitation_mm', :value, 'mm', :pkey,
+                               :pstart, :pend, 'era5-v1',
+                               'era5_reanalysis,grid_25km', 'real')""",
+                    id=rain_id, pid=project_id, value=row["precipitation_mm"],
+                    pkey=row["period_key"], pstart=_ts(row["period_start"]),
+                    pend=_ts(row["period_end"]),
+                )
+
     log.info("inserted %d, updated %d, skipped %d (of %d rows)",
              inserted, updated, skipped, len(rows))
     return 0

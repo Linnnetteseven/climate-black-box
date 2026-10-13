@@ -13,6 +13,7 @@ import json
 from datetime import datetime
 from typing import Any
 
+from services.api.db.coerce import as_json, as_str_list, as_text
 from services.api.db.connection import cursor
 from services.api.schemas.contracts import (
     Alert,
@@ -23,34 +24,6 @@ from services.api.schemas.contracts import (
     Project,
     SimulationStatus,
 )
-
-
-def _json(value: Any) -> Any:
-    """Oracle hands JSON-constrained columns back as a dict, a str or a LOB
-    depending on version and column type. Normalise all three."""
-    if value is None:
-        return None
-    if isinstance(value, (dict, list)):
-        return value
-    if hasattr(value, "read"):
-        value = value.read()
-    if isinstance(value, str):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            return None
-    return None
-
-
-def _text(value: Any) -> str | None:
-    if value is None:
-        return None
-    return value.read() if hasattr(value, "read") else str(value)
-
-
-def _flags(value: Any) -> list[str]:
-    raw = _text(value)
-    return [f.strip() for f in raw.split(",") if f.strip()] if raw else []
 
 
 # --- projects --------------------------------------------------------------
@@ -65,7 +38,7 @@ _PROJECT_COLUMNS = """
 def _to_project(row: tuple) -> Project:
     return Project(
         id=row[0], name=row[1], country=row[2], region=row[3], owner_org=row[4],
-        status=row[5], boundary=_json(row[6]), boundary_is_survey=bool(row[7]),
+        status=row[5], boundary=as_json(row[6]), boundary_is_survey=bool(row[7]),
         reporting_start=row[8].date() if isinstance(row[8], datetime) else row[8],
         reporting_end=row[9].date() if isinstance(row[9], datetime) else row[9],
         simulation_status=SimulationStatus(row[10]),
@@ -103,7 +76,7 @@ def list_commitments(project_id: str) -> list[Commitment]:
             Commitment(
                 id=r[0], project_id=r[1], metric=r[2], target_value=r[3], unit=r[4],
                 due_date=r[5], baseline_start=r[6], baseline_end=r[7],
-                source_document=r[8], source_text_span=_text(r[9]),
+                source_document=r[8], source_text_span=as_text(r[9]),
                 extraction_status=r[10], extraction_model=r[11], prompt_version=r[12],
                 reviewer=r[13], reviewed_at=r[14],
                 simulation_status=SimulationStatus(r[15]),
@@ -149,7 +122,7 @@ def list_observations(
                 id=r[0], project_id=r[1], metric=r[2], value=r[3], unit=r[4],
                 period_start=r[5], period_end=r[6], observed_at=r[7],
                 valid_pixel_fraction=r[8], cloud_cover_scene_pct=r[9],
-                quality_flags=_flags(r[10]),
+                quality_flags=as_str_list(r[10]),
                 source_dataset=r[11], source_scene_id=r[12],
                 processing_version=r[13], evidence_asset_id=r[14],
                 simulation_status=SimulationStatus(r[15]),
@@ -176,8 +149,8 @@ def _to_alert(r: tuple) -> Alert:
         observed_value=r[7], expected_value=r[8], expected_low=r[9], expected_high=r[10],
         deviation_abs=r[11], deviation_pct=r[12], consecutive_periods=r[13] or 0,
         period_start=r[14], period_end=r[15],
-        quality_flags=_flags(r[16]), evidence_ids=_json(r[17]) or [],
-        explanation=_text(r[18]) or "", limitations=_text(r[19]) or "",
+        quality_flags=as_str_list(r[16]), evidence_ids=as_json(r[17]) or [],
+        explanation=as_text(r[18]) or "", limitations=as_text(r[19]) or "",
         created_at=r[20], simulation_status=SimulationStatus(r[21]),
     )
 

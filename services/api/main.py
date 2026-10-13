@@ -23,11 +23,15 @@ from fastapi import APIRouter, FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from services.api.interventions import create_intervention, list_interventions, trend_for
 from services.ckb.verifier import verify_event
+from services.genai.service import investigation_for
 from services.api.db import repository
 from services.api.db.connection import DatabaseUnavailable, describe_backend
 from services.api.schemas.contracts import (
     Alert,
+    Intervention,
+    InterventionCreate,
     AuditEvent,
     Commitment,
     ErrorResponse,
@@ -184,6 +188,44 @@ def get_alert(alert_id: str, request: Request):
     if alert is None:
         return _error(request, "not_found", f"No alert with id {alert_id!r}.", 404)
     return alert
+
+
+@api.get("/projects/{project_id}/interventions", response_model=list[Intervention],
+         tags=["interventions"])
+def get_interventions(project_id: str) -> list[Intervention]:
+    return list_interventions(project_id)
+
+
+@api.post("/interventions", response_model=Intervention, tags=["interventions"])
+def post_intervention(payload: InterventionCreate):
+    """Record a corrective action.
+
+    Always stored as `simulated` -- the database refuses anything else, because
+    this demonstration has no field team and must not be able to imply it does.
+    Logging one appends to the evidence chain.
+    """
+    return create_intervention(payload)
+
+
+@api.get("/projects/{project_id}/trend", tags=["interventions"])
+def get_trend(project_id: str):
+    """Pre/post comparison around the latest intervention, and what to do next."""
+    return trend_for(project_id)
+
+
+@api.get("/alerts/{alert_id}/investigation", tags=["alerts"])
+def get_investigation(alert_id: str, request: Request, refresh: bool = Query(default=False)):
+    """Evidence-grounded investigation for an alert.
+
+    `simulation_status` tells you where it came from: `real` means the model
+    produced it and the output passed validation; `fallback` means the
+    deterministic template did, because the model was unavailable or its answer
+    cited evidence we never supplied.
+    """
+    result = investigation_for(alert_id, refresh=refresh)
+    if result is None:
+        return _error(request, "not_found", f"No alert {alert_id!r}.", 404)
+    return result
 
 
 @api.get("/evidence/{event_id}/verify", tags=["integrity"])

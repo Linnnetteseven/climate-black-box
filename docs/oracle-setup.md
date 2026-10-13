@@ -1,5 +1,16 @@
 # Oracle setup — what to do in the console
 
+> **Status as of 13 Oct, after the first build session.** Steps 1, 2 and 3 are
+> DONE. The ADB is provisioned in Frankfurt (Lakehouse workload), the wallet is
+> downloaded and verified, and the `CBB` application user exists with its
+> password stored in `.env`. The GeoRaster question is settled: **Oracle
+> Spatial and GeoRaster are both available** on this instance (84 `SDO_GEOR*`
+> objects), the schema is migrated, both demonstration sites are loaded, and
+> the API runs against ADB.
+>
+> **What remains: step 4 (APEX workspace) and, optionally, step 5 (OCI
+> Generative AI).** Step 6 describes work already completed.
+
 **Home region: eu-frankfurt-1 (Frankfurt).** Good news: Frankfurt is one of
 the regions where OCI Generative AI is available, so the AI beat does not
 need a second region or a workaround.
@@ -14,7 +25,7 @@ the repo. Work top to bottom; each step says what to send back.
 
 ---
 
-## 1. Autonomous Database (20 minutes, mostly waiting)
+## 1. Autonomous Database — DONE
 
 1. Console → **Oracle Database → Autonomous Database** → *Create Autonomous
    Database*.
@@ -53,7 +64,7 @@ Always Free. No password.
 
 ---
 
-## 2. Wallet (this is how the API connects)
+## 2. Wallet — DONE (password verified)
 
 1. On the database page → **Database connection** → *Download wallet*.
 2. Set a wallet password (any strong value; save it).
@@ -75,7 +86,18 @@ keep it outside the repo anyway.
 
 ---
 
-## 3. Database user for the app
+## 3. Database user for the app — DONE
+
+The `CBB` user was created during the build session using the ADMIN
+credential, granted `CONNECT, RESOURCE` and unlimited quota on `DATA`, with a
+generated 20-character password written straight into `.env`. It was never
+printed. Retrieve it with `grep ADB_PASSWORD .env` if a tool asks for it.
+
+The GeoRaster check below returned **84** `SDO_GEOR*` objects and **3**
+`SDO_GEOMETRY` objects, so `002_spatial.sql` applies in full on ADB and native
+geometry is live (`gtype=2003`, `srid=4326`, spatial index present).
+
+Original instructions, kept for reference:
 
 Do **not** let the app connect as ADMIN. On the database page → **Database
 actions** → *SQL*, signed in as ADMIN, run:
@@ -106,7 +128,19 @@ project polygon in it. `SDO_GEOR*` decides GeoRaster.
 
 ---
 
-## 4. APEX workspace (this is our Oracle proof on stage)
+## 4. APEX workspace — OUTSTANDING, highest value
+
+**The one remaining step that matters for the demo.** Attach the workspace to
+the EXISTING `CBB` schema. If APEX creates its own schema it will be reading
+empty tables, and the "same rows, two interfaces" proof is lost.
+
+Verify it worked with, in SQL Workshop -> SQL Commands:
+
+```sql
+SELECT project_id, COUNT(*) AS observations FROM observations GROUP BY project_id;
+```
+
+Expect `kiambu-restoration-demo 44` and `mau-transmara-demo 45`.
 
 1. Database page → **Tools** tab → **APEX** → *Open APEX*.
 2. First time it asks you to create a workspace. Sign in as `ADMIN` with the
@@ -124,7 +158,11 @@ and confirmation that the workspace is attached to the `CBB` schema.
 
 ---
 
-## 5. OCI Generative AI access
+## 5. OCI Generative AI — OPTIONAL for the mentor call
+
+Needed only for the AI investigation beat. A deterministic fallback already
+exists and is badged `fallback` in the UI, so the demo holds without this.
+Frankfurt supports Generative AI, so it can be done at any point.
 
 Frankfurt has it. Two things are needed: a compartment and a policy.
 
@@ -176,7 +214,7 @@ fingerprint.
 
 ---
 
-## 6. What I do once you send those back
+## 6. Follow-on work — DONE (this was not a console step)
 
 - Point the API at ADB instead of local Oracle — it is one connection string
   plus `TNS_ADMIN`, already wired in `.env.example`.

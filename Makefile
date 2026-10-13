@@ -70,11 +70,14 @@ ingest-write: ## re-run the pipeline and overwrite the fixture
 load: ## load the observation fixture into Oracle (idempotent)
 	$(PY) scripts/load_observations.py
 
-anchor: ## anchor unanchored evidence to CKB testnet
-	$(PY) -m services.ckb.anchor
+anchor: ## anchor any unanchored evidence to CKB testnet
+	$(PY) scripts/anchor_pending.py --project $${PROJECT:-mau-transmara-demo}
 
-verify: ## verify every anchored evidence record
-	$(PY) -m services.ckb.verify --all
+verify: ## verify every anchored evidence record against the chain
+	$(PY) scripts/verify_chain.py --project $${PROJECT:-mau-transmara-demo}
+
+tamper: ## demonstrate that verification fails on an altered manifest
+	$(PY) scripts/verify_chain.py --project $${PROJECT:-mau-transmara-demo} --tamper observed_value
 
 clean:
 	rm -rf .venv apps/web/node_modules apps/web/.next .pytest_cache

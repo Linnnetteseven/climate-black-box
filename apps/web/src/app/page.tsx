@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { AlertCard } from "@/components/AlertCard";
+import { InterventionPanel } from "@/components/InterventionPanel";
+import { InvestigationPanel } from "@/components/InvestigationPanel";
 import { NdviChart } from "@/components/NdviChart";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
 import { VerifyPanel } from "@/components/VerifyPanel";
@@ -23,7 +25,7 @@ export default async function Page({
     : SITES[0].id;
 
   const [projectResult, commitmentsResult, observationsResult, healthResult,
-         alertResult, auditResult] =
+         alertResult, auditResult, trendResult] =
     await Promise.all([
       api.project(PROJECT_ID),
       api.commitments(PROJECT_ID),
@@ -31,6 +33,7 @@ export default async function Page({
       api.health(),
       api.latestAlert(PROJECT_ID),
       api.audit(PROJECT_ID),
+      api.trend(PROJECT_ID),
     ]);
 
   // Every surface degrades independently. If the API is down the page still
@@ -42,6 +45,14 @@ export default async function Page({
   const health = healthResult.ok ? healthResult.data : null;
   const latestAlert = alertResult.ok ? alertResult.data : null;
   const auditEvents = auditResult.ok ? auditResult.data : [];
+  const trend = trendResult.ok ? trendResult.data : null;
+
+  // Beat 5 only exists when there is something to investigate. On the control
+  // site there is no alert, and that absence is the point.
+  const alertId = latestAlert?.alert?.id;
+  const investigationResult = alertId ? await api.investigation(alertId) : null;
+  const investigation =
+    investigationResult?.ok ? investigationResult.data : null;
 
   const usable = observations.filter((o) => o.value !== null);
   const latest = [...usable].sort((a, b) => b.period_start.localeCompare(a.period_start))[0];
@@ -211,6 +222,36 @@ export default async function Page({
           />
         )}
       </section>
+
+      {investigation && (
+        <section style={{ padding: "8px 0 56px" }}>
+          <h2 style={{ fontSize: 22, marginBottom: 6 }}>Investigation</h2>
+          <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
+            Generated from a bounded packet of the evidence this alert rests on.
+            Every statement cites records that exist; anything citing evidence we
+            did not supply is rejected and the deterministic fallback is used
+            instead.
+          </p>
+          <InvestigationPanel investigation={investigation} />
+        </section>
+      )}
+
+      {latestAlert?.alert && trend && (
+        <section style={{ padding: "8px 0 56px" }}>
+          <h2 style={{ fontSize: 22, marginBottom: 6 }}>Act, re-measure, decide</h2>
+          <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
+            Recording a corrective action appends it to the evidence chain. Later
+            observations are then compared with earlier ones on a seasonally
+            adjusted basis — which is the only comparison across an intervention
+            date that means anything.
+          </p>
+          <InterventionPanel
+            projectId={PROJECT_ID}
+            alertId={latestAlert.alert.id}
+            trend={trend}
+          />
+        </section>
+      )}
 
       <section style={{ padding: "8px 0 56px" }}>
         <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap", marginBottom: 6 }}>

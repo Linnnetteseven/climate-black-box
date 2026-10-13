@@ -127,9 +127,61 @@ export interface VerificationResult {
   detail: string | null;
 }
 
+export interface Hypothesis {
+  statement: string;
+  evidence_ids: string[];
+  confidence: "low" | "medium" | "high";
+}
+
+export interface Investigation {
+  id: string;
+  alert_id: string;
+  summary: string;
+  hypotheses: Hypothesis[];
+  evidence_ids: string[];
+  missing_evidence: string;
+  model_id: string | null;
+  prompt_version: string;
+  /** "real" = model output that passed validation; "fallback" = template. */
+  simulation_status: SimulationStatus;
+}
+
 export interface LatestAlert {
   alert: Alert | null;
   detector_ran: boolean;
+  note: string | null;
+}
+
+export interface Intervention {
+  id: string;
+  project_id: string;
+  alert_id: string | null;
+  action: string;
+  actor: string;
+  action_date: string;
+  expected_outcome: string | null;
+  followup_date: string | null;
+  status: "planned" | "in_progress" | "done" | "abandoned";
+  simulation_status: "simulated";
+  created_at: string;
+}
+
+export interface TrendResult {
+  project_id: string;
+  metric: string;
+  intervention: Intervention | null;
+  trend: {
+    pre_mean: number | null;
+    post_mean: number | null;
+    pre_periods: number;
+    post_periods: number;
+    change_abs: number | null;
+    sufficient: boolean;
+    direction: "improving" | "declining" | "unchanged" | "unknown";
+    note: string;
+    causal_note: string;
+  } | null;
+  recommendation: { action: string; reasoning: string } | null;
   note: string | null;
 }
 
@@ -199,5 +251,8 @@ export const api = {
   health: () => get<{ status: string; backend: string }>("/api/health"),
   latestAlert: (id: string) => get<LatestAlert>(`/api/projects/${id}/latest-alert`),
   audit: (id: string) => get<AuditEvent[]>(`/api/projects/${id}/audit`),
+  investigation: (alertId: string) =>
+    get<Investigation>(`/api/alerts/${alertId}/investigation`),
+  trend: (id: string) => get<TrendResult>(`/api/projects/${id}/trend`),
   verify: (eventId: string) => get<VerificationResult>(`/api/evidence/${eventId}/verify`),
 };
