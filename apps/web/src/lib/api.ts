@@ -8,6 +8,13 @@
 
 export type SimulationStatus = "real" | "simulated" | "mixed" | "fallback";
 
+/** Minimal GeoJSON polygon, declared locally rather than pulling in a types
+ *  package for one shape. Coordinates are [lon, lat] rings in WGS84. */
+export interface PolygonGeometry {
+  type: "Polygon";
+  coordinates: [number, number][][];
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -15,7 +22,7 @@ export interface Project {
   region: string | null;
   owner_org: string | null;
   status: "active" | "closed" | "suspended";
-  boundary: GeoJSON.Polygon | null;
+  boundary: PolygonGeometry | null;
   boundary_is_survey: boolean;
   reporting_start: string | null;
   reporting_end: string | null;
@@ -67,7 +74,20 @@ export type Result<T> =
   | { ok: true; data: T }
   | { ok: false; error: ApiError };
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+/**
+ * Where to find the API.
+ *
+ * In the browser we use a relative path, which next.config.mjs rewrites to the
+ * API service -- that keeps everything on one origin and avoids CORS.
+ *
+ * On the server there is no origin to be relative to: a server component's
+ * fetch needs an absolute URL, and a relative one fails outright. So server
+ * renders talk to the API directly over loopback.
+ */
+const BASE =
+  typeof window === "undefined"
+    ? process.env.API_INTERNAL_URL ?? "http://127.0.0.1:8001"
+    : "";
 
 async function get<T>(path: string): Promise<Result<T>> {
   try {

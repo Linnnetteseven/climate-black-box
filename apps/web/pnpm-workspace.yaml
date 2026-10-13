@@ -1,2 +1,6 @@
+# pnpm 11 gates dependency build scripts and asks interactively unless the
+# answer is recorded here. sharp is a transitive dependency of Next used for
+# image optimisation; this app does not use next/image, so its native build is
+# not needed and skipping it keeps installs non-interactive on a fresh clone.
 allowBuilds:
-  sharp: set this to true or false
+  sharp: false

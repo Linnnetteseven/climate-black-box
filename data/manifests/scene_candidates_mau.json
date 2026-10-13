@@ -1,0 +1,818 @@
+[
+  {
+    "scene_id": "LC08_L2SP_169061_20230102_02_T1",
+    "datetime_utc": "2023-01-02T07:49:47Z",
+    "cloud_cover_pct": 17.51,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230110_02_T1",
+    "datetime_utc": "2023-01-10T07:49:48Z",
+    "cloud_cover_pct": 16.13,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230118_02_T1",
+    "datetime_utc": "2023-01-18T07:49:38Z",
+    "cloud_cover_pct": 0.47,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230126_02_T1",
+    "datetime_utc": "2023-01-26T07:49:45Z",
+    "cloud_cover_pct": 10.77,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230203_02_T1",
+    "datetime_utc": "2023-02-03T07:49:44Z",
+    "cloud_cover_pct": 2.96,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230211_02_T1",
+    "datetime_utc": "2023-02-11T07:49:52Z",
+    "cloud_cover_pct": 0.29,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230219_02_T1",
+    "datetime_utc": "2023-02-19T07:49:33Z",
+    "cloud_cover_pct": 1.87,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230227_02_T1",
+    "datetime_utc": "2023-02-27T07:49:38Z",
+    "cloud_cover_pct": 3.2,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230323_02_T1",
+    "datetime_utc": "2023-03-23T07:49:12Z",
+    "cloud_cover_pct": 43.3,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230331_02_T1",
+    "datetime_utc": "2023-03-31T07:49:19Z",
+    "cloud_cover_pct": 11.53,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230408_02_T1",
+    "datetime_utc": "2023-04-08T07:48:59Z",
+    "cloud_cover_pct": 50.55,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230424_02_T1",
+    "datetime_utc": "2023-04-24T07:48:53Z",
+    "cloud_cover_pct": 48.76,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230502_02_T1",
+    "datetime_utc": "2023-05-02T07:49:03Z",
+    "cloud_cover_pct": 28.6,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230510_02_T1",
+    "datetime_utc": "2023-05-10T07:48:41Z",
+    "cloud_cover_pct": 47.09,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230518_02_T1",
+    "datetime_utc": "2023-05-18T07:48:56Z",
+    "cloud_cover_pct": 11.26,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230526_02_T1",
+    "datetime_utc": "2023-05-26T07:48:40Z",
+    "cloud_cover_pct": 33.04,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230603_02_T1",
+    "datetime_utc": "2023-06-03T07:48:49Z",
+    "cloud_cover_pct": 30.5,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230619_02_T1",
+    "datetime_utc": "2023-06-19T07:48:41Z",
+    "cloud_cover_pct": 47.86,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230627_02_T1",
+    "datetime_utc": "2023-06-27T07:48:55Z",
+    "cloud_cover_pct": 27.36,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230705_02_T1",
+    "datetime_utc": "2023-07-05T07:48:53Z",
+    "cloud_cover_pct": 25.02,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230713_02_T1",
+    "datetime_utc": "2023-07-13T07:49:04Z",
+    "cloud_cover_pct": 38.5,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230721_02_T1",
+    "datetime_utc": "2023-07-21T07:48:57Z",
+    "cloud_cover_pct": 32.6,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230729_02_T1",
+    "datetime_utc": "2023-07-29T07:49:11Z",
+    "cloud_cover_pct": 14.11,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230806_02_T1",
+    "datetime_utc": "2023-08-06T07:49:07Z",
+    "cloud_cover_pct": 57.77,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20230814_02_T1",
+    "datetime_utc": "2023-08-14T07:49:16Z",
+    "cloud_cover_pct": 40.12,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230822_02_T1",
+    "datetime_utc": "2023-08-22T07:49:12Z",
+    "cloud_cover_pct": 14.61,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20230923_02_T1",
+    "datetime_utc": "2023-09-23T07:49:24Z",
+    "cloud_cover_pct": 11.31,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20231001_02_T1",
+    "datetime_utc": "2023-10-01T07:49:29Z",
+    "cloud_cover_pct": 16.11,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20231009_02_T1",
+    "datetime_utc": "2023-10-09T07:49:30Z",
+    "cloud_cover_pct": 1.64,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20231017_02_T1",
+    "datetime_utc": "2023-10-17T07:49:31Z",
+    "cloud_cover_pct": 14.46,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20231025_02_T1",
+    "datetime_utc": "2023-10-25T07:49:35Z",
+    "cloud_cover_pct": 23.28,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20231110_02_T1",
+    "datetime_utc": "2023-11-10T07:49:32Z",
+    "cloud_cover_pct": 50.89,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20231118_02_T1",
+    "datetime_utc": "2023-11-18T07:49:35Z",
+    "cloud_cover_pct": 42.26,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20231126_02_T1",
+    "datetime_utc": "2023-11-26T07:49:40Z",
+    "cloud_cover_pct": 33.52,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20231204_02_T1",
+    "datetime_utc": "2023-12-04T07:49:30Z",
+    "cloud_cover_pct": 29.68,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20231212_02_T1",
+    "datetime_utc": "2023-12-12T07:49:38Z",
+    "cloud_cover_pct": 7.42,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20231220_02_T1",
+    "datetime_utc": "2023-12-20T07:49:35Z",
+    "cloud_cover_pct": 4.98,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20231228_02_T1",
+    "datetime_utc": "2023-12-28T07:49:41Z",
+    "cloud_cover_pct": 32.89,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240129_02_T1",
+    "datetime_utc": "2024-01-29T07:49:38Z",
+    "cloud_cover_pct": 6.65,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240206_02_T1",
+    "datetime_utc": "2024-02-06T07:49:27Z",
+    "cloud_cover_pct": 15.68,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240214_02_T1",
+    "datetime_utc": "2024-02-14T07:49:37Z",
+    "cloud_cover_pct": 8.77,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240222_02_T1",
+    "datetime_utc": "2024-02-22T07:49:25Z",
+    "cloud_cover_pct": 1.17,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240301_02_T1",
+    "datetime_utc": "2024-03-01T07:49:31Z",
+    "cloud_cover_pct": 49.0,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240309_02_T1",
+    "datetime_utc": "2024-03-09T07:49:13Z",
+    "cloud_cover_pct": 51.9,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240317_02_T1",
+    "datetime_utc": "2024-03-17T07:49:31Z",
+    "cloud_cover_pct": 0.05,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240402_02_T1",
+    "datetime_utc": "2024-04-02T07:49:22Z",
+    "cloud_cover_pct": 44.64,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240410_02_T1",
+    "datetime_utc": "2024-04-10T07:48:57Z",
+    "cloud_cover_pct": 7.84,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240418_02_T1",
+    "datetime_utc": "2024-04-18T07:49:11Z",
+    "cloud_cover_pct": 28.39,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240512_02_T1",
+    "datetime_utc": "2024-05-12T07:48:35Z",
+    "cloud_cover_pct": 9.72,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240520_02_T1",
+    "datetime_utc": "2024-05-20T07:48:49Z",
+    "cloud_cover_pct": 36.54,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240528_02_T1",
+    "datetime_utc": "2024-05-28T07:48:24Z",
+    "cloud_cover_pct": 49.55,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240605_02_T1",
+    "datetime_utc": "2024-06-05T07:48:43Z",
+    "cloud_cover_pct": 24.96,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240613_02_T1",
+    "datetime_utc": "2024-06-13T07:48:26Z",
+    "cloud_cover_pct": 4.23,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240621_02_T1",
+    "datetime_utc": "2024-06-21T07:48:26Z",
+    "cloud_cover_pct": 27.81,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240629_02_T1",
+    "datetime_utc": "2024-06-29T07:48:39Z",
+    "cloud_cover_pct": 11.72,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240715_02_T1",
+    "datetime_utc": "2024-07-15T07:48:50Z",
+    "cloud_cover_pct": 4.69,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240723_02_T1",
+    "datetime_utc": "2024-07-23T07:48:48Z",
+    "cloud_cover_pct": 6.43,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240808_02_T1",
+    "datetime_utc": "2024-08-08T07:48:52Z",
+    "cloud_cover_pct": 43.62,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240816_02_T1",
+    "datetime_utc": "2024-08-16T07:49:03Z",
+    "cloud_cover_pct": 54.0,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240824_02_T1",
+    "datetime_utc": "2024-08-24T07:49:07Z",
+    "cloud_cover_pct": 36.71,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240901_02_T1",
+    "datetime_utc": "2024-09-01T07:49:11Z",
+    "cloud_cover_pct": 32.62,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240909_02_T1",
+    "datetime_utc": "2024-09-09T07:49:08Z",
+    "cloud_cover_pct": 0.67,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20240917_02_T1",
+    "datetime_utc": "2024-09-17T07:49:17Z",
+    "cloud_cover_pct": 27.52,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20240925_02_T1",
+    "datetime_utc": "2024-09-25T07:49:10Z",
+    "cloud_cover_pct": 34.26,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20241003_02_T1",
+    "datetime_utc": "2024-10-03T07:49:13Z",
+    "cloud_cover_pct": 28.0,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20241011_02_T1",
+    "datetime_utc": "2024-10-11T07:49:18Z",
+    "cloud_cover_pct": 14.94,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20241027_02_T1",
+    "datetime_utc": "2024-10-27T07:49:31Z",
+    "cloud_cover_pct": 47.88,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20241104_02_T1",
+    "datetime_utc": "2024-11-04T07:49:20Z",
+    "cloud_cover_pct": 13.61,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20241120_02_T1",
+    "datetime_utc": "2024-11-20T07:49:28Z",
+    "cloud_cover_pct": 35.72,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20241128_02_T1",
+    "datetime_utc": "2024-11-28T07:49:38Z",
+    "cloud_cover_pct": 57.49,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20241206_02_T1",
+    "datetime_utc": "2024-12-06T07:49:28Z",
+    "cloud_cover_pct": 22.63,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20241214_02_T1",
+    "datetime_utc": "2024-12-14T07:49:30Z",
+    "cloud_cover_pct": 15.91,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20241222_02_T1",
+    "datetime_utc": "2024-12-22T07:49:24Z",
+    "cloud_cover_pct": 12.98,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20241230_02_T1",
+    "datetime_utc": "2024-12-30T07:49:30Z",
+    "cloud_cover_pct": 3.81,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250107_02_T1",
+    "datetime_utc": "2025-01-07T07:49:26Z",
+    "cloud_cover_pct": 0.38,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250115_02_T1",
+    "datetime_utc": "2025-01-15T07:49:33Z",
+    "cloud_cover_pct": 29.5,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250123_02_T1",
+    "datetime_utc": "2025-01-23T07:49:20Z",
+    "cloud_cover_pct": 13.5,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250131_02_T1",
+    "datetime_utc": "2025-01-31T07:49:28Z",
+    "cloud_cover_pct": 55.92,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250208_02_T1",
+    "datetime_utc": "2025-02-08T07:49:24Z",
+    "cloud_cover_pct": 0.26,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250216_02_T1",
+    "datetime_utc": "2025-02-16T07:49:33Z",
+    "cloud_cover_pct": 2.02,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250224_02_T1",
+    "datetime_utc": "2025-02-24T07:49:14Z",
+    "cloud_cover_pct": 0.06,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250304_02_T1",
+    "datetime_utc": "2025-03-04T07:49:26Z",
+    "cloud_cover_pct": 2.86,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250429_02_T1",
+    "datetime_utc": "2025-04-29T07:48:47Z",
+    "cloud_cover_pct": 11.48,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250507_02_T1",
+    "datetime_utc": "2025-05-07T07:49:02Z",
+    "cloud_cover_pct": 54.99,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250515_02_T1",
+    "datetime_utc": "2025-05-15T07:48:46Z",
+    "cloud_cover_pct": 31.82,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250523_02_T1",
+    "datetime_utc": "2025-05-23T07:48:51Z",
+    "cloud_cover_pct": 47.43,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250531_02_T1",
+    "datetime_utc": "2025-05-31T07:48:50Z",
+    "cloud_cover_pct": 3.48,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250608_02_T1",
+    "datetime_utc": "2025-06-08T07:48:49Z",
+    "cloud_cover_pct": 17.74,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250616_02_T1",
+    "datetime_utc": "2025-06-16T07:49:00Z",
+    "cloud_cover_pct": 21.35,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250624_02_T1",
+    "datetime_utc": "2025-06-24T07:49:02Z",
+    "cloud_cover_pct": 2.65,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250702_02_T1",
+    "datetime_utc": "2025-07-02T07:49:07Z",
+    "cloud_cover_pct": 29.61,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250718_02_T1",
+    "datetime_utc": "2025-07-18T07:49:12Z",
+    "cloud_cover_pct": 24.17,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250726_02_T1",
+    "datetime_utc": "2025-07-26T07:49:14Z",
+    "cloud_cover_pct": 0.74,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250803_02_T1",
+    "datetime_utc": "2025-08-03T07:49:18Z",
+    "cloud_cover_pct": 31.2,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250811_02_T1",
+    "datetime_utc": "2025-08-11T07:49:24Z",
+    "cloud_cover_pct": 25.58,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250827_02_T1",
+    "datetime_utc": "2025-08-27T07:49:29Z",
+    "cloud_cover_pct": 10.14,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250904_02_T1",
+    "datetime_utc": "2025-09-04T07:49:28Z",
+    "cloud_cover_pct": 5.92,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250912_02_T1",
+    "datetime_utc": "2025-09-12T07:49:35Z",
+    "cloud_cover_pct": 8.65,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20250920_02_T1",
+    "datetime_utc": "2025-09-20T07:49:35Z",
+    "cloud_cover_pct": 12.71,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20250928_02_T1",
+    "datetime_utc": "2025-09-28T07:49:38Z",
+    "cloud_cover_pct": 12.86,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20251014_02_T1",
+    "datetime_utc": "2025-10-14T07:49:44Z",
+    "cloud_cover_pct": 9.07,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20251107_02_T1",
+    "datetime_utc": "2025-11-07T07:49:39Z",
+    "cloud_cover_pct": 5.9,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20251115_02_T1",
+    "datetime_utc": "2025-11-15T07:49:44Z",
+    "cloud_cover_pct": 8.8,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20251123_02_T1",
+    "datetime_utc": "2025-11-23T07:49:40Z",
+    "cloud_cover_pct": 26.42,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20251201_02_T1",
+    "datetime_utc": "2025-12-01T07:49:44Z",
+    "cloud_cover_pct": 0.48,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20251209_02_T1",
+    "datetime_utc": "2025-12-09T07:49:38Z",
+    "cloud_cover_pct": 3.74,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20251217_02_T1",
+    "datetime_utc": "2025-12-17T07:49:44Z",
+    "cloud_cover_pct": 24.25,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260102_02_T1",
+    "datetime_utc": "2026-01-02T07:49:45Z",
+    "cloud_cover_pct": 1.35,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260110_02_T1",
+    "datetime_utc": "2026-01-10T07:49:28Z",
+    "cloud_cover_pct": 10.86,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260118_02_T1",
+    "datetime_utc": "2026-01-18T07:49:42Z",
+    "cloud_cover_pct": 7.85,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260126_02_T1",
+    "datetime_utc": "2026-01-26T07:49:26Z",
+    "cloud_cover_pct": 3.73,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260203_02_T1",
+    "datetime_utc": "2026-02-03T07:49:36Z",
+    "cloud_cover_pct": 2.77,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260211_02_T1",
+    "datetime_utc": "2026-02-11T07:49:22Z",
+    "cloud_cover_pct": 1.29,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260219_02_T1",
+    "datetime_utc": "2026-02-19T07:49:29Z",
+    "cloud_cover_pct": 22.22,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260315_02_T1",
+    "datetime_utc": "2026-03-15T07:49:10Z",
+    "cloud_cover_pct": 3.92,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260331_02_T1",
+    "datetime_utc": "2026-03-31T07:49:00Z",
+    "cloud_cover_pct": 19.33,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260408_02_T1",
+    "datetime_utc": "2026-04-08T07:49:10Z",
+    "cloud_cover_pct": 21.53,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260416_02_T1",
+    "datetime_utc": "2026-04-16T07:48:55Z",
+    "cloud_cover_pct": 24.44,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260424_02_T1",
+    "datetime_utc": "2026-04-24T07:49:06Z",
+    "cloud_cover_pct": 29.83,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260510_02_T1",
+    "datetime_utc": "2026-05-10T07:48:54Z",
+    "cloud_cover_pct": 53.6,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260518_02_T1",
+    "datetime_utc": "2026-05-18T07:48:28Z",
+    "cloud_cover_pct": 45.65,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260526_02_T1",
+    "datetime_utc": "2026-05-26T07:48:40Z",
+    "cloud_cover_pct": 23.01,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260603_02_T1",
+    "datetime_utc": "2026-06-03T07:48:27Z",
+    "cloud_cover_pct": 35.87,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260611_02_T1",
+    "datetime_utc": "2026-06-11T07:48:38Z",
+    "cloud_cover_pct": 13.35,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260627_02_T1",
+    "datetime_utc": "2026-06-27T07:48:50Z",
+    "cloud_cover_pct": 4.12,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260705_02_T1",
+    "datetime_utc": "2026-07-05T07:48:45Z",
+    "cloud_cover_pct": 51.58,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260713_02_T1",
+    "datetime_utc": "2026-07-13T07:48:56Z",
+    "cloud_cover_pct": 44.19,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260721_02_T1",
+    "datetime_utc": "2026-07-21T07:48:52Z",
+    "cloud_cover_pct": 5.8,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260729_02_T1",
+    "datetime_utc": "2026-07-29T07:49:08Z",
+    "cloud_cover_pct": 41.36,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260806_02_T1",
+    "datetime_utc": "2026-08-06T07:49:00Z",
+    "cloud_cover_pct": 17.53,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260814_02_T1",
+    "datetime_utc": "2026-08-14T07:49:10Z",
+    "cloud_cover_pct": 0.23,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260822_02_T1",
+    "datetime_utc": "2026-08-22T07:49:07Z",
+    "cloud_cover_pct": 10.06,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260830_02_T1",
+    "datetime_utc": "2026-08-30T07:49:16Z",
+    "cloud_cover_pct": 9.78,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260907_02_T1",
+    "datetime_utc": "2026-09-07T07:49:11Z",
+    "cloud_cover_pct": 0.13,
+    "platform": "landsat-8"
+  },
+  {
+    "scene_id": "LC09_L2SP_169061_20260915_02_T1",
+    "datetime_utc": "2026-09-15T07:49:20Z",
+    "cloud_cover_pct": 38.81,
+    "platform": "landsat-9"
+  },
+  {
+    "scene_id": "LC08_L2SP_169061_20260923_02_T1",
+    "datetime_utc": "2026-09-23T07:49:19Z",
+    "cloud_cover_pct": 23.81,
+    "platform": "landsat-8"
+  }
+]

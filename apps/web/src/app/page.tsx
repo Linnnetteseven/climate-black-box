@@ -1,0 +1,209 @@
+import { api } from "@/lib/api";
+import { NdviChart } from "@/components/NdviChart";
+import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+
+export const dynamic = "force-dynamic";
+
+const PROJECT_ID = "kiambu-restoration-demo";
+
+export default async function Page() {
+  const [projectResult, commitmentsResult, observationsResult, healthResult] =
+    await Promise.all([
+      api.project(PROJECT_ID),
+      api.commitments(PROJECT_ID),
+      api.observations(PROJECT_ID),
+      api.health(),
+    ]);
+
+  // Every surface degrades independently. If the API is down the page still
+  // renders and says so, because a blank screen mid-demo is worse than an
+  // honest one.
+  const project = projectResult.ok ? projectResult.data : null;
+  const commitments = commitmentsResult.ok ? commitmentsResult.data : [];
+  const observations = observationsResult.ok ? observationsResult.data : [];
+  const health = healthResult.ok ? healthResult.data : null;
+
+  const usable = observations.filter((o) => o.value !== null);
+  const latest = [...usable].sort((a, b) => b.period_start.localeCompare(a.period_start))[0];
+  const scenes = new Set(observations.map((o) => o.source_scene_id).filter(Boolean));
+
+  return (
+    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "0 24px 120px" }}>
+      {/* demo-mode banner: which records are invented, stated before anything else */}
+      <div
+        style={{
+          margin: "0 -24px 0", padding: "10px 24px",
+          background: "color-mix(in srgb, var(--status-warning) 12%, transparent)",
+          borderBottom: "1px solid color-mix(in srgb, var(--status-warning) 35%, transparent)",
+          fontSize: 13, color: "var(--ink-2)", fontFamily: "var(--font-mono)",
+        }}
+      >
+        <strong style={{ color: "var(--status-warning)" }}>DEMONSTRATION</strong>
+        {" · "}satellite observations and rainfall are real and traceable to public sources
+        {" · "}the project, its commitment and any intervention are simulated
+      </div>
+
+      <header style={{ padding: "72px 0 40px", borderBottom: "1px solid var(--line)" }}>
+        <p
+          style={{
+            fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em",
+            textTransform: "uppercase", color: "var(--ink-muted)", margin: "0 0 18px",
+          }}
+        >
+          Climate Black Box
+        </p>
+        <h1 style={{ fontSize: "clamp(34px, 5.5vw, 62px)", lineHeight: 1.02, margin: "0 0 18px" }}>
+          Know what happens<br />after the funding ends.
+        </h1>
+        <p style={{ fontSize: 19, color: "var(--ink-2)", maxWidth: "56ch", margin: 0 }}>
+          A final report tells you what happened on reporting day. It cannot tell
+          you what is happening now.
+        </p>
+      </header>
+
+      {!projectResult.ok && (
+        <Degraded message={projectResult.error.message} requestId={projectResult.error.request_id} />
+      )}
+
+      {project && (
+        <section style={{ padding: "40px 0" }}>
+          <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap" }}>
+            <h2 style={{ fontSize: 27 }}>{project.name}</h2>
+            <ProvenanceBadge status={project.simulation_status} />
+          </div>
+          <p style={{ color: "var(--ink-2)", margin: "8px 0 0" }}>
+            {project.region}, {project.country}
+            {!project.boundary_is_survey && (
+              <span style={{ color: "var(--ink-muted)" }}>
+                {" · "}approximate demonstration polygon, not a surveyed boundary
+              </span>
+            )}
+          </p>
+
+          <div
+            style={{
+              display: "grid", gap: 1, marginTop: 28,
+              gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+              background: "var(--line)", border: "1px solid var(--line)", borderRadius: 4,
+              overflow: "hidden",
+            }}
+          >
+            <Stat label="Observations" value={String(observations.length)} note="monthly periods" />
+            <Stat label="Usable" value={String(usable.length)} note={`${observations.length - usable.length} fully clouded`} />
+            <Stat label="Source scenes" value={String(scenes.size)} note="Landsat 8 / 9" />
+            <Stat
+              label="Latest NDVI"
+              value={latest?.value ? latest.value.toFixed(3) : "—"}
+              note={latest ? latest.period_start.slice(0, 7) : "no data"}
+            />
+            {commitments[0]?.target_value && (
+              <Stat
+                label="Commitment"
+                value={commitments[0].target_value.toFixed(2)}
+                note={`by ${commitments[0].due_date ?? "—"}`}
+              />
+            )}
+          </div>
+
+          {commitments[0] && (
+            <p style={{ marginTop: 18, fontSize: 14, color: "var(--ink-muted)" }}>
+              Baseline approved by{" "}
+              <span style={{ color: "var(--ink-2)" }}>{commitments[0].reviewer}</span>
+              {commitments[0].reviewed_at &&
+                ` on ${commitments[0].reviewed_at.slice(0, 10)}`}
+              {" · "}extraction status{" "}
+              <span className="mono">{commitments[0].extraction_status}</span>
+            </p>
+          )}
+        </section>
+      )}
+
+      <section style={{ padding: "16px 0 56px" }}>
+        <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap", marginBottom: 6 }}>
+          <h2 style={{ fontSize: 22 }}>Vegetation greenness, monthly mean NDVI</h2>
+          <ProvenanceBadge status="real" />
+        </div>
+        <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
+          Landsat Collection 2 Level-2 surface reflectance, cloud and shadow
+          masked per pixel before averaging. NDVI is a greenness indicator — not
+          tree survival, not carbon.
+        </p>
+
+        {observationsResult.ok ? (
+          observations.length ? (
+            <NdviChart observations={observations} />
+          ) : (
+            <Empty />
+          )
+        ) : (
+          <Degraded
+            message={observationsResult.error.message}
+            requestId={observationsResult.error.request_id}
+          />
+        )}
+      </section>
+
+      <footer
+        style={{
+          borderTop: "1px solid var(--line)", paddingTop: 20,
+          fontSize: 12.5, color: "var(--ink-faint)", fontFamily: "var(--font-mono)",
+          display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap",
+        }}
+      >
+        <span>{health ? `system of record: ${health.backend}` : "backend unreachable"}</span>
+        <span>NDVI ≠ carbon · rainfall context is ERA5 at ~25 km</span>
+      </footer>
+    </main>
+  );
+}
+
+function Stat({ label, value, note }: { label: string; value: string; note: string }) {
+  return (
+    <div style={{ background: "var(--surface-1)", padding: "14px 16px" }}>
+      <div
+        style={{
+          fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.14em",
+          textTransform: "uppercase", color: "var(--ink-muted)", marginBottom: 6,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 24,
+          fontVariantNumeric: "tabular-nums", lineHeight: 1.1,
+        }}
+      >
+        {value}
+      </div>
+      <div style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 2 }}>{note}</div>
+    </div>
+  );
+}
+
+function Degraded({ message, requestId }: { message: string; requestId: string }) {
+  return (
+    <div
+      style={{
+        border: "1px solid color-mix(in srgb, var(--status-warning) 40%, transparent)",
+        background: "color-mix(in srgb, var(--status-warning) 8%, transparent)",
+        borderRadius: 4, padding: "16px 18px", margin: "24px 0",
+      }}
+    >
+      <strong style={{ color: "var(--status-warning)" }}>Evidence unavailable</strong>
+      <p style={{ margin: "6px 0 0", color: "var(--ink-2)", fontSize: 14 }}>{message}</p>
+      <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--ink-faint)" }} className="mono">
+        request {requestId}
+      </p>
+    </div>
+  );
+}
+
+function Empty() {
+  return (
+    <p style={{ color: "var(--ink-muted)", padding: "32px 0" }}>
+      No observations loaded yet. Run <span className="mono">make ingest-write</span> then{" "}
+      <span className="mono">make load</span>.
+    </p>
+  );
+}

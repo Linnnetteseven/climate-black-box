@@ -1,0 +1,119 @@
+[
+  {
+    "key": "kiambu-control",
+    "name": "Kiambu highlands (control)",
+    "note": "the existing project site; expected healthy",
+    "lon": 36.8385,
+    "lat": -1.1125,
+    "periods_total": 19,
+    "baseline_usable": 6,
+    "observed_usable": 5,
+    "fires": false,
+    "mean_anomaly": 0.0017,
+    "consecutive": 1,
+    "reasons": [
+      "No run of 2 consecutive usable periods below the expected band (longest run: 1).",
+      "5 period(s) excluded for valid-pixel fraction below 75%: 2025-07, 2025-09, 2025-11, 2026-03, 2026-07."
+    ],
+    "seasonal_swing": 0.1549
+  },
+  {
+    "key": "mau-eastern",
+    "name": "Eastern Mau Forest",
+    "note": "Kenya's most documented forest-loss complex",
+    "lon": 35.93,
+    "lat": -0.47,
+    "periods_total": 19,
+    "baseline_usable": 7,
+    "observed_usable": 8,
+    "fires": false,
+    "mean_anomaly": 0.0173,
+    "consecutive": 1,
+    "reasons": [
+      "No run of 2 consecutive usable periods below the expected band (longest run: 1).",
+      "1 period(s) excluded for valid-pixel fraction below 75%: 2026-07."
+    ],
+    "seasonal_swing": 0.0958
+  },
+  {
+    "key": "mau-transmara",
+    "name": "Transmara / South-West Mau",
+    "note": "excision and charcoal pressure",
+    "lon": 35.24,
+    "lat": -0.93,
+    "periods_total": 19,
+    "baseline_usable": 9,
+    "observed_usable": 9,
+    "fires": true,
+    "mean_anomaly": -0.0458,
+    "consecutive": 6,
+    "reasons": [
+      "Observed 2026-09 at -0.118, below the expected band [0.053, 0.175] around 0.114, for 6 consecutive periods.",
+      "All 6 breaching periods had valid-pixel fraction at or above 75%, so this is not a data-coverage artefact."
+    ],
+    "seasonal_swing": 0.1889,
+    "observed_value": -0.1183,
+    "expected_low": 0.0532,
+    "deviation_pct": -203.6
+  },
+  {
+    "key": "cherangany",
+    "name": "Cherangany Hills",
+    "note": "water-tower forest under encroachment",
+    "lon": 35.45,
+    "lat": 1.05,
+    "periods_total": 19,
+    "baseline_usable": 5,
+    "observed_usable": 6,
+    "fires": true,
+    "mean_anomaly": -0.0186,
+    "consecutive": 2,
+    "reasons": [
+      "Observed 2025-03 at -0.085, below the expected band [0.014, 0.039] around 0.027, for 2 consecutive periods.",
+      "All 2 breaching periods had valid-pixel fraction at or above 75%, so this is not a data-coverage artefact.",
+      "5 period(s) excluded for valid-pixel fraction below 75%: 2025-07, 2026-01, 2026-03, 2026-07, 2026-09."
+    ],
+    "seasonal_swing": 0.0739,
+    "observed_value": -0.0847,
+    "expected_low": 0.0141,
+    "deviation_pct": -418.2
+  },
+  {
+    "key": "embobut",
+    "name": "Embobut Forest",
+    "note": "settlement and clearance pressure",
+    "lon": 35.42,
+    "lat": 0.98,
+    "periods_total": 19,
+    "baseline_usable": 4,
+    "observed_usable": 6,
+    "fires": false,
+    "mean_anomaly": -0.0076,
+    "consecutive": 0,
+    "reasons": [
+      "Baseline has near-zero residual spread (sigma=2.11e-03, floor=0.005), so no meaningful band can be drawn and any deviation would breach it. Treat the trajectory as unvalidated rather than firing on rounding error."
+    ],
+    "seasonal_swing": 0.0726
+  },
+  {
+    "key": "kakamega",
+    "name": "Kakamega Forest edge",
+    "note": "fragmentation at the forest margin",
+    "lon": 34.87,
+    "lat": 0.32,
+    "periods_total": 19,
+    "baseline_usable": 9,
+    "observed_usable": 9,
+    "fires": true,
+    "mean_anomaly": -0.0259,
+    "consecutive": 9,
+    "reasons": [
+      "Observed 2026-09 at -0.015, below the expected band [0.002, 0.019] around 0.010, for 9 consecutive periods.",
+      "All 9 breaching periods had valid-pixel fraction at or above 75%, so this is not a data-coverage artefact."
+    ],
+    "seasonal_swing": 0.0366,
+    "observed_value": -0.0147,
+    "expected_low": 0.0021,
+    "deviation_pct": -240.1
+  }
+]

@@ -44,12 +44,22 @@ from services.analytics.sources import (
 
 log = logging.getLogger("cbb.ingest")
 
-FIXTURE_PATH = Path("data/sample/observations_ndvi-v1.json")
-SITE_PATH = Path("data/sample/kiambu_site.geojson")
-SCENES_PATH = Path("data/manifests/scene_candidates.json")
-
-PROJECT_ID = "kiambu-restoration-demo"
 METRIC = "ndvi_mean"
+
+#: Sites the pipeline knows about. Each is a real place with a real polygon;
+#: adding one is a data change, not a code change.
+SITES = {
+    "kiambu-restoration-demo": {
+        "geojson": Path("data/sample/kiambu_site.geojson"),
+        "fixture": Path("data/sample/observations_ndvi-v1.json"),
+        "scenes": Path("data/manifests/scene_candidates.json"),
+    },
+    "mau-transmara-demo": {
+        "geojson": Path("data/sample/mau_transmara_site.geojson"),
+        "fixture": Path("data/sample/observations_mau_ndvi-v1.json"),
+        "scenes": Path("data/manifests/scene_candidates_mau.json"),
+    },
+}
 
 
 @dataclass
@@ -147,10 +157,11 @@ def build_observations(
     end: date,
     centroid: tuple[float, float],
     limit_months: int | None = None,
+    scenes_path: Path = Path("data/manifests/scene_candidates.json"),
 ) -> list[MonthlyObservation]:
     scenes = search_landsat(_bbox(geometry), start, end)
-    SCENES_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SCENES_PATH.write_text(
+    scenes_path.parent.mkdir(parents=True, exist_ok=True)
+    scenes_path.write_text(
         json.dumps(
             [
                 {
@@ -165,7 +176,7 @@ def build_observations(
         ),
         encoding="utf-8",
     )
-    log.info("wrote %s (%d scenes)", SCENES_PATH, len(scenes))
+    log.info("wrote %s (%d scenes)", scenes_path, len(scenes))
 
     monthly = pick_monthly_scenes(scenes)
     if limit_months:
@@ -250,20 +261,24 @@ def main() -> int:
     parser.add_argument("--end", type=date.fromisoformat, default=date(2026, 9, 30))
     parser.add_argument("--limit-months", type=int, default=None,
                         help="process only the first N months (for a quick trial run)")
+    parser.add_argument("--project", default="kiambu-restoration-demo", choices=sorted(SITES),
+                        help="which site to ingest")
     parser.add_argument("--check", action="store_true",
                         help="regenerate and diff against the committed fixture "
                              "instead of overwriting it")
     args = parser.parse_args()
 
-    geometry = json.loads(SITE_PATH.read_text(encoding="utf-8"))
+    site = SITES[args.project]
+    geometry = json.loads(site["geojson"].read_text(encoding="utf-8"))
     if geometry.get("type") == "Feature":
         geometry = geometry["geometry"]
 
     observations = build_observations(
-        geometry, args.start, args.end, _centroid(geometry), args.limit_months
+        geometry, args.start, args.end, _centroid(geometry), args.limit_months,
+        scenes_path=site["scenes"],
     )
     payload = {
-        "project_id": PROJECT_ID,
+        "project_id": args.project,
         "metric": METRIC,
         "processing_version": PROCESSING_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -274,8 +289,9 @@ def main() -> int:
     log.info("\n%d months processed, %d usable, %d gaps",
              len(observations), len(usable), len(observations) - len(usable))
 
-    if args.check and FIXTURE_PATH.exists():
-        committed = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    fixture_path = site["fixture"]
+    if args.check and fixture_path.exists():
+        committed = json.loads(fixture_path.read_text(encoding="utf-8"))
         same = _compare(committed["observations"], payload["observations"])
         if same:
             log.info("fixture reproduced exactly.")
@@ -283,9 +299,9 @@ def main() -> int:
         log.error("FIXTURE DRIFT: regenerated numbers differ from the committed copy.")
         return 1
 
-    FIXTURE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    FIXTURE_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    log.info("wrote %s", FIXTURE_PATH)
+    fixture_path.parent.mkdir(parents=True, exist_ok=True)
+    fixture_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    log.info("wrote %s", fixture_path)
     return 0
 
 
