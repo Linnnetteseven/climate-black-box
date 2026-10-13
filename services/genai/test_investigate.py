@@ -89,8 +89,10 @@ def test_fallback_notices_falling_rainfall():
 GOOD = {
     "summary": "Greenness sat below the expected band for five consecutive periods.",
     "hypotheses": [
-        {"statement": "Vegetation loss on the ground.",
+        {"statement": "The decline is consistent with vegetation loss on the ground.",
          "evidence_ids": ["obs-1", "obs-2"], "confidence": "medium"},
+        {"statement": "Lower rainfall may explain part of the decline.",
+         "evidence_ids": ["rain-2026-05"], "confidence": "medium"},
     ],
     "missing_evidence": "Field observation would distinguish these.",
 }
@@ -104,14 +106,14 @@ def test_valid_model_output_is_accepted_and_badged_real():
 
 def test_model_citing_an_unknown_evidence_id_is_rejected():
     """The decisive check: the model referenced something we never supplied."""
-    bad = {**GOOD, "hypotheses": [
+    bad = {**GOOD, "hypotheses": GOOD["hypotheses"] + [
         {"statement": "Clearance.", "evidence_ids": ["obs-999"], "confidence": "high"}]}
     with pytest.raises(InvalidModelOutput, match="unknown evidence"):
         _validate(bad, packet(), "m")
 
 
 def test_model_citing_nothing_is_rejected():
-    bad = {**GOOD, "hypotheses": [
+    bad = {**GOOD, "hypotheses": GOOD["hypotheses"] + [
         {"statement": "Something happened.", "evidence_ids": [], "confidence": "high"}]}
     with pytest.raises(InvalidModelOutput):
         _validate(bad, packet(), "m")
@@ -128,7 +130,7 @@ def test_model_making_a_forbidden_claim_is_rejected(claim):
 
 
 def test_model_with_bad_confidence_is_rejected():
-    bad = {**GOOD, "hypotheses": [
+    bad = {**GOOD, "hypotheses": GOOD["hypotheses"] + [
         {"statement": "x", "evidence_ids": ["obs-1"], "confidence": "very sure"}]}
     with pytest.raises(InvalidModelOutput):
         _validate(bad, packet(), "m")
@@ -172,3 +174,49 @@ def test_build_packet_includes_context_either_side_of_the_breach():
     assert "2026-07" in periods and "2026-08" in periods
     assert "2026-05" in periods  # context before
     assert "2026-10" in periods  # context after
+
+
+def test_a_single_hypothesis_is_rejected():
+    """One explanation is not an investigation. The fallback does better."""
+    from services.genai.investigate import MIN_HYPOTHESES
+
+    one = {**GOOD, "hypotheses": GOOD["hypotheses"][:1]}
+    assert len(one["hypotheses"]) < MIN_HYPOTHESES
+    with pytest.raises(InvalidModelOutput, match="at least"):
+        _validate(one, packet(), "m")
+
+
+def test_two_hypotheses_are_accepted():
+    two = {**GOOD, "hypotheses": [
+        {"statement": "Rainfall fell.", "evidence_ids": ["rain-2026-05"], "confidence": "medium"},
+        {"statement": "Clearance on the ground.", "evidence_ids": ["obs-1"], "confidence": "medium"},
+    ]}
+    assert len(_validate(two, packet(), "m").hypotheses) == 2
+
+
+@pytest.mark.parametrize("statement", [
+    "The decline in NDVI is due to a decrease in rainfall.",
+    "The change is caused by clearance on the ground.",
+    "The drop is because of grazing pressure.",
+])
+def test_causal_assertions_in_hypotheses_are_rejected(statement):
+    """A hypothesis says what the evidence is consistent with. It does not
+    announce the answer -- and this product's whole claim is that it keeps
+    those apart, so the guard is mechanical rather than a hope."""
+    bad = {**GOOD, "hypotheses": [
+        {"statement": statement, "evidence_ids": ["obs-1"], "confidence": "medium"},
+        {"statement": "Something else is consistent with it.",
+         "evidence_ids": ["obs-2"], "confidence": "low"},
+    ]}
+    with pytest.raises(InvalidModelOutput, match="do not permit"):
+        _validate(bad, packet(), "m")
+
+
+def test_hedged_phrasing_is_accepted():
+    ok = {**GOOD, "hypotheses": [
+        {"statement": "The decline is consistent with reduced rainfall.",
+         "evidence_ids": ["rain-2026-05"], "confidence": "medium"},
+        {"statement": "Clearance on the ground may explain it.",
+         "evidence_ids": ["obs-1"], "confidence": "medium"},
+    ]}
+    assert len(_validate(ok, packet(), "m").hypotheses) == 2

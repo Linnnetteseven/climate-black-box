@@ -29,7 +29,11 @@ from services.genai.evidence import EvidencePacket
 
 log = logging.getLogger("cbb.genai")
 
-PROMPT_VERSION = "investigate-v1"
+PROMPT_VERSION = "investigate-v2"
+
+#: An investigation with one explanation gives a reviewer nothing to choose
+#: between. Below this we prefer the deterministic fallback.
+MIN_HYPOTHESES = 2
 
 
 @dataclass
@@ -151,15 +155,17 @@ def deterministic_investigation(packet: EvidencePacket) -> Investigation:
     )
 
 
-SYSTEM_PROMPT = """You are assisting an environmental monitoring review.
+SYSTEM_PROMPT = """You are assisting an environmental monitoring review for a climate funder.
 
 You will be given a JSON evidence packet describing one alert and the measurements it rests on. Follow these rules exactly:
 
 1. Use ONLY facts present in the packet. Never state a measurement that is not there.
 2. Every hypothesis must cite evidence_id values that appear in the packet.
-3. Never assert a cause. Offer hypotheses, and say what further evidence would distinguish them.
-4. NDVI is a vegetation greenness indicator. It is not tree survival, canopy cover, biomass or carbon. Do not imply otherwise.
-5. Rainfall here is ERA5 at roughly 25 km and cannot resolve a single site.
+3. Give BETWEEN TWO AND FOUR competing hypotheses. One explanation is not an investigation: the reviewer needs the plausible alternatives so they can choose what to check. Consider at least: rainfall and seasonal conditions; change on the ground such as clearance, grazing, fire or harvesting; and measurement limitations such as partial pixel coverage.
+4. Never assert a cause. Write every hypothesis as a possibility, not a finding: use "is consistent with", "may reflect", "would be expected if". Do NOT write "is due to", "is caused by", "is because of" -- those state a conclusion the evidence cannot support. Say what further evidence would distinguish the hypotheses from each other.
+5. Write the summary for a funder deciding whether to send someone to the site. State what was observed, over how many periods, and how trustworthy the coverage was.
+6. NDVI is a vegetation greenness indicator. It is not tree survival, canopy cover, biomass or carbon. Do not imply otherwise.
+7. Rainfall here is ERA5 at roughly 25 km and cannot resolve a single site. Do not treat it as site rainfall.
 
 Return STRICT JSON with this shape and nothing else:
 {"summary": "...", "hypotheses": [{"statement": "...", "evidence_ids": ["..."], "confidence": "low|medium|high"}], "missing_evidence": "..."}"""
@@ -172,6 +178,13 @@ def _validate(payload: dict, packet: EvidencePacket, model_id: str) -> Investiga
     raw = payload.get("hypotheses")
     if not isinstance(raw, list) or not raw:
         raise InvalidModelOutput("missing hypotheses")
+    if len(raw) < MIN_HYPOTHESES:
+        # One explanation is not an investigation. The deterministic fallback
+        # produces several well-grounded alternatives, so it is genuinely
+        # better than a model that offers a single answer.
+        raise InvalidModelOutput(
+            f"only {len(raw)} hypothesis offered; at least {MIN_HYPOTHESES} are required"
+        )
 
     hypotheses: list[Hypothesis] = []
     for item in raw:
@@ -189,8 +202,23 @@ def _validate(payload: dict, packet: EvidencePacket, model_id: str) -> Investiga
         hypotheses.append(Hypothesis(item["statement"].strip(), sorted(ids), item["confidence"]))
 
     # Guard the claims we promised never to make, whatever the prompt said.
-    body = payload["summary"] + " ".join(h.statement for h in hypotheses)
-    for forbidden in (r"\bcarbon\b", r"\bproves?\b", r"\bproven\b", r"\bcertainly\b"):
+    body = payload["summary"] + " " + " ".join(h.statement for h in hypotheses)
+    forbidden_patterns = (
+        r"\bcarbon\b",
+        r"\bproves?\b",
+        r"\bproven\b",
+        r"\bcertainly\b",
+        # Causal assertions. A hypothesis says what the evidence is consistent
+        # with; it does not announce the answer. This product's whole claim is
+        # that it distinguishes the two, so the guard is mechanical rather than
+        # a hope that the prompt was followed.
+        r"\bis due to\b",
+        r"\bare due to\b",
+        r"\bis caused by\b",
+        r"\bcaused by\b",
+        r"\bis because of\b",
+    )
+    for forbidden in forbidden_patterns:
         if re.search(forbidden, body, re.IGNORECASE):
             raise InvalidModelOutput(f"output made a claim we do not permit: {forbidden}")
 

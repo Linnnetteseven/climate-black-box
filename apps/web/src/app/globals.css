@@ -72,14 +72,44 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; margin: 
 
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
-/* An orbital drift behind the hero. Motion that says "observation from
-   above", not decoration for its own sake. */
-@keyframes drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-40px, 18px, 0); } }
+/* Section rhythm.
+
+   Each beat settles in as it enters the viewport. The intent is that the
+   story reads as a sequence of findings rather than one wall of panels --
+   motion that paces the narrative, not decoration.
+
+   `animation-timeline: view()` degrades silently: browsers without it simply
+   show the content, which is the correct fallback. */
+@keyframes settle {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@supports (animation-timeline: view()) {
+  main > section {
+    animation: settle linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 42%;
+  }
+}
+
+/* Headings should never be orphaned from their first line of body text. */
+h2 { text-wrap: balance; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+  /* Scroll-driven animation ignores animation-duration, so it has to be
+     switched off by name rather than by making it fast. */
+  main > section { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+
+/* Readable on a projector: the demo is shown in a lit room on a screen
+   nobody is sitting close to. */
+@media (min-width: 1600px) {
+  html { font-size: 17px; }
 }

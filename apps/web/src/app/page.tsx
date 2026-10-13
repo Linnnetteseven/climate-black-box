@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { AlertCard } from "@/components/AlertCard";
+import { AmbientAudio } from "@/components/AmbientAudio";
 import { InterventionPanel } from "@/components/InterventionPanel";
 import { InvestigationPanel } from "@/components/InvestigationPanel";
 import { NdviChart } from "@/components/NdviChart";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+import { Starfield } from "@/components/Starfield";
 import { VerifyPanel } from "@/components/VerifyPanel";
 
 export const dynamic = "force-dynamic";
@@ -74,22 +76,31 @@ export default async function Page({
         {" · "}the project, its commitment and any intervention are simulated
       </div>
 
-      <header style={{ padding: "72px 0 40px", borderBottom: "1px solid var(--line)" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em",
-            textTransform: "uppercase", color: "var(--ink-muted)", margin: "0 0 18px",
-          }}
-        >
-          Climate Black Box
-        </p>
-        <h1 style={{ fontSize: "clamp(34px, 5.5vw, 62px)", lineHeight: 1.02, margin: "0 0 18px" }}>
-          Know what happens<br />after the funding ends.
-        </h1>
-        <p style={{ fontSize: 19, color: "var(--ink-2)", maxWidth: "56ch", margin: 0 }}>
-          A final report tells you what happened on reporting day. It cannot tell
-          you what is happening now.
-        </p>
+      <header
+        style={{
+          position: "relative", padding: "84px 0 44px",
+          borderBottom: "1px solid var(--line)", overflow: "hidden",
+        }}
+      >
+        <Starfield />
+        <div style={{ position: "relative" }}>
+          <p
+            style={{
+              fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em",
+              textTransform: "uppercase", color: "var(--ink-muted)", margin: "0 0 18px",
+            }}
+          >
+            Climate Black Box
+          </p>
+          <h1 style={{ fontSize: "clamp(34px, 5.5vw, 62px)", lineHeight: 1.02, margin: "0 0 18px" }}>
+            Know what happens<br />after the funding ends.
+          </h1>
+          <p style={{ fontSize: 19, color: "var(--ink-2)", maxWidth: "56ch", margin: "0 0 26px" }}>
+            A final report tells you what happened on reporting day. It cannot tell
+            you what is happening now.
+          </p>
+          <AmbientAudio />
+        </div>
       </header>
 
       <nav

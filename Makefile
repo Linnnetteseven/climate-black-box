@@ -49,6 +49,9 @@ db-seed: ## load the demo projects and derive spatial geometry
 	@$(PY) scripts/run_sql.py database/seed/020_mau_project.sql
 	@$(PY) scripts/run_sql.py database/seed/030_spatial_backfill.sql --tolerant
 
+genai-check: ## report which OCI Generative AI models this tenancy can use
+	$(PY) scripts/check_genai.py
+
 test: ## run every test
 	$(PYTEST)
 
