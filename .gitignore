@@ -1,0 +1,25 @@
+# python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+# node
+node_modules/
+.next/
+out/
+dist/
+# env & secrets
+.env
+.env.local
+*.pem
+*.key
+wallet/
+Wallet_*.zip
+# data artefacts (large / regenerable)
+data/cache/
+data/raw/
+*.tif
+*.TIF
+# os
+.DS_Store

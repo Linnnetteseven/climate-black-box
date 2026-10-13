@@ -1,0 +1,1354 @@
+<title>Black Box Flight Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EBEFF1; --surface:#FFFFFF; --surface-2:#F4F7F8;
+  --ink:#0F1619; --ink-2:#2A3A41; --muted:#5C6B71; --faint:#93A4AB;
+  --line:#D3DCDF; --line-strong:#B6C4C9;
+  --accent:#0B5A61; --accent-soft:#D8E8E9; --accent-ink:#083E43;
+  --signal:#9B5400; --signal-soft:#F7E7D2;
+  --go:#1C6B4F; --go-soft:#D9EBE2;
+  --stop:#962B2B; --stop-soft:#F6DEDE;
+  --shadow:0 1px 2px rgba(15,22,25,.05),0 8px 24px -16px rgba(15,22,25,.18);
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#090F12; --surface:#111A1E; --surface-2:#172227;
+    --ink:#E7EEF0; --ink-2:#C3D1D6; --muted:#8C9DA4; --faint:#5F7278;
+    --line:#223036; --line-strong:#32444C;
+    --accent:#49B3AB; --accent-soft:#11302F; --accent-ink:#8FD6D0;
+    --signal:#DE9C42; --signal-soft:#33230C;
+    --go:#4FB184; --go-soft:#0E2B20;
+    --stop:#DF7070; --stop-soft:#2E1414;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#090F12; --surface:#111A1E; --surface-2:#172227;
+  --ink:#E7EEF0; --ink-2:#C3D1D6; --muted:#8C9DA4; --faint:#5F7278;
+  --line:#223036; --line-strong:#32444C;
+  --accent:#49B3AB; --accent-soft:#11302F; --accent-ink:#8FD6D0;
+  --signal:#DE9C42; --signal-soft:#33230C;
+  --go:#4FB184; --go-soft:#0E2B20;
+  --stop:#DF7070; --stop-soft:#2E1414;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:1px solid var(--line-strong);padding:52px 0 28px;margin-bottom:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(38px,6vw,68px);line-height:.98;letter-spacing:-.025em;margin:18px 0 10px;text-wrap:balance}
+.sub{font-size:19px;color:var(--ink-2);max-width:58ch;margin:0 0 26px}
+.sub em{font-style:normal;color:var(--accent);font-weight:500}
+.vitals{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.vital{background:var(--surface);padding:14px 16px}
+.vital dt{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+.vital dd{margin:0;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.01em}
+.vital dd small{display:block;font-family:var(--body);font-weight:400;font-size:12.5px;letter-spacing:0;color:var(--muted);margin-top:2px}
+
+/* ---------- layout ---------- */
+.shell{display:grid;grid-template-columns:214px minmax(0,1fr);gap:48px;align-items:start;padding-top:34px}
+@media (max-width:900px){.shell{grid-template-columns:1fr;gap:0}}
+nav.toc{position:sticky;top:20px;font-size:13.5px}
+@media (max-width:900px){nav.toc{position:static;margin-bottom:34px;border-bottom:1px solid var(--line);padding-bottom:20px}}
+nav.toc h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:500}
+nav.toc ol{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:1px}
+nav.toc a{display:block;padding:4px 8px;color:var(--ink-2);text-decoration:none;border-left:2px solid transparent;border-radius:0 2px 2px 0}
+nav.toc a:hover{background:var(--surface);color:var(--ink);border-left-color:var(--line-strong)}
+nav.toc a.is-lane{font-family:var(--mono);font-size:12px}
+
+/* ---------- sections ---------- */
+section{scroll-margin-top:20px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin:56px 0 18px;padding-bottom:9px;border-bottom:1px solid var(--line-strong)}
+.sec-head:first-of-type{margin-top:0}
+.sec-num{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.06em;flex:none;padding-top:4px}
+.sec-head h2{font-family:var(--display);font-weight:600;font-size:clamp(23px,3vw,31px);letter-spacing:-.018em;margin:0;line-height:1.14;text-wrap:balance}
+h3{font-family:var(--display);font-weight:600;font-size:18.5px;letter-spacing:-.01em;margin:32px 0 10px}
+h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:26px 0 8px}
+p{max-width:70ch;margin:0 0 14px}
+.lede{font-size:17.5px;color:var(--ink-2);max-width:66ch}
+ul,ol{max-width:70ch;padding-left:22px;margin:0 0 16px}
+li{margin-bottom:6px}
+strong{font-weight:600;color:var(--ink)}
+code{font-family:var(--mono);font-size:.87em;background:var(--surface-2);border:1px solid var(--line);padding:1px 5px;border-radius:3px;white-space:nowrap}
+blockquote{margin:0 0 18px;padding:12px 18px;background:var(--surface-2);border-left:3px solid var(--accent);border-radius:0 3px 3px 0;max-width:70ch}
+blockquote p:last-child{margin-bottom:0}
+hr{border:0;border-top:1px solid var(--line);margin:40px 0}
+
+/* ---------- tables ---------- */
+.tscroll{overflow-x:auto;margin:0 0 20px;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:540px}
+th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:11px 14px;border-bottom:1px solid var(--line-strong);background:var(--surface-2);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+td:first-child{color:var(--ink)}
+.t-num td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--accent);font-weight:600;width:1%;white-space:nowrap}
+.tid{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap}
+.beat td:first-child{font-family:var(--display);font-weight:600;color:var(--ink);white-space:nowrap}
+
+/* ---------- phase blocks ---------- */
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:3px;margin:0 0 20px;box-shadow:var(--shadow);overflow:hidden}
+.phase-head{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.phase-tag{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--surface);background:var(--accent);padding:4px 9px;border-radius:2px;flex:none}
+.phase-title{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.012em;flex:1 1 auto;min-width:200px}
+.phase-clock{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;background:var(--paper);border:1px solid var(--line);padding:3px 9px;border-radius:2px;flex:none}
+.phase-body{padding:16px 18px}
+.phase-body>p:first-child{margin-top:0}
+.phase-body .tscroll{box-shadow:none}
+
+/* ---------- gates ---------- */
+.gate{border:1px solid var(--signal);border-left-width:4px;background:var(--signal-soft);border-radius:3px;padding:15px 18px;margin:0 0 26px}
+.gate-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:7px}
+.gate-id{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--signal)}
+.gate-name{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.012em;color:var(--ink)}
+.gate p{margin:0 0 8px;font-size:14.8px;max-width:76ch;color:var(--ink-2)}
+.gate p:last-child{margin-bottom:0}
+.gate .green{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--go);font-weight:600}
+.gate.critical{border-color:var(--stop);background:var(--stop-soft)}
+.gate.critical .gate-id{color:var(--stop)}
+
+/* ---------- lane filter ---------- */
+.lanebar{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);padding:9px 0;margin-bottom:0}
+.lanebar-in{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.lanebar .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:3px}
+.lanebtn{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);padding:5px 11px;border-radius:2px;cursor:pointer;line-height:1.2}
+.lanebtn:hover{border-color:var(--line-strong);color:var(--ink)}
+.lanebtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .lanebtn[aria-pressed="true"],
+:root:not([data-theme="light"]) .lanebtn[aria-pressed="true"]{color:#06201F}
+.lanebtn .tally{opacity:.62;margin-left:5px;font-variant-numeric:tabular-nums}
+body.filtering .lane-sec{display:none}
+body.filtering .lane-sec.lane-on{display:block}
+
+/* ---------- lane sections ---------- */
+.lane-sec{margin-top:56px}
+.lane-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;padding:16px 18px;border:1px solid var(--line-strong);border-bottom:0;border-radius:3px 3px 0 0;background:var(--surface-2)}
+.lane-code{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--surface);background:var(--ink);padding:4px 9px;border-radius:2px}
+:root[data-theme="dark"] .lane-code,:root:not([data-theme="light"]) .lane-code{color:var(--paper);background:var(--ink-2)}
+.lane-head h2{font-family:var(--display);font-weight:700;font-size:clamp(21px,2.6vw,27px);letter-spacing:-.02em;margin:0;flex:1 1 auto;min-width:220px;line-height:1.1}
+.lane-meta{border:1px solid var(--line-strong);border-top:1px solid var(--line);border-bottom:0;background:var(--surface);padding:14px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 26px;font-size:14px}
+.lane-meta div{color:var(--ink-2)}
+.lane-meta b{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;font-weight:500}
+.lane-body{border:1px solid var(--line-strong);border-top:0;border-radius:0 0 3px 3px;background:var(--surface);padding:6px 18px 18px}
+.step{border-top:1px solid var(--line);padding:18px 0 4px}
+.step:first-child{border-top:0}
+.step-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:11px}
+.step-phase{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.step-clock{font-family:var(--mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.step-ids{font-family:var(--mono);font-size:11px;color:var(--faint);margin-left:auto}
+.done-when{font-size:14px;color:var(--muted);border-left:2px solid var(--line-strong);padding:2px 0 2px 12px;margin:10px 0 0;max-width:72ch}
+.done-when b{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+
+/* ---------- checklists ---------- */
+.cl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;max-width:none}
+.cl li{display:flex;gap:10px;align-items:flex-start;margin:0;padding:4px 7px 4px 6px;border-radius:3px;font-size:14.8px;line-height:1.52;color:var(--ink-2)}
+.cl li:hover{background:var(--surface-2)}
+.cl input[type="checkbox"]{appearance:none;flex:none;width:15px;height:15px;margin-top:4px;border:1.5px solid var(--line-strong);border-radius:3px;background:var(--surface);cursor:pointer;position:relative}
+.cl input:hover{border-color:var(--accent)}
+.cl input:checked{background:var(--accent);border-color:var(--accent)}
+.cl input:checked::after{content:"";position:absolute;left:3.6px;top:.7px;width:4px;height:8px;border:solid #fff;border-width:0 1.8px 1.8px 0;transform:rotate(42deg)}
+:root[data-theme="dark"] .cl input:checked::after,:root:not([data-theme="light"]) .cl input:checked::after{border-color:#06201F}
+.cl li.ticked{color:var(--faint)}
+.cl li.ticked label{text-decoration:line-through;text-decoration-color:var(--line-strong)}
+.cl label{cursor:pointer}
+
+/* ---------- misc components ---------- */
+.callout{border:1px solid var(--line-strong);border-left:3px solid var(--accent);background:var(--surface);border-radius:0 3px 3px 0;padding:14px 18px;margin:0 0 20px}
+.callout.warn{border-left-color:var(--signal)}
+.callout h4{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.cut{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 20px;padding:0;list-style:none;max-width:none}
+.cut li{margin:0;font-family:var(--mono);font-size:12.5px;color:var(--muted);background:var(--surface);border:1px dashed var(--line-strong);padding:4px 10px;border-radius:2px;text-decoration:line-through;text-decoration-color:var(--stop)}
+pre{font-family:var(--mono);font-size:12.8px;line-height:1.62;background:var(--surface);color:var(--ink-2);border:1px solid var(--line);border-radius:3px;padding:15px 17px;overflow-x:auto;margin:0 0 20px}
+pre code{background:0 0;border:0;padding:0;white-space:pre;font-size:inherit}
+.copybox{position:relative}
+.copybox button{position:absolute;top:9px;right:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line-strong);padding:5px 10px;border-radius:2px;cursor:pointer}
+.copybox button:hover{border-color:var(--accent);color:var(--accent)}
+.script{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin:0 0 20px}
+.script-row{display:grid;grid-template-columns:86px 120px minmax(0,1fr);background:var(--surface)}
+@media (max-width:700px){.script-row{grid-template-columns:1fr;gap:2px;padding:12px 14px}.script-row>*{padding:0!important}}
+.script-row>*{padding:12px 14px}
+.script-t{font-family:var(--mono);font-size:12.5px;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+.script-b{font-family:var(--display);font-weight:600;font-size:14.5px}
+.script-l{font-size:14.5px;color:var(--ink-2)}
+.footnote{font-size:13.5px;color:var(--muted);max-width:74ch}
+.closer{margin-top:56px;padding:26px 0 0;border-top:1px solid var(--line-strong)}
+.closer p{font-family:var(--display);font-weight:500;font-size:clamp(19px,2.4vw,25px);line-height:1.34;letter-spacing:-.015em;color:var(--ink);max-width:40ch;text-wrap:balance}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  .lanebar,nav.toc,.copybox button{display:none}
+  body{background:#fff;color:#000;font-size:11pt}
+  .shell{grid-template-columns:1fr;padding-top:0}
+  .phase,.lane-body,.tscroll{box-shadow:none;break-inside:avoid}
+  .sec-head,.lane-sec{break-after:avoid}
+  .gate{break-inside:avoid}
+  a{color:#000}
+}
+</style>
+
+<div class="lanebar">
+  <div class="lanebar-in">
+    <span class="lbl">Show lane</span>
+    <button class="lanebtn" data-lane="all" aria-pressed="true">Everything</button>
+    <button class="lanebtn" data-lane="fe" aria-pressed="false">P1 · Frontend<span class="tally"></span></button>
+    <button class="lanebtn" data-lane="da" aria-pressed="false">P2 · Data &amp; AI<span class="tally"></span></button>
+    <button class="lanebtn" data-lane="or" aria-pressed="false">P3 · Oracle<span class="tally"></span></button>
+    <button class="lanebtn" data-lane="ck" aria-pressed="false">P4 · Linnette<span class="tally"></span></button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>Green Tech Hackathon</span><span class="dot"></span>
+      <span>Oracle × Strathmore University</span><span class="dot"></span>
+      <span>Plan v2.0 — execution cut</span>
+    </div>
+    <h1>Black Box Flight Plan</h1>
+    <p class="sub">Two days, four people, one vertical slice. Every task below has an hour, an owner and a definition of done — because <em>if it isn't wired end to end, it doesn't exist.</em></p>
+    <dl class="vitals">
+      <div class="vital"><dt>Clock starts</dt><dd>13 Oct · 12:00<small>EAT, Monday</small></dd></div>
+      <div class="vital"><dt>Demo</dt><dd>14 Oct · 18:00<small>≈21 working hours</small></dd></div>
+      <div class="vital"><dt>Team</dt><dd>4 people<small>P4 is Linnette — CKB + integration</small></dd></div>
+      <div class="vital"><dt>Gates</dt><dd>7 checkpoints<small>Gate 2 is the one that matters</small></dd></div>
+      <div class="vital"><dt>Scope</dt><dd>9 demo beats<small>One Kiambu project, nothing else</small></dd></div>
+    </dl>
+  </header>
+
+  <div class="shell">
+    <nav class="toc" aria-label="Contents">
+      <h2>The plan</h2>
+      <ol>
+        <li><a href="#changed">1 · What changed</a></li>
+        <li><a href="#frozen">2 · Frozen decisions</a></li>
+        <li><a href="#spine">3 · The demo spine</a></li>
+        <li><a href="#clock">4 · The clock</a></li>
+        <li><a href="#loop">5 · Your gate reports</a></li>
+        <li><a href="#contracts">6 · Shared contracts</a></li>
+        <li><a href="#data">7 · Data sources</a></li>
+        <li><a href="#ckb">8 · CKB spec</a></li>
+        <li><a href="#oracle">9 · Oracle &amp; fallback</a></li>
+        <li><a href="#ui">10 · UI quality</a></li>
+        <li><a href="#repo">11 · Conventions</a></li>
+        <li><a href="#kill">12 · Kill-switches</a></li>
+        <li><a href="#script">13 · Demo script</a></li>
+        <li><a href="#dod">14 · Definition of done</a></li>
+        <li><a href="#access">15 · Access check</a></li>
+        <li><a href="#recon">16 · vs. tasks.md</a></li>
+      </ol>
+      <h2>The tasks</h2>
+      <ol>
+        <li><a class="is-lane" href="#p1">P1 · Frontend</a></li>
+        <li><a class="is-lane" href="#p2">P2 · Data &amp; AI</a></li>
+        <li><a class="is-lane" href="#p3">P3 · Oracle</a></li>
+        <li><a class="is-lane" href="#p4">P4 · CKB (Linnette)</a></li>
+        <li><a class="is-lane" href="#p5">P4 · Integration hat</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <blockquote><p><strong>Product promise:</strong> keep the impact visible after the money is spent. <strong>Non-negotiable:</strong> simulated commitments, field reports, interventions and recovery data are labelled as simulated, everywhere, always.</p></blockquote>
+
+      <div class="callout warn">
+        <h4>Four people, not five — how the load is absorbed</h4>
+        <p>Linnette is <strong>Person 4</strong>: the CKB lane <em>and</em> integration lead. That works, but only because the two have opposite shapes on the clock — <strong>CKB is front-loaded and finishes at Gate 3 on Day 1 night; integration is light on Day 1 and peaks on Day 2.</strong> They barely overlap at full intensity.</p>
+        <p>Three moves make it fit, and they are not optional: <strong>IN-2</strong> (the FastAPI skeleton) and <strong>IN-3</strong> (compose, Makefile, README) move to <strong>Person 3</strong>, who owns that code anyway; and <strong>APEX drops to three pages</strong> — project detail, alert investigation, audit timeline — to pay for the extra load on his lane.</p>
+        <p><strong>The failure mode to watch:</strong> if CKB is still red at Gate 2, Linnette cannot run the convergence <em>and</em> fix the chain lane. In that case <strong>Person 2 takes the gate call and the integration build</strong> for the rest of Day 1. Agree that handover now, not at 21:00.</p>
+      </div>
+
+      <section id="changed">
+        <div class="sec-head"><span class="sec-num">01</span><h2>What changed from the v1.0 build plan</h2></div>
+        <p class="lede">v1.0 is a sound five-day plan. At 21 working hours it will not land as written. Ten decisions make it fit.</p>
+        <div class="tscroll"><table class="t-num">
+          <thead><tr><th>#</th><th>Decision</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><strong>FastAPI is the only business-logic API.</strong> ORDS is strictly for APEX-internal reads.</td><td>v1.0 left API ownership open. Two sources of logic is the likeliest cause of a broken integration at hour 30.</td></tr>
+            <tr><td>2</td><td><strong>GeoRaster is cut to a 30-minute spike</strong>, written up either way.</td><td>Raster loading into ADB needs tooling and privileges we have not confirmed. An honest "here's what it would need" scores better than a broken claim.</td></tr>
+            <tr><td>3</td><td><strong>Satellite data is pre-baked in Phase 0</strong> and committed as fixtures. The pipeline stays re-runnable.</td><td>Cloud cover, token throttling and conference wifi are all demo-killers. Reproducibility is a judging asset; live API calls on stage are not.</td></tr>
+            <tr><td>4</td><td><strong>Local Oracle 23ai Free in Docker is the dev target from hour one.</strong> ADB is a connection-string swap.</td><td>Removes "blocked waiting for Oracle access" without faking Oracle. The SQL stays Oracle-real.</td></tr>
+            <tr><td>5</td><td><strong>Rainfall is ERA5 via Open-Meteo (~25 km)</strong>, labelled district-level context.</td><td>Free, no key, instant. Labelling its coarseness honestly is itself a credibility point — it shows we understand our own uncertainty.</td></tr>
+            <tr><td>6</td><td><strong>CKB uses <code>@ckb-ccc/core</code>, not Lumos.</strong> First testnet anchor lands Day 1 night.</td><td>Lumos is no longer actively maintained; CCC is the current recommended CKB JS/TS SDK. Anchoring early de-risks faucet and capacity surprises.</td></tr>
+            <tr><td>7</td><td><strong>OCI GenAI has a hard go/no-go at 17:30 Day 1.</strong></td><td>GenAI needs trial credits in a supported region; Always-Free ADB alone does not grant it. The AI is one of nine beats — it cannot own the critical path.</td></tr>
+            <tr><td>8</td><td><strong>The simulation-label system is built once, in Phase 1</strong> — a DB column plus one badge component.</td><td>v1.0 mentions labelling in eight places. Build it as infrastructure on day one or it gets retrofitted badly at 2am.</td></tr>
+            <tr><td>9</td><td><strong>One polygon, one baseline, one alert, one intervention, two post-intervention observations.</strong></td><td>v1.0's "should ship if time allows" list is a two-day plan on its own.</td></tr>
+            <tr><td>10</td><td><strong>Day 2 after 16:30 is a code freeze.</strong></td><td>Two clean rehearsals require a stable build.</td></tr>
+          </tbody>
+        </table></div>
+        <h4>Cut list — nobody builds these</h4>
+        <ul class="cut">
+          <li>portfolio view</li><li>role-specific views</li><li>PDF export</li><li>live tile server</li><li>imagery slider</li><li>custom Type Script</li><li>Isolation Forest</li><li>user accounts</li><li>Object Storage uploads</li><li>mobile-first layout</li><li>i18n</li>
+        </ul>
+      </section>
+
+      <section id="frozen">
+        <div class="sec-head"><span class="sec-num">02</span><h2>Frozen decisions — not reopened after 14:00</h2></div>
+        <div class="tscroll"><table class="t-num">
+          <thead><tr><th>#</th><th>Locked</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><strong>Site:</strong> one restoration polygon in Kiambu County, 50–500 ha, forest/shrub, low cloud history. P2 picks it in Phase 0 and commits the GeoJSON.</td></tr>
+            <tr><td>2</td><td><strong>Project ID:</strong> <code>kiambu-restoration-demo</code> — stable, used everywhere.</td></tr>
+            <tr><td>3</td><td><strong>Metric:</strong> <code>ndvi_mean</code>, Landsat Collection 2 Level-2 surface reflectance, <code>processing_version = "ndvi-v1"</code>.</td></tr>
+            <tr><td>4</td><td><strong>Window:</strong> 2023-01-01 → 2026-09-30, monthly aggregation, minimum 10 valid months.</td></tr>
+            <tr><td>5</td><td><strong>Baseline &amp; threshold:</strong> linear expected trajectory, human-approved. Divergence = below the expected band for 2 consecutive valid months; band = expected ± 1.5 × residual σ.</td></tr>
+            <tr><td>6</td><td><strong>API:</strong> FastAPI at <code>/api/*</code>. The frontend never talks to Oracle or CKB directly.</td></tr>
+            <tr><td>7</td><td><strong>Database:</strong> Oracle. Local <code>gvenzl/oracle-free</code> 23ai in dev; ADB if access lands.</td></tr>
+            <tr><td>8</td><td><strong>Chain:</strong> CKB testnet, <code>sha256</code> over canonical JSON, anchored in output cell data.</td></tr>
+            <tr><td>9</td><td><strong>Time:</strong> UTC, ISO-8601 with <code>Z</code>, stored as <code>TIMESTAMP WITH TIME ZONE</code>.</td></tr>
+            <tr><td>10</td><td><strong>Every row carries</strong> <code>simulation_status ∈ {real, simulated, mixed, fallback}</code>.</td></tr>
+            <tr><td>11</td><td><strong>Design tokens</strong> freeze at the end of Phase 1. No palette debates on Day 2.</td></tr>
+            <tr><td>12</td><td><strong>Language of claims:</strong> NDVI is a "vegetation greenness indicator". Never "carbon". Never "proves". Never "verified impact".</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="spine">
+        <div class="sec-head"><span class="sec-num">03</span><h2>The demo spine — nine beats, in order</h2></div>
+        <p class="lede">This is the only user journey we build. The order is the narrative order; the dependencies are what make it real.</p>
+        <div class="tscroll"><table class="beat">
+          <thead><tr><th>Beat</th><th>What the judge sees</th><th>Owner</th><th>Hard dependency</th></tr></thead>
+          <tbody>
+            <tr><td>1 Promise</td><td>Hero, the one-sentence problem, "Explore live project"</td><td>P1</td><td>—</td></tr>
+            <tr><td>2 Brief</td><td>The commitment: target trajectory, named reviewer, source span from the proposal</td><td>P1 · P2</td><td>commitments seeded</td></tr>
+            <tr><td>3 Observe</td><td>Polygon on the map, monthly NDVI, each point carrying scene ID and valid-pixel %</td><td>P1 · P2</td><td>observations in Oracle</td></tr>
+            <tr><td>4 Detect</td><td>The scrubber hits the divergence; the alert explains its own rule and numbers</td><td>P2 · P1</td><td>alert engine</td></tr>
+            <tr><td>5 Investigate</td><td>Rainfall context, data quality, AI hypotheses citing evidence IDs</td><td>P2</td><td>GenAI or fallback</td></tr>
+            <tr><td>6 Verify</td><td>Manifest, its sha256, the CKB tx. Verify → pass. Tamper → fail.</td><td>P4 · P1</td><td>anchor on testnet</td></tr>
+            <tr><td>7 Act</td><td>Log a replanting intervention — labelled simulated — with owner and date</td><td>P1 · P3</td><td>interventions API</td></tr>
+            <tr><td>8 Re-measure</td><td>Two later observations, pre/post trend, explicit correlation-not-causation note</td><td>P2 · P1</td><td>observations</td></tr>
+            <tr><td>9 Decide</td><td>Recommended next action, confidence, what evidence is still missing</td><td>P1</td><td>—</td></tr>
+            <tr><td>Oracle proof</td><td>APEX console showing the same rows the web app shows, live</td><td>P3</td><td>shared schema</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="clock">
+        <div class="sec-head"><span class="sec-num">04</span><h2>The clock</h2></div>
+        <p class="lede">Times are EAT, breaks built in. If a phase overruns by more than 45 minutes, the gate owner invokes the matching kill-switch from §12 — that is not a schedule slip, it is the plan working.</p>
+
+        <div class="phase">
+          <div class="phase-head"><span class="phase-tag">Phase 0</span><span class="phase-title">Unblock — all hands, no building</span><span class="phase-clock">12:00 → 14:00 · D1</span></div>
+          <div class="phase-body">
+            <p>Nothing else starts until this gate is green. The point is to discover what we <em>don't</em> have while there is still time to route around it.</p>
+            <div class="tscroll"><table>
+              <thead><tr><th>ID</th><th>Task</th><th>Owner</th><th>Done when</th></tr></thead>
+              <tbody>
+                <tr><td class="tid">IN-0</td><td>Post the access-check message (§15); create repo, issue board with every task ID, branch protection</td><td>IN</td><td>40+ issues on the board; everyone can push</td></tr>
+                <tr><td class="tid">OR-0</td><td><code>docker compose up oracle</code> → Oracle 23ai Free running locally</td><td>P3</td><td><code>SELECT 1 FROM dual</code> returns</td></tr>
+                <tr><td class="tid">OR-1</td><td>In parallel: provision ADB + open APEX workspace</td><td>P3</td><td>ADB "Available", or a written blocker with an ETA</td></tr>
+                <tr><td class="tid">OR-2</td><td><strong>Timeboxed 30 min:</strong> GeoRaster spike → <code>docs/georaster-feasibility.md</code></td><td>P3</td><td>File committed with a verdict. Stop at 30 min regardless.</td></tr>
+                <tr><td class="tid">DA-0</td><td>Choose the polygon; commit site + reference GeoJSON</td><td>P2</td><td>Both render in geojson.io</td></tr>
+                <tr><td class="tid">DA-1</td><td>STAC query for the window; list scene IDs with cloud cover</td><td>P2</td><td><code>scene_candidates.json</code> committed, ≥10 usable months</td></tr>
+                <tr><td class="tid">DA-2</td><td>Rainfall smoke test — one Open-Meteo archive call</td><td>P2</td><td>Response saved to <code>data/sample/</code></td></tr>
+                <tr><td class="tid">DA-3</td><td><strong>Go/no-go: OCI Generative AI</strong></td><td>P2</td><td>A successful completion logged, or the fallback decision recorded</td></tr>
+                <tr><td class="tid">CK-0</td><td>CKB testnet signer generated and funded from the faucet</td><td>P4</td><td>Address holds ≥300 CKB</td></tr>
+                <tr><td class="tid">CK-1</td><td>Prove a minimal testnet transaction sends</td><td>P4</td><td>Tx hash on the explorer, pasted in chat</td></tr>
+                <tr><td class="tid">FE-0</td><td><code>apps/web</code> scaffolded; MapLibre renders the polygon</td><td>P1</td><td><code>pnpm dev</code> shows the polygon on a dark basemap</td></tr>
+                <tr><td class="tid">IN-1</td><td>Freeze §2 into <code>docs/decisions.md</code>; publish <code>docs/api-contracts.md</code></td><td>IN</td><td>Both committed</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="gate">
+          <div class="gate-top"><span class="gate-id">Gate 0 · 14:00 D1</span><span class="gate-name">"Nothing is unknown."</span></div>
+          <p><span class="green">Green when</span> Oracle reachable (local at minimum) · ≥10 scene candidates identified · rainfall call works · a CKB testnet tx has been sent · the web app renders the polygon · GenAI verdict recorded · contracts published.</p>
+          <p><strong>Report:</strong> one table of seven green/red, and for each red, which kill-switch fires.</p>
+        </div>
+
+        <div class="phase">
+          <div class="phase-head"><span class="phase-tag">Phase 1</span><span class="phase-title">Contracts &amp; skeletons — parallel, mock-backed</span><span class="phase-clock">14:00 → 17:30 · D1</span></div>
+          <div class="phase-body">
+            <p>Everyone builds against the frozen contracts. No lane waits for another.</p>
+            <div class="tscroll"><table>
+              <thead><tr><th>ID</th><th>Task</th><th>Owner</th><th>Done when</th></tr></thead>
+              <tbody>
+                <tr><td class="tid">OR-3</td><td>Migration <code>001_core.sql</code> — nine tables, constraints, indexes, <code>simulation_status</code> CHECK</td><td>P3</td><td><code>make db-reset</code> recreates from zero</td></tr>
+                <tr><td class="tid">OR-4</td><td>Seed the project, polygon as <code>SDO_GEOMETRY</code>, commitment, reviewer, proposal text</td><td>P3</td><td>Project returns with valid geometry</td></tr>
+                <tr><td class="tid">OR-5</td><td>KPI views: observations, alerts, audit timeline</td><td>P3</td><td>Views return seeded rows</td></tr>
+                <tr><td class="tid">DA-4</td><td><code>ndvi.py</code> — pure functions: scale/offset, QA bit unpacking, masked mean, valid fraction</td><td>P2</td><td>≥8 assertions on QA logic alone</td></tr>
+                <tr><td class="tid">DA-5</td><td><code>ingest.py</code> — STAC → sign → windowed read → monthly records with provenance</td><td>P2</td><td>≥10 observation dicts for the real site</td></tr>
+                <tr><td class="tid">DA-6</td><td><code>rainfall.py</code> — monthly totals + anomaly, with dataset metadata</td><td>P2</td><td>Monthly series for the window</td></tr>
+                <tr><td class="tid">CK-2</td><td>Canonicalization + <code>sha256</code>, golden-file tested</td><td>P4</td><td>Reordered input produces an identical hash</td></tr>
+                <tr><td class="tid">CK-3</td><td>Manifest as a Pydantic model + JSON Schema</td><td>P4</td><td>Schema validates the golden fixture</td></tr>
+                <tr><td class="tid">FE-1</td><td>Design tokens + <code>&lt;ProvenanceBadge&gt;</code> + loading/empty/error/offline primitives</td><td>P1</td><td>A page renders every state</td></tr>
+                <tr><td class="tid">FE-2</td><td>Typed API client from OpenAPI; MSW mocks of the §6 fixtures</td><td>P1</td><td>All nine beats render with zero backend running</td></tr>
+                <tr><td class="tid">FE-3</td><td>Beats 1–3 built against mocks</td><td>P1</td><td>Clickable, with per-point provenance</td></tr>
+                <tr><td class="tid">IN-2</td><td>FastAPI skeleton serving every contract route from fixtures; OpenAPI published</td><td><strong>P3</strong></td><td><code>/docs</code> lists every route</td></tr>
+                <tr><td class="tid">IN-3</td><td><code>docker-compose</code> + <code>Makefile</code> + <code>.env.example</code> + README</td><td><strong>P3</strong></td><td>Fresh clone → running stack in 2 commands</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="gate">
+          <div class="gate-top"><span class="gate-id">Gate 1 · 17:30 D1</span><span class="gate-name">"The shell is real, the data is fake, everyone agrees on the shapes."</span></div>
+          <p><span class="green">Green when</span> the DB recreates from scratch · all nine beats render on fixtures · the canonical hash is deterministic and tested · NDVI/QA tests pass · FastAPI serves every route.</p>
+          <p>Also at this gate: the <strong>GenAI go/no-go is final</strong>, and the ADB-vs-local decision is made.</p>
+          <p><strong>Report:</strong> a screenshot of beats 1–3, test counts, the GenAI decision.</p>
+        </div>
+
+        <div class="phase">
+          <div class="phase-head"><span class="phase-tag">Phase 2</span><span class="phase-title">Real evidence into Oracle</span><span class="phase-clock">17:30 → 21:00 · D1</span></div>
+          <div class="phase-body">
+            <p>The highest-value hours of the hackathon. This is where "real" starts.</p>
+            <div class="tscroll"><table>
+              <thead><tr><th>ID</th><th>Task</th><th>Owner</th><th>Done when</th></tr></thead>
+              <tbody>
+                <tr><td class="tid">DA-7</td><td>Run the pipeline on the real site; commit the observation fixture <em>and</em> a <code>make ingest</code> that reproduces it</td><td>P2</td><td>≥10 real monthly observations with scene IDs and quality</td></tr>
+                <tr><td class="tid">DA-8</td><td>Export two preview PNGs — baseline month, worst month</td><td>P2</td><td>Same extent, shared colour scale, legend</td></tr>
+                <tr><td class="tid">OR-6</td><td>Idempotent <code>MERGE</code> loader for the fixture</td><td>P3</td><td>Re-running changes no rows</td></tr>
+                <tr><td class="tid">OR-7</td><td>Repository layer — <code>oracledb</code>, explicit SQL, bind variables only</td><td>P3 · IN</td><td>The observations route returns <strong>Oracle rows</strong></td></tr>
+                <tr><td class="tid">OR-8</td><td>APEX pages 1–3: project detail, evidence review, observation report</td><td>P3</td><td>APEX shows the same ten observations the API returns</td></tr>
+                <tr><td class="tid">FE-4</td><td>MSW → live API for beats 1–3; per-point evidence drawer</td><td>P1</td><td>A chart point shows real scene metadata</td></tr>
+                <tr><td class="tid">CK-4</td><td>Anchor service: manifest → canonical bytes → sha256 → testnet cell</td><td>P4</td><td>A real confirmed tx hash stored in Oracle</td></tr>
+                <tr><td class="tid">CK-5</td><td>Verify endpoint: re-fetch, re-canonicalize, re-hash, compare</td><td>P4</td><td>Returns <code>verified: true</code></td></tr>
+                <tr><td class="tid">IN-4</td><td>Integration build #1</td><td>IN</td><td>Works on a second machine</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="gate critical">
+          <div class="gate-top"><span class="gate-id">Gate 2 · 21:00 D1 · The vertical slice</span><span class="gate-name">The most important gate of the two days</span></div>
+          <p><span class="green">Green when</span> one real Landsat observation can be traced from its <strong>scene ID</strong> → through the <strong>QA-masked NDVI computation</strong> → to an <strong>Oracle row</strong> → to a <strong>chart point in the browser</strong> → to an <strong>anchored hash on CKB testnet that verifies.</strong></p>
+          <p>If this is green, we have a demo. If it is red, everything in Phase 3 is postponed and all four lanes converge on it — and if the red is in CKB, Person 2 takes the gate call so Linnette can fix the chain lane. This is the one gate we never slip past.</p>
+          <p><strong>Report:</strong> the trace, end to end, with the scene ID and the tx hash.</p>
+        </div>
+
+        <div class="phase">
+          <div class="phase-head"><span class="phase-tag">Phase 3</span><span class="phase-title">Detect &amp; verify</span><span class="phase-clock">21:00 → 23:00 · D1</span></div>
+          <div class="phase-body">
+            <div class="tscroll"><table>
+              <thead><tr><th>ID</th><th>Task</th><th>Owner</th><th>Done when</th></tr></thead>
+              <tbody>
+                <tr><td class="tid">DA-9</td><td>Alert engine: robust baseline, σ band, 2-consecutive-month rule, valid-fraction guard</td><td>P2</td><td>≥6 tests green; the real series fires exactly one alert</td></tr>
+                <tr><td class="tid">DA-10</td><td>Investigation assembler — bounded, cited evidence payload</td><td>P2</td><td>≤4 KB, every fact carries an evidence ID</td></tr>
+                <tr><td class="tid">DA-11</td><td>GenAI call or fallback — schema-validated summary + 2–4 hypotheses</td><td>P2</td><td>Validated response persisted</td></tr>
+                <tr><td class="tid">CK-6</td><td><strong>Tamper demo</strong> — mutate a manifest copy, show verification failing with both hashes</td><td>P4</td><td>Verify returns <code>false</code>, unambiguously</td></tr>
+                <tr><td class="tid">CK-7</td><td>Anchor the alert and intervention events too</td><td>P4</td><td>3 anchors, each with a testnet tx</td></tr>
+                <tr><td class="tid">FE-5</td><td>Beat 4 (scrubber + alert card) and beat 6 (manifest, hash, tx, verify, tamper)</td><td>P1</td><td>Both work against live endpoints</td></tr>
+                <tr><td class="tid">OR-9</td><td>APEX alert-investigation page + audit timeline with verification status</td><td>P3</td><td>APEX shows the alert and its anchors</td></tr>
+                <tr><td class="tid">IN-5</td><td>Integration build #2; file an issue for every gap</td><td>IN</td><td>Build green</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="gate">
+          <div class="gate-top"><span class="gate-id">Gate 3 · 23:00 D1</span><span class="gate-name">"A judge can detect a problem and verify the evidence."</span></div>
+          <p><span class="green">Green when</span> the alert fires from real data with a visible explanation · the AI (or fallback) summary cites evidence IDs · verify passes · tamper fails · three anchors are on testnet.</p>
+          <p><strong>Report:</strong> a 60-second screen recording of beats 4 and 6. <strong>Then everyone sleeps.</strong> A tired team on Day 2 morning is a bigger risk than two unfinished nice-to-haves.</p>
+        </div>
+
+        <div class="phase">
+          <div class="phase-head"><span class="phase-tag">Phase 4</span><span class="phase-title">Close the loop</span><span class="phase-clock">08:00 → 12:30 · D2</span></div>
+          <div class="phase-body">
+            <div class="tscroll"><table>
+              <thead><tr><th>ID</th><th>Task</th><th>Owner</th><th>Done when</th></tr></thead>
+              <tbody>
+                <tr><td class="tid">OR-10</td><td>Interventions endpoint — append-only, plus a DB constraint forcing <code>simulated</code></td><td>P3 · IN</td><td>It is impossible to insert one labelled <code>real</code></td></tr>
+                <tr><td class="tid">FE-6</td><td>Beat 7 — intervention form with an unmissable simulated badge</td><td>P1</td><td>Submitting writes a real Oracle row</td></tr>
+                <tr><td class="tid">DA-12</td><td>Two post-intervention observations; pre/post trend with non-causal language</td><td>P2</td><td>Trend object served by the API</td></tr>
+                <tr><td class="tid">FE-7</td><td>Beats 8 and 9 — re-measurement and the decision card</td><td>P1</td><td>Both live</td></tr>
+                <tr><td class="tid">CK-8</td><td>Anchor the re-measurement — a four-link hash chain</td><td>P4</td><td>Chain verifies link by link</td></tr>
+                <tr><td class="tid">OR-11</td><td>The Oracle-proof view for the stage (the APEX intervention log is <strong>cut</strong> — three APEX pages total)</td><td>P3</td><td>Side-by-side with the web app, rows match exactly</td></tr>
+                <tr><td class="tid">DA-13</td><td>Commitment extraction → human approval by a named reviewer</td><td>P2 · IN</td><td>Approval writes an audit event</td></tr>
+                <tr><td class="tid">IN-6</td><td>Integration build #3 + a timed nine-beat click-through</td><td>IN</td><td>Under 4 minutes, no developer intervention</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="gate">
+          <div class="gate-top"><span class="gate-id">Gate 4 · 12:30 D2</span><span class="gate-name">"The whole story works on live endpoints, with no manual DB edits."</span></div>
+          <p><span class="green">Green when</span> all nine beats run start to finish on the integration build, twice in a row, driven by someone who did not build that beat.</p>
+          <p><strong>After this gate, no new features.</strong></p>
+        </div>
+
+        <div class="phase">
+          <div class="phase-head"><span class="phase-tag">Phase 5</span><span class="phase-title">Make it look like it matters</span><span class="phase-clock">12:30 → 16:30 · D2</span></div>
+          <div class="phase-body">
+            <p>Only now does the cinematic layer get built — on top of something that already works.</p>
+            <div class="tscroll"><table>
+              <thead><tr><th>ID</th><th>Task</th><th>Owner</th><th>Done when</th></tr></thead>
+              <tbody>
+                <tr><td class="tid">FE-8</td><td>Cinematic pass — palette, Earth hero, orbital motifs, amber alert states, beat transitions, reduced-motion respected</td><td>P1</td><td>Every beat looks deliberate at 1920×1080</td></tr>
+                <tr><td class="tid">FE-9</td><td>Chart craft — uncertainty as bands, honest axes, colour-blind-safe series, legends</td><td>P1</td><td>Readable at 3 m from a projector</td></tr>
+                <tr><td class="tid">FE-10</td><td>Opt-in ambient audio, default off, with volume and persistent mute</td><td>P1</td><td>No sound until clicked; state persists</td></tr>
+                <tr><td class="tid">FE-11</td><td>Fallback states — tiles, API, CKB RPC, GenAI</td><td>P1</td><td>Kill each service in turn; the app stays usable</td></tr>
+                <tr><td class="tid">FE-12</td><td>Demo-mode banner naming exactly which records are simulated</td><td>P1</td><td>Visible on every beat</td></tr>
+                <tr><td class="tid">DA-14</td><td>Data dictionary + data README with honest limitations</td><td>P2</td><td>A judge can answer "where did this number come from" from the docs alone</td></tr>
+                <tr><td class="tid">CK-9</td><td><code>docs/ckb-integrity.md</code> — what the anchor proves and what it does not</td><td>P4</td><td>Reviewed by IN</td></tr>
+                <tr><td class="tid">OR-12</td><td>Oracle setup doc + APEX export + ADB swap instructions</td><td>P3</td><td>Someone else can stand it up</td></tr>
+                <tr><td class="tid">IN-7</td><td>Run <code>/code-review</code> over the full diff; triage findings</td><td>IN</td><td>Must-fix list empty by 16:30</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="gate">
+          <div class="gate-top"><span class="gate-id">Gate 5 · 16:30 D2</span><span class="gate-name">Code freeze</span></div>
+          <p><span class="green">Green when</span> all P0 beats are polished, fallbacks were tested by actually killing services, docs are committed, review findings resolved. After this: demo-blocking bugfixes only.</p>
+        </div>
+
+        <div class="phase">
+          <div class="phase-head"><span class="phase-tag">Phase 6</span><span class="phase-title">Freeze, rehearse, insure</span><span class="phase-clock">16:30 → 18:00 · D2</span></div>
+          <div class="phase-body">
+            <div class="tscroll"><table>
+              <thead><tr><th>ID</th><th>Task</th><th>Owner</th><th>Done when</th></tr></thead>
+              <tbody>
+                <tr><td class="tid">IN-8</td><td>Clean-install rehearsal — fresh clone, fresh DB, documented commands only</td><td>IN</td><td>Works first time</td></tr>
+                <tr><td class="tid">IN-9</td><td>Record the fallback walkthrough of all nine beats</td><td>IN</td><td>On two laptops and a USB stick</td></tr>
+                <tr><td class="tid">ALL</td><td><strong>Rehearsal 1</strong> timed with Q&amp;A → fix demo-blockers only → <strong>Rehearsal 2</strong></td><td>All</td><td>Two consecutive clean runs</td></tr>
+                <tr><td class="tid">IN-10</td><td>Stage roles: who drives, who narrates, who answers Oracle, who answers CKB</td><td>IN</td><td>One card per person</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <div class="gate">
+          <div class="gate-top"><span class="gate-id">Gate 6 · 18:00 D2</span><span class="gate-name">Demo-ready</span></div>
+          <p><span class="green">Green when</span> two clean rehearsals are done, the fallback recording exists, laptops are charged, the hotspot is tested and the explorer tabs are pre-opened.</p>
+        </div>
+      </section>
+
+      <section id="loop">
+        <div class="sec-head"><span class="sec-num">05</span><h2>What Linnette gets at every gate</h2></div>
+        <p>Four lines, nothing more — plus a screenshot or a 60-second recording, so nobody has to take "it works" on faith.</p>
+        <pre><code>GATE n — GREEN / RED
+Shipped:    &lt;what demonstrably works, with the trace&gt;
+Red:        &lt;lane, task ID, which kill-switch fires&gt;
+Your call:  &lt;the one decision needed, if any&gt;</code></pre>
+        <p class="footnote">Between gates there are no interruptions unless a kill-switch needs authorising.</p>
+      </section>
+
+      <section id="contracts">
+        <div class="sec-head"><span class="sec-num">06</span><h2>Shared contracts — frozen at 14:00 Day 1</h2></div>
+        <div class="callout warn">
+          <h4>These supersede the draft contracts in tasks.md</h4>
+          <p>Four conflicts were resolved — see §16 for the reasoning. The field names below are final; the <code>tasks.md</code> field names are not.</p>
+        </div>
+        <h3>Observation</h3>
+        <pre><code>{
+  "id": "obs_2026_08",
+  "project_id": "kiambu-restoration-demo",
+  "metric": "ndvi_mean",
+  "value": 0.42,
+  "unit": "index",
+  "period_start": "2026-08-01T00:00:00Z",
+  "period_end": "2026-08-31T23:59:59Z",
+  "observed_at": "2026-08-15T07:42:11Z",
+  "valid_pixel_fraction": 0.87,
+  "cloud_cover_scene_pct": 12.4,
+  "quality_flags": ["cloud_masked", "shadow_masked", "coverage_ok"],
+  "source_dataset": "Landsat Collection 2 Level-2 (landsat-c2-l2)",
+  "source_scene_id": "&lt;REAL_SCENE_ID_FROM_STAC&gt;",
+  "processing_version": "ndvi-v1",
+  "evidence_asset_id": "ev_0007",
+  "simulation_status": "real"
+}</code></pre>
+        <h3>Alert</h3>
+        <pre><code>{
+  "id": "alert_001",
+  "project_id": "kiambu-restoration-demo",
+  "metric": "ndvi_mean",
+  "rule_version": "divergence-v1",
+  "method": "robust linear baseline, residual sigma band, 2 consecutive periods",
+  "severity": "review",
+  "status": "open",
+  "observed_value": 0.42,
+  "expected_value": 0.51,
+  "expected_low": 0.47,
+  "expected_high": 0.55,
+  "deviation_abs": -0.09,
+  "deviation_pct": -17.6,
+  "consecutive_periods": 2,
+  "quality_flags": ["coverage_ok", "rainfall_within_1sd"],
+  "evidence_ids": ["obs_2026_07", "obs_2026_08", "rain_2026_07", "rain_2026_08"],
+  "explanation": "Observed NDVI sat below the expected band for two consecutive
+                  valid months. Valid-pixel fraction exceeded 0.75 in both, so
+                  this is not a data-coverage artefact. District-scale rainfall
+                  was within 1 SD of the window mean, so drought is not
+                  indicated at that scale.",
+  "limitations": "NDVI is a greenness indicator, not tree survival or carbon.
+                  Rainfall context is ERA5 at ~25 km and cannot resolve this
+                  site. Cause is not established.",
+  "created_at": "2026-10-13T09:00:00Z",
+  "simulation_status": "real"
+}</code></pre>
+        <h3>Evidence manifest — the thing we hash</h3>
+        <pre><code>{
+  "schema_version": "1.0",
+  "project_id": "kiambu-restoration-demo",
+  "event_id": "evt_000003",
+  "event_type": "observation_recorded",
+  "observed_at": "2026-08-15T07:42:11Z",
+  "observation_ids": ["obs_2026_08"],
+  "source_dataset": "Landsat Collection 2 Level-2 (landsat-c2-l2)",
+  "source_scene_id": "&lt;REAL_SCENE_ID&gt;",
+  "asset_sha256": ["&lt;sha256 of the derived observation payload&gt;"],
+  "processing_version": "ndvi-v1",
+  "metric_name": "ndvi_mean",
+  "metric_value": "0.42",
+  "unit": "index",
+  "quality_summary": {"valid_pixel_fraction": "0.87",
+                      "cloud_cover_scene_pct": "12.4"},
+  "previous_event_hash": "&lt;sha256 hex or null&gt;",
+  "created_at": "2026-10-13T09:00:00Z",
+  "simulation_status": "real"
+}</code></pre>
+        <div class="callout">
+          <h4>Why manifest numbers are strings while API numbers are not</h4>
+          <p><code>tasks.md</code> rightly says "keep numeric values numeric" — that holds for every API response above. The manifest is the one exception, and only because it is hashed: float formatting (<code>0.42</code> vs <code>0.420</code> vs <code>4.2e-1</code>) differs across languages and library versions, and any such drift silently breaks verification. Strings inside the manifest remove an entire class of 2am bug. Document it in <code>docs/ckb-integrity.md</code> so it reads as a deliberate choice, not an oversight.</p>
+        </div>
+        <h3>Verification response</h3>
+        <pre><code>{
+  "evidence_id": "evt_000003",
+  "verified": true,
+  "state": "verified",
+  "manifest_hash_recomputed": "a3f1...",
+  "manifest_hash_onchain": "a3f1...",
+  "network": "ckb-testnet",
+  "tx_hash": "0x...",
+  "output_index": 0,
+  "anchored_at": "2026-10-13T20:14:00Z",
+  "explorer_url": "https://pudge.explorer.nervos.org/transaction/0x..."
+}</code></pre>
+        <p><code>state</code> is one of <code>verified</code> · <code>modified</code> · <code>not_anchored</code> · <code>pending</code> · <code>chain_unavailable</code> — the four non-happy paths, each with its own UI treatment in <code>FE-11</code>.</p>
+        <h3>Routes — FastAPI owns all of these</h3>
+        <pre><code>GET  /api/projects
+GET  /api/projects/{id}
+GET  /api/projects/{id}/observations    ?metric=&amp;from=&amp;to=
+GET  /api/projects/{id}/rainfall
+GET  /api/projects/{id}/trend           pre/post intervention comparison
+GET  /api/projects/{id}/audit           ordered timeline + anchor status
+GET  /api/alerts                        ?project_id=
+GET  /api/alerts/{id}/investigation
+POST /api/proposals                     → extracted commitments (proposed)
+POST /api/commitments/{id}/approve      → baseline + audit event
+POST /api/interventions                 → append-only + audit event
+POST /api/evidence/{id}/anchor          → CKB tx
+GET  /api/evidence/{id}/verify
+POST /api/evidence/{id}/tamper-check    → demo-only, proves the failure path</code></pre>
+        <p class="footnote"><strong>Error envelope</strong> on every non-2xx: <code>{code, message, request_id, details[]}</code>. Never a stack trace.</p>
+      </section>
+
+      <section id="data">
+        <div class="sec-head"><span class="sec-num">07</span><h2>Data sources — the fast path, verified</h2></div>
+        <div class="tscroll"><table>
+          <thead><tr><th>Need</th><th>Source</th><th>Access reality</th><th>Limitation to state on stage</th></tr></thead>
+          <tbody>
+            <tr><td>Landsat C2 L2 surface reflectance</td><td>Microsoft Planetary Computer STAC, collection <code>landsat-c2-l2</code></td><td>STAC search is open; asset reads need a SAS token, obtainable anonymously (throttled) via the Data Authentication API. An API key raises limits.</td><td>30 m pixels; cloud gaps; greenness ≠ survival ≠ carbon</td></tr>
+            <tr><td>Rainfall</td><td>Open-Meteo Historical Weather API, <code>daily=precipitation_sum</code></td><td>Free, <strong>no key</strong>, ERA5 from 1940, ~10k calls/day non-commercial, 5-day lag</td><td><strong>~25 km grid</strong> → district-level context, not site rainfall. Say this out loud.</td></tr>
+            <tr><td>Rainfall (P1 only)</td><td>CHIRPS, ~5 km</td><td>Heavier retrieval</td><td>Only if Phase 5 has spare time</td></tr>
+            <tr><td>Proposal, field reports, intervention</td><td>Synthetic fixtures in <code>data/sample/</code></td><td>Committed to the repo, every row <code>simulated</code></td><td>Labelled in both the UI and the database</td></tr>
+            <tr><td>Basemap</td><td>MapLibre + a dark style</td><td>Verify the tile source's terms</td><td>Degrades to the polygon on a flat ground if tiles fail</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout">
+          <h4>The reproducibility requirement</h4>
+          <p><code>make ingest</code> must regenerate the committed observation fixture identically, or print a clear diff. That property is what makes the evidence claim defensible — without it we are only asserting numbers.</p>
+        </div>
+      </section>
+
+      <section id="ckb">
+        <div class="sec-head"><span class="sec-num">08</span><h2>CKB integrity layer — build spec</h2></div>
+        <ul>
+          <li><strong>SDK:</strong> <code>@ckb-ccc/core</code> (CCC). Lumos is no longer actively maintained — do not start there.</li>
+          <li><strong>Network:</strong> testnet. Fund the signer in Phase 0; capacity surprises are the classic 2am blocker. A cell needs ~61 CKB of capacity plus 1 CKB per data byte, so keep the payload to the 32-byte hash and a version prefix — never the manifest itself.</li>
+          <li><strong>Anchor:</strong> one output cell, standard lock = our testnet address, cell data = <code>version_byte || sha256(canonical_manifest)</code>. <strong>No custom Type Script</strong> — explicitly out of scope, and we say so rather than implying a smart contract exists.</li>
+          <li><strong>Canonicalization:</strong> sorted keys, no insignificant whitespace, UTF-8, numbers as strings. Golden-file tested. If the hash is not reproducible, nothing else in this lane matters.</li>
+          <li><strong>Event chain:</strong> each manifest carries <code>previous_event_hash</code>, giving four links across observation → alert → intervention → re-measurement. It is an application-level structure anchored on CKB, <em>not</em> enforced by on-chain script. State that distinction plainly.</li>
+          <li><strong>Keys:</strong> backend env only. Never in <code>apps/web</code>, never in logs, never in the repo.</li>
+        </ul>
+        <div class="callout warn">
+          <h4>What we claim, and what we don't</h4>
+          <p><strong>Claim:</strong> this exact evidence record existed in this exact form at this time, and you can check it yourself.</p>
+          <p><strong>Do not claim:</strong> that the measurement is correct, the sensor calibrated, the field report honest, or the AI right.</p>
+        </div>
+      </section>
+
+      <section id="oracle">
+        <div class="sec-head"><span class="sec-num">09</span><h2>Oracle plan and its fallback</h2></div>
+        <p><strong>Target:</strong> Autonomous Database + bundled APEX + ORDS, one schema shared by the API and APEX. That shared schema <em>is</em> the Oracle proof — the stage moment is the enterprise console and the cinematic web app reading the same rows.</p>
+        <p><strong>Dev from hour one:</strong> <code>gvenzl/oracle-free</code> (Oracle Database 23ai Free) in Docker Compose. Oracle-real SQL, zero provisioning wait.</p>
+        <p><strong>Promotion:</strong> one connection string — <code>oracledb</code> thin mode plus a wallet for ADB. P3 verifies the swap <em>before</em> Gate 2, not on Day 2.</p>
+        <div class="callout warn">
+          <h4>If ADB or APEX never lands</h4>
+          <p>Demo on local Oracle 23ai Free, show the migrations and the APEX export, and say exactly that. A working local Oracle with honest framing beats a broken cloud claim — but we never describe local Oracle as "Autonomous Database".</p>
+        </div>
+        <p><strong>GeoRaster:</strong> a 30-minute spike, a feasibility note, then stop. If it happens to work, one raster metadata query is a bonus beat at the very end. It is never a dependency.</p>
+        <p><strong>OCI GenAI:</strong> needs trial credits in a supported region; Always-Free ADB alone does not include it. Hence the Gate 1 go/no-go.</p>
+      </section>
+
+      <section id="ui">
+        <div class="sec-head"><span class="sec-num">10</span><h2>UI quality — and the skills we use for it</h2></div>
+        <p class="lede">It should look like something a climate fund would actually buy, not a hackathon dashboard. Three things get us there.</p>
+        <ol>
+          <li><strong>Design system before pixels.</strong> <code>FE-1</code> locks palette, type scale, spacing, motion durations and elevation, plus the provenance badge. shadcn/ui for primitives so nobody hand-rolls a dialog at midnight.</li>
+          <li><strong>Charts as evidence, not decoration.</strong> Uncertainty drawn as bands. Valid-pixel fraction encoded, not hidden. Honest axes — no truncated y-axis to dramatise the dip. One colour-blind-safe series palette across every beat.</li>
+          <li><strong>Motion that carries meaning.</strong> Transitions communicate time passing and spatial zoom. Everything else stays still, and <code>prefers-reduced-motion</code> is honoured.</li>
+        </ol>
+        <h4>Skills to invoke during the build</h4>
+        <div class="tscroll"><table>
+          <thead><tr><th>Skill</th><th>When</th></tr></thead>
+          <tbody>
+            <tr><td><code>dataviz</code></td><td>Before the first chart line is written — palette, mark specs, legend and axis rules, light/dark consistency</td></tr>
+            <tr><td><code>vercel:shadcn</code></td><td>Component installation and composition patterns</td></tr>
+            <tr><td><code>vercel:nextjs</code></td><td>App Router, server components, data-fetching patterns</td></tr>
+            <tr><td><code>vercel:react-best-practices</code></td><td>After the Phase 5 component sprint</td></tr>
+            <tr><td><code>artifact-design</code> · <code>artifact-diagramming</code></td><td>The architecture diagram and any shared-out page</td></tr>
+            <tr><td><code>/code-review</code> · <code>/simplify</code></td><td>Gate 5, and on the frontend diff if time allows</td></tr>
+          </tbody>
+        </table></div>
+        <p class="footnote"><strong>Non-negotiable UI states:</strong> loading, empty, error, offline and fallback-labelled. <code>FE-11</code> tests them by actually killing each service, not by assuming.</p>
+      </section>
+
+      <section id="repo">
+        <div class="sec-head"><span class="sec-num">11</span><h2>Conventions and commands</h2></div>
+        <ul>
+          <li>TypeScript <code>strict</code>; Python type hints and Pydantic at every boundary.</li>
+          <li>Business logic out of React components and out of route handlers. Pure functions for NDVI, QA masking, canonicalization and alert rules — these are the testable core.</li>
+          <li>Repositories for all DB access. Bind variables only. No string-interpolated SQL, ever.</li>
+          <li>Migrations are versioned and forward-only. If it isn't in <code>database/migrations</code>, it doesn't exist.</li>
+          <li>Conventional commits prefixed with the task ID: <code>feat(DA-9): divergence alert rule + tests</code>.</li>
+          <li>Branch per task, PR into <code>main</code>. IN reviews everything; lanes cross-review each other's tests.</li>
+          <li>Structured logs with request IDs. Never log credentials, keys or document contents.</li>
+        </ul>
+        <h4>Tests that must exist by Gate 5</h4>
+        <p>NDVI and QA masking · alert thresholds (fires / doesn't / suppressed) · canonical hash determinism · verification pass and fail · one API→Oracle integration test · one Playwright run of the nine beats.</p>
+        <pre><code>make up        # docker compose: oracle + api + web
+make db-reset  # drop, migrate, seed from zero
+make ingest    # re-run the Landsat + rainfall pipeline
+make test      # pytest + vitest + playwright
+make anchor    # anchor the latest unanchored evidence to CKB testnet
+make verify    # verify every anchored evidence record</code></pre>
+      </section>
+
+      <section id="kill">
+        <div class="sec-head"><span class="sec-num">12</span><h2>Kill-switches — pre-authorised, with deadlines</h2></div>
+        <p class="lede">Each has a decision time. When the clock hits it, the switch fires without a meeting.</p>
+        <div class="tscroll"><table>
+          <thead><tr><th>Risk</th><th>Deadline</th><th>Kill-switch</th></tr></thead>
+          <tbody>
+            <tr><td>ADB / APEX access not granted</td><td>Gate 1</td><td>Ship on local Oracle 23ai Free; commit the APEX export; state it plainly on stage</td></tr>
+            <tr><td>OCI GenAI unreachable</td><td>Gate 1</td><td>Deterministic extractor + templated investigation, every output badged <code>fallback</code>. Beat 5 unchanged in shape</td></tr>
+            <tr><td>Landsat too cloudy / STAC throttled</td><td>Gate 0</td><td>Widen the window to 2022, drop to quarterly, or move the polygon. Decide before building, never after</td></tr>
+            <tr><td>CKB faucet or capacity trouble</td><td>Gate 0</td><td>Escalate immediately; P4 pairs with IN. The anchor is P0 — if it is at risk it gets two people</td></tr>
+            <tr><td>Canonical hash not reproducible</td><td>Gate 1</td><td>Simplify the manifest — fewer fields, all strings — until it is. Determinism beats richness</td></tr>
+            <tr><td><strong>Vertical slice red</strong></td><td>Gate 2</td><td><strong>All four lanes converge on it.</strong> Phase 3 postponed. The one gate we do not slip past</td></tr>
+            <tr><td>Linnette double-booked — CKB red while a gate needs running</td><td>Gate 2 or 3</td><td>Person 2 takes the gate call and the integration build for the rest of Day 1. Agreed in advance, not negotiated at 21:00</td></tr>
+            <tr><td>GeoRaster rabbit hole</td><td>30 min in</td><td>Hard stop, write the feasibility note, move on</td></tr>
+            <tr><td>Frontend polish starting early</td><td>any time</td><td>IN blocks the PR. Cinematics begin at 12:30 Day 2, not before</td></tr>
+            <tr><td>Scope creep — "what if we also…"</td><td>any time</td><td>No until Gate 5. It goes in <code>docs/post-hackathon.md</code> instead</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="script">
+        <div class="sec-head"><span class="sec-num">13</span><h2>Demo script — 3:30</h2></div>
+        <div class="script">
+          <div class="script-row"><div class="script-t">0:00–0:20</div><div class="script-b">Promise</div><div class="script-l">"Aircraft have flight recorders because when something goes wrong, somebody has to be able to reconstruct what actually happened. Climate finance has final reports." Kiambu, its approved commitment, its named reviewer.</div></div>
+          <div class="script-row"><div class="script-t">0:20–0:50</div><div class="script-b">Observe</div><div class="script-l">Polygon, monthly NDVI from real Landsat scenes. Click a point: scene ID, acquisition date, 87% valid pixels. "Every number here knows where it came from."</div></div>
+          <div class="script-row"><div class="script-t">0:50–1:25</div><div class="script-b">Detect</div><div class="script-l">Scrub to the divergence. The alert explains itself: two consecutive months below the expected band, coverage good, rainfall normal at district scale. "So this is probably not drought, and it is definitely not a cloud artefact."</div></div>
+          <div class="script-row"><div class="script-t">1:25–1:55</div><div class="script-b">Investigate</div><div class="script-l">Evidence-grounded hypotheses, each citing evidence IDs, plus what further data would separate them. "It doesn't tell us the cause. It tells us what to go and check."</div></div>
+          <div class="script-row"><div class="script-t">1:55–2:30</div><div class="script-b">Verify</div><div class="script-l">Manifest, its sha256, the CKB testnet transaction. Verify → pass. Then tamper one field → <strong>fail</strong>. "The record cannot be quietly rewritten after the fact."</div></div>
+          <div class="script-row"><div class="script-t">2:30–2:50</div><div class="script-b">Act</div><div class="script-l">Log the replanting intervention — labelled simulated — owner, date, follow-up.</div></div>
+          <div class="script-row"><div class="script-t">2:50–3:15</div><div class="script-b">Re-measure</div><div class="script-l">Two later real observations, the trend turning. "Correlation, not proof. But now the question is answerable."</div></div>
+          <div class="script-row"><div class="script-t">3:15–3:30</div><div class="script-b">Close</div><div class="script-l">APEX console, same rows, enterprise view. "Oracle is the system of record. CKB is the independent check. The loop is what's new."</div></div>
+        </div>
+        <p><strong>If cut to 3:00:</strong> shorten the opening and the AI beat. <strong>Never</strong> cut verify, tamper or re-measure — those are the differentiators.</p>
+        <h4>Pre-loaded Q&amp;A</h4>
+        <p>NDVI ≠ carbon · ERA5 is 25 km · the hash proves integrity, not truth · no custom on-chain script · what is simulated and why · what production would need: ground-truth plots, higher-resolution imagery, independent field audit.</p>
+      </section>
+
+      <section id="dod">
+        <div class="sec-head"><span class="sec-num">14</span><h2>Definition of done</h2></div>
+        <ul class="cl" data-cl="dod">
+          <li><input type="checkbox" id="d1"><label for="d1">Fresh clone → running stack in two documented commands</label></li>
+          <li><input type="checkbox" id="d2"><label for="d2">No secrets in git; <code>.env.example</code> holds names only</label></li>
+          <li><input type="checkbox" id="d3"><label for="d3"><code>make ingest</code> reproduces the committed observation fixture</label></li>
+          <li><input type="checkbox" id="d4"><label for="d4">Unit tests: NDVI/QA, alert rule, canonical hash, verification pass and fail</label></li>
+          <li><input type="checkbox" id="d5"><label for="d5">One API→Oracle integration test, one Playwright nine-beat run</label></li>
+          <li><input type="checkbox" id="d6"><label for="d6">All nine beats work on live endpoints with no manual DB edits</label></li>
+          <li><input type="checkbox" id="d7"><label for="d7">Loading, empty, error, offline and fallback states exist — tested by killing services</label></li>
+          <li><input type="checkbox" id="d8"><label for="d8">Every record shows source, date, quality and simulation status</label></li>
+          <li><input type="checkbox" id="d9"><label for="d9">AI output schema-validated and citing evidence IDs — or badged <code>fallback</code></label></li>
+          <li><input type="checkbox" id="d10"><label for="d10">CKB tx real and verifiable from the public explorer; tamper path demonstrated</label></li>
+          <li><input type="checkbox" id="d11"><label for="d11">Docs: architecture, data dictionary, API contracts, ckb-integrity, oracle-setup, georaster-feasibility, demo script</label></li>
+          <li><input type="checkbox" id="d12"><label for="d12">Two consecutive clean rehearsals + the recorded fallback on two machines</label></li>
+        </ul>
+      </section>
+
+      <section id="access">
+        <div class="sec-head"><span class="sec-num">15</span><h2>Paste this into the team chat now</h2></div>
+        <div class="copybox">
+          <button type="button" id="copyAccess">Copy</button>
+          <pre><code id="accessText">Phase 0 access check — I need answers in the next 60 minutes, and
+"I'll check later" is a red for our purposes. Please answer
+YES / NO / NOT SURE, plus a link or screenshot if yes:
+
+ORACLE
+1. Does anyone have an Oracle Cloud account with an Autonomous
+   Database instance currently "Available"? (Free tier counts.)
+   Who, and which home region?
+2. Can you open an APEX workspace on that instance — the Database
+   Actions / APEX link from the ADB console?
+   (An apex.oracle.com-only workspace is a DIFFERENT answer — say
+   so, because it has no OCI GenAI and no Object Storage.)
+3. Is ORDS enabled / can we REST-enable a schema?
+4. Run this and paste the row count:
+   SELECT * FROM all_objects WHERE object_name LIKE 'SDO_GEOR%';
+   (GeoRaster check — 30-minute spike only, not a dependency.)
+
+OCI GENERATIVE AI
+5. Does the tenancy have Generative AI available in a supported
+   region (e.g. Chicago, Frankfurt, London)? This needs the $300
+   trial credits — Always Free ADB alone does NOT include it.
+6. Do we have an API user with a key pair and the IAM policy to
+   call the inference endpoint? Can someone get one successful
+   chat completion from Python today?
+
+CKB
+7. Who has a CKB testnet address funded from the faucet (we need
+   ~300 CKB)? Paste the address.
+
+ACCOUNT OWNERSHIP
+8. Who actually owns the Oracle account, and are they reachable
+   for the next 30 hours?
+
+If 1-3 are NO/NOT SURE we ship on local Oracle 23ai Free in
+Docker and say so honestly on stage — that path is already in the
+plan and costs us nothing today.
+If 5-6 are NO we ship the deterministic fallback for the AI beat.
+Neither blocks anyone. But I need to know by 14:00 so we route
+around it now rather than at 2am.</code></pre>
+        </div>
+      </section>
+
+      <section id="recon">
+        <div class="sec-head"><span class="sec-num">16</span><h2>Reconciliation with tasks.md</h2></div>
+        <p class="lede"><code>tasks.md</code> is a good ownership document, written without a fixed clock and assuming four people. Two structural changes and four contract conflicts needed resolving. After this, <strong>this document is the single source of truth.</strong></p>
+        <h3>Structural changes</h3>
+        <div class="tscroll"><table>
+          <thead><tr><th>tasks.md said</th><th>Now</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>"The integration lead is one of the four. An additional coordination duty, not a fifth role."</td><td><strong>Unchanged — tasks.md was right.</strong> The team is four. Linnette is Person 4: CKB <em>and</em> integration lead.</td><td>An earlier draft of this plan made the integrator a dedicated fifth role. That was wrong about the team, so it is reverted. The load is absorbed by the three moves in the callout at the top of this page.</td></tr>
+            <tr><td>Phases 0–4, undated</td><td>Phases 0–6 on a wall clock with 7 gates</td><td>"Parallel development" without a deadline is where two-day hackathons die. Every task now has an hour.</td></tr>
+            <tr><td>Person 3 owns both Oracle and the API</td><td><strong>Unchanged — P3 owns the API.</strong> IN wires routes and owns the integration build only.</td><td>Honouring tasks.md. It also satisfies its own "avoid competing APIs" rule: FastAPI is the one boundary, ORDS is APEX-internal.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Contract conflicts resolved</h3>
+        <div class="tscroll"><table>
+          <thead><tr><th>Conflict</th><th>Resolution</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>camelCase (<code>projectId</code>) vs snake_case (<code>project_id</code>)</td><td><strong>snake_case on the wire.</strong> P1 generates TypeScript types from OpenAPI, so nobody hand-writes either spelling.</td><td>Python, Oracle and FastAPI are all snake_case-native. One conversion, at one boundary, generated rather than hand-maintained.</td></tr>
+            <tr><td><code>indicator</code> vs <code>metric</code></td><td><strong><code>metric</code></strong></td><td>Matches the v1.0 data model and the DB column already specified there.</td></tr>
+            <tr><td><code>isSimulated</code> boolean vs <code>simulation_status</code> enum</td><td><strong>The enum:</strong> <code>real</code> · <code>simulated</code> · <code>mixed</code> · <code>fallback</code></td><td>A boolean cannot express "this AI summary came from the deterministic fallback, not the model" — which is exactly a state we must label honestly.</td></tr>
+            <tr><td>"Keep numeric values numeric" vs hashing needs stable formatting</td><td><strong>Numeric in all API responses. Strings inside the manifest only.</strong></td><td>Both rules are right in their own scope. Float-format drift silently breaks verification; everywhere else, numbers should be numbers.</td></tr>
+          </tbody>
+        </table></div>
+        <h3>Checkpoint mapping</h3>
+        <div class="tscroll"><table>
+          <thead><tr><th>tasks.md checkpoint</th><th>Becomes</th></tr></thead>
+          <tbody>
+            <tr><td>CP1 — all four agree on contracts</td><td>Gate 0 · 14:00 D1</td></tr>
+            <tr><td>CP2 — P1 renders mocks matching contracts</td><td>Gate 1 · 17:30 D1</td></tr>
+            <tr><td>CP3 — P2's observations load into the data store</td><td>Gate 2 · 21:00 D1</td></tr>
+            <tr><td>CP4 — P4 can anchor and verify</td><td>Gate 2 (anchor) and Gate 3 (verify + tamper)</td></tr>
+            <tr><td>CP5 — full journey, no manual DB edits</td><td>Gate 4 · 12:30 D2</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="tasks-intro">
+        <div class="sec-head"><span class="sec-num">—</span><h2>The task board</h2></div>
+        <div class="callout">
+          <h4>Start here</h4>
+          <p><strong>Find your lane:</strong> hit your button in the bar at the top of the page and everything else disappears. Your next action is always <strong>the top unticked box in your current phase</strong>. Linnette's button shows both of her sections, CKB first and integration second.</p>
+          <p>Tick boxes as you go — they save in your own browser, so your copy of this page remembers where you are. If a task is blocked, say so in team chat straight away if it blocks someone else, otherwise raise it at the next gate.</p>
+          <p>Every phase ends with a <strong>Done when</strong> line. That is the bar, not "I think it works".</p>
+        </div>
+      </section>
+
+      <section id="p1" class="lane-sec" data-lane="fe">
+        <div class="lane-head"><span class="lane-code">P1 · FE</span><h2>Frontend &amp; User Experience</h2></div>
+        <div class="lane-meta">
+          <div><b>Owns</b><code>apps/web</code> — the nine beats, design system, map, charts, provenance badges, fallback states</div>
+          <div><b>Measured on</b>Can a judge follow the whole story with nobody explaining the screens?</div>
+          <div><b>Doesn't touch</b>Python, SQL, chain code</div>
+        </div>
+        <div class="lane-body">
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 0 · Unblock</span><span class="step-clock">12:00–14:00 D1</span><span class="step-ids">FE-0</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="fe01"><label for="fe01">Read §2 frozen decisions and §6 contracts. Raise any field you cannot render <strong>before 14:00</strong>, not after.</label></li>
+              <li><input type="checkbox" id="fe02"><label for="fe02">Scaffold <code>apps/web</code>: Next.js App Router, TypeScript <code>strict</code>, Tailwind, shadcn/ui.</label></li>
+              <li><input type="checkbox" id="fe03"><label for="fe03">MapLibre renders P2's committed <code>kiambu_site.geojson</code> on a dark basemap.</label></li>
+              <li><input type="checkbox" id="fe04"><label for="fe04">Decide the nine-beat navigation now — one route per beat, or one scroll spine. Your call, but decide.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> <code>pnpm dev</code> shows the Kiambu polygon.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 1 · Contracts &amp; skeletons</span><span class="step-clock">14:00–17:30 D1</span><span class="step-ids">FE-1 · FE-2 · FE-3</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="fe11"><label for="fe11"><strong>Freeze design tokens:</strong> palette (deep navy / near-black / restrained teal / amber alerts), type scale, spacing, motion durations, elevation. No palette changes after this phase.</label></li>
+              <li><input type="checkbox" id="fe12"><label for="fe12"><code>&lt;ProvenanceBadge status="real|simulated|mixed|fallback"&gt;</code> — build once, use everywhere.</label></li>
+              <li><input type="checkbox" id="fe13"><label for="fe13">Loading / empty / error / offline / fallback primitives.</label></li>
+              <li><input type="checkbox" id="fe14"><label for="fe14">Typed API client generated from P3's OpenAPI; MSW mocks returning the §6 fixtures.</label></li>
+              <li><input type="checkbox" id="fe15"><label for="fe15"><strong>Beat 1 Promise:</strong> hero, one-sentence problem, "Explore live project" CTA.</label></li>
+              <li><input type="checkbox" id="fe16"><label for="fe16"><strong>Beat 2 Brief:</strong> name, location, reporting period, the commitment and approved baseline, named reviewer, source span from the proposal.</label></li>
+              <li><input type="checkbox" id="fe17"><label for="fe17"><strong>Beat 3 Observe:</strong> map + monthly NDVI chart; clicking a point opens an evidence drawer with source dataset, scene ID, acquisition date, valid-pixel %, processing version, badge.</label></li>
+              <li><input type="checkbox" id="fe18"><label for="fe18">Label the boundary "approximate demo polygon" if it is not a surveyed boundary.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> all nine beats render against mocks with zero backend running, and beats 1–3 are genuinely usable.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 2 · Real evidence</span><span class="step-clock">17:30–21:00 D1</span><span class="step-ids">FE-4</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="fe21"><label for="fe21">Swap MSW → live FastAPI for beats 1–3.</label></li>
+              <li><input type="checkbox" id="fe22"><label for="fe22">Show P2's two preview PNGs as a labelled baseline-vs-worst-month comparison — static images, shared colour scale and legend, no tile server.</label></li>
+              <li><input type="checkbox" id="fe23"><label for="fe23">Make gaps visible: months with no valid observation render as gaps, <strong>never</strong> interpolated lines.</label></li>
+              <li><input type="checkbox" id="fe24"><label for="fe24">Surface data-quality warnings inline on low-valid-fraction points.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> clicking a chart point shows real Landsat scene metadata coming from Oracle.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 3 · Detect &amp; verify</span><span class="step-clock">21:00–23:00 D1</span><span class="step-ids">FE-5</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="fe31"><label for="fe31"><strong>Beat 4 Detect:</strong> timeline scrubber; alert card showing observed vs expected band, deviation absolute and %, the period, the <code>method</code>, <code>quality_flags</code>, and the plain-language <code>explanation</code>.</label></li>
+              <li><input type="checkbox" id="fe32"><label for="fe32">Render <code>limitations</code> next to every alert — not hidden in a tooltip.</label></li>
+              <li><input type="checkbox" id="fe33"><label for="fe33">Alert status chip: open / under investigation / resolved.</label></li>
+              <li><input type="checkbox" id="fe34"><label for="fe34"><strong>Beat 6 Verify:</strong> manifest viewer, its sha256, network and tx reference with an explorer link, a <strong>Verify</strong> button and a <strong>Tamper</strong> button.</label></li>
+              <li><input type="checkbox" id="fe35"><label for="fe35">Handle all five verification states: <code>verified</code>, <code>modified</code>, <code>not_anchored</code>, <code>pending</code>, <code>chain_unavailable</code>.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> both beats work against live endpoints and tamper visibly fails with both hashes shown.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 4 · Close the loop</span><span class="step-clock">08:00–12:30 D2</span><span class="step-ids">FE-6 · FE-7</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="fe41"><label for="fe41"><strong>Beat 7 Act:</strong> intervention form — action, responsible person, date, expected outcome, follow-up date, status. Simulated badge unmissable.</label></li>
+              <li><input type="checkbox" id="fe42"><label for="fe42">The intervention appears as a marker on the project timeline.</label></li>
+              <li><input type="checkbox" id="fe43"><label for="fe43"><strong>Beat 8 Re-measure:</strong> later observations beside pre-intervention ones, the pre/post trajectory, and the correlation-not-causation note <strong>in the UI</strong>, not just the script.</label></li>
+              <li><input type="checkbox" id="fe44"><label for="fe44"><strong>Beat 9 Decide:</strong> recommended next action, confidence, what evidence is still missing.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> submitting the form writes a real Oracle row and the timeline updates.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 5 · Polish</span><span class="step-clock">12:30–16:30 D2</span><span class="step-ids">FE-8 → FE-12</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="fe51"><label for="fe51">Cinematic pass: atmospheric Earth hero, orbital line motifs, amber alert states, beat transitions, telemetry-style type. Mood reference only — no film assets, titles or soundtrack.</label></li>
+              <li><input type="checkbox" id="fe52"><label for="fe52"><code>prefers-reduced-motion</code> honoured throughout.</label></li>
+              <li><input type="checkbox" id="fe53"><label for="fe53">Chart craft: uncertainty as bands, honest axes (<strong>never</strong> a truncated y-axis to dramatise the dip), colour-blind-safe series, legends, valid-pixel encoding.</label></li>
+              <li><input type="checkbox" id="fe54"><label for="fe54">Check it on the <strong>actual presentation screen</strong>, and from 3 m away.</label></li>
+              <li><input type="checkbox" id="fe55"><label for="fe55">Opt-in ambient audio: default off, licensed or original track, volume plus persistent mute.</label></li>
+              <li><input type="checkbox" id="fe56"><label for="fe56">Fallback states tested by actually killing each service: map tiles, API, CKB RPC, GenAI.</label></li>
+              <li><input type="checkbox" id="fe57"><label for="fe57">Demo-mode banner naming exactly which records are simulated.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> every beat looks deliberate at 1920×1080 and nothing blanks when a service dies.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">P1 is finished when</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="fef1"><label for="fef1">The full story runs overview → verification without developer intervention.</label></li>
+              <li><input type="checkbox" id="fef2"><label for="fef2">Every important value shows source and date, or a simulation label.</label></li>
+              <li><input type="checkbox" id="fef3"><label for="fef3">The app uses the agreed API, or explicitly labelled fixtures.</label></li>
+              <li><input type="checkbox" id="fef4"><label for="fef4">Successful verification <strong>and</strong> tamper failure are both visible.</label></li>
+              <li><input type="checkbox" id="fef5"><label for="fef5">Loading, empty, error, offline and fallback states all exist and were tested.</label></li>
+              <li><input type="checkbox" id="fef6"><label for="fef6">Stable enough to click through live, twice, without a reload.</label></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="p2" class="lane-sec" data-lane="da">
+        <div class="lane-head"><span class="lane-code">P2 · DA</span><h2>Environmental Data, Analytics &amp; AI</h2></div>
+        <div class="lane-meta">
+          <div><b>Owns</b><code>services/analytics</code>, <code>services/genai</code>, the data dictionary, metric definitions</div>
+          <div><b>Measured on</b>Reproducibility. Someone else must be able to regenerate your numbers.</div>
+          <div><b>Doesn't touch</b>React, APEX</div>
+        </div>
+        <div class="lane-body">
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 0 · Unblock</span><span class="step-clock">12:00–14:00 D1</span><span class="step-ids">DA-0 → DA-3</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="da01"><label for="da01">Choose the Kiambu polygon. Commit <code>data/sample/kiambu_site.geojson</code> (EPSG:4326) <strong>and</strong> a reference polygon 5–10 km away. 50–500 ha, forest/shrub, low cloud history.</label></li>
+              <li><input type="checkbox" id="da02"><label for="da02">STAC query against Planetary Computer <code>landsat-c2-l2</code> for 2023-01-01 → 2026-09-30. Commit <code>data/manifests/scene_candidates.json</code> with scene IDs and cloud cover.</label></li>
+              <li><input type="checkbox" id="da03"><label for="da03"><strong>Confirm ≥10 usable observation months.</strong> If not, say so at the gate — we widen the window or move the polygon <em>before</em> anyone builds on it.</label></li>
+              <li><input type="checkbox" id="da04"><label for="da04">Rainfall smoke test: one Open-Meteo archive call for the centroid returning <code>precipitation_sum</code>. Save the response.</label></li>
+              <li><input type="checkbox" id="da05"><label for="da05"><strong>Go/no-go on OCI Generative AI:</strong> one successful chat completion from Python in a supported region, or a recorded "no". Report either way.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> scene candidates are committed, the rainfall call works, and the GenAI verdict is recorded.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 1 · Contracts &amp; skeletons</span><span class="step-clock">14:00–17:30 D1</span><span class="step-ids">DA-4 → DA-6</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="da11"><label for="da11"><code>ndvi.py</code> as <strong>pure functions</strong>: scale factor and offset, <code>QA_PIXEL</code> bit unpacking (fill, cloud, cloud shadow, snow, saturation), masked mean, valid-pixel fraction.</label></li>
+              <li><input type="checkbox" id="da12"><label for="da12"><strong>Unit tests on hand-built arrays</strong> — at least 8 assertions on the QA logic alone. This is the credibility core of the whole project; test it like it is.</label></li>
+              <li><input type="checkbox" id="da13"><label for="da13">Never average invalid pixels into the project mean.</label></li>
+              <li><input type="checkbox" id="da14"><label for="da14"><code>ingest.py</code>: STAC search → sign assets → windowed read of red/NIR over the polygon → monthly observations with full provenance.</label></li>
+              <li><input type="checkbox" id="da15"><label for="da15"><code>rainfall.py</code>: monthly totals plus anomaly vs window mean, recording dataset name, version, resolution and units.</label></li>
+              <li><input type="checkbox" id="da16"><label for="da16">Document how the project-area statistic is computed — mean of valid pixels within the polygon, area-weighted or not. State which.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> <code>pytest services/analytics</code> is green and the NDVI/QA functions are tested in isolation.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 2 · Real evidence</span><span class="step-clock">17:30–21:00 D1</span><span class="step-ids">DA-7 · DA-8</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="da21"><label for="da21">Run the full pipeline on the real site. Commit <code>data/sample/observations_ndvi-v1.json</code> as the frozen fixture.</label></li>
+              <li><input type="checkbox" id="da22"><label for="da22"><code>make ingest</code> regenerates that fixture identically, or prints a clear diff. <strong>This property is the reproducibility claim</strong> — without it we are only asserting numbers.</label></li>
+              <li><input type="checkbox" id="da23"><label for="da23">Export two preview PNGs — baseline month and worst month — clipped to the polygon, same extent, shared colour scale, legend.</label></li>
+              <li><input type="checkbox" id="da24"><label for="da24">Hand P3 the observation records and P4 the evidence fields his manifest needs.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> ≥10 real monthly observations exist with scene IDs, valid fractions and cloud summaries.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 3 · Detect &amp; verify</span><span class="step-clock">21:00–23:00 D1</span><span class="step-ids">DA-9 → DA-11</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="da31"><label for="da31">Alert engine: robust linear baseline fit, residual σ band, divergence when below the band for <strong>2 consecutive valid months</strong>, suppressed when valid-pixel fraction &lt; 0.75.</label></li>
+              <li><input type="checkbox" id="da32"><label for="da32">Emit the full §6 alert shape: <code>rule_version</code>, <code>method</code>, observed, expected plus band, deviation abs and %, <code>quality_flags</code>, <code>evidence_ids</code>, plain-language <code>explanation</code>, <code>limitations</code>.</label></li>
+              <li><input type="checkbox" id="da33"><label for="da33"><strong>Three tests minimum:</strong> a series that fires, one that does not, one suppressed by poor data quality. No unexplained scores — if you cannot write the sentence explaining it, don't ship it.</label></li>
+              <li><input type="checkbox" id="da34"><label for="da34">Investigation assembler: bounded payload (≤4 KB) containing only the alert's own evidence, every fact carrying an evidence ID.</label></li>
+              <li><input type="checkbox" id="da35"><label for="da35">GenAI or fallback: schema-validated output with a summary, 2–4 hypotheses each citing evidence IDs, and "what further data would distinguish these". Record model ID and prompt version. Badge <code>fallback</code> if templated.</label></li>
+              <li><input type="checkbox" id="da36"><label for="da36">The model never invents measurements, never writes to the ledger, never asserts a cause.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> the real series fires exactly one alert, explained, and the investigation cites evidence IDs.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 4 · Close the loop</span><span class="step-clock">08:00–12:30 D2</span><span class="step-ids">DA-12 · DA-13</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="da41"><label for="da41">Two post-intervention observations from real later scenes. If none are usable, produce a clearly <code>simulated</code> record and state the limitation in the UI copy — <strong>never backfill a plausible number</strong>.</label></li>
+              <li><input type="checkbox" id="da42"><label for="da42">Pre/post trend comparison with a confidence interval and explicitly non-causal phrasing.</label></li>
+              <li><input type="checkbox" id="da43"><label for="da43">Commitment extraction from the sample proposal into strict JSON, every field marked <code>proposed</code>, awaiting human approval.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> the trend object is served by the API and the extraction validates against its schema.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 5 · Polish</span><span class="step-clock">12:30–16:30 D2</span><span class="step-ids">DA-14</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="da51"><label for="da51"><code>docs/data-dictionary.md</code> and <code>data/README.md</code>: every source, licence, dataset version, resolution, and the honest limitations.</label></li>
+              <li><input type="checkbox" id="da52"><label for="da52">Spell out: ERA5 is <strong>~25 km</strong> → district-level context, not site rainfall. Landsat is <strong>30 m</strong>. NDVI ≠ survival ≠ carbon ≠ biodiversity.</label></li>
+              <li><input type="checkbox" id="da53"><label for="da53">Document missing months, cloud contamination and seasonal effects.</label></li>
+              <li><input type="checkbox" id="da54"><label for="da54">Brief P1 on what every charted metric means and what it cannot support.</label></li>
+              <li><input type="checkbox" id="da55"><label for="da55">Prepare your Q&amp;A answers: what NDVI shows, how the alert triggers, what the AI is and isn't doing.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> a judge can answer "where did this number come from?" from the docs alone.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">P2 is finished when</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="daf1"><label for="daf1">The observation dataset can be regenerated by someone else from documented commands.</label></li>
+              <li><input type="checkbox" id="daf2"><label for="daf2">Real satellite observations and rainfall context exist, or the gaps are disclosed in the UI.</label></li>
+              <li><input type="checkbox" id="daf3"><label for="daf3">The alert logic is reproducible, tested three ways, and explainable in one sentence.</label></li>
+              <li><input type="checkbox" id="daf4"><label for="daf4">AI output is schema-validated and grounded in supplied evidence IDs — or badged <code>fallback</code>.</label></li>
+              <li><input type="checkbox" id="daf5"><label for="daf5">No environmental indicator is presented as proof of something it cannot establish.</label></li>
+              <li><input type="checkbox" id="daf6"><label for="daf6">No credentials in the repo, ever.</label></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="p3" class="lane-sec" data-lane="or">
+        <div class="lane-head"><span class="lane-code">P3 · OR</span><h2>Oracle, Backend &amp; Integration</h2></div>
+        <div class="lane-meta">
+          <div><b>Owns</b><code>database/</code>, <code>apps/apex</code>, <code>services/api</code>, ORDS, ADB provisioning — <strong>plus</strong> the compose/Makefile setup (<code>IN-3</code>) and the FastAPI skeleton (<code>IN-2</code>), which moved here when the team came in at four</div>
+          <div><b>Measured on</b>The shared data layer. Everyone else depends on you being right about shapes.</div>
+          <div><b>Doesn't touch</b>Chain internals, React</div>
+          <div><b>Heads up</b>This is now the heaviest lane. APEX is trimmed to three pages to pay for it. If you are behind at Gate 1, say so <em>there</em> — the next thing to cut is APEX page 3, not the API.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 0 · Unblock</span><span class="step-clock">12:00–14:00 D1</span><span class="step-ids">OR-0 → OR-2</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="or01"><label for="or01"><code>docker compose up oracle</code> → Oracle 23ai Free (<code>gvenzl/oracle-free</code>) running locally. <strong>This is the dev target from hour one</strong> so nobody waits on cloud provisioning.</label></li>
+              <li><input type="checkbox" id="or02"><label for="or02">In parallel: provision Autonomous Database (free tier) and open its APEX workspace. Record access, quota, network and permission constraints.</label></li>
+              <li><input type="checkbox" id="or03"><label for="or03">Confirm ORDS availability and whether a schema can be REST-enabled.</label></li>
+              <li><input type="checkbox" id="or04"><label for="or04"><strong>Timeboxed 30 minutes:</strong> GeoRaster spike. Does <code>SDO_GEOR</code> exist? Can you create a raster table? What does loading need? Write <code>docs/georaster-feasibility.md</code> with a verdict and <strong>stop at 30 minutes regardless of outcome.</strong></label></li>
+              <li><input type="checkbox" id="or05"><label for="or05">Answer the §15 access-check questions in team chat.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> <code>SELECT 1 FROM dual</code> returns from the container, and ADB status is either "Available" or a written blocker with an ETA.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 1 · Contracts &amp; skeletons</span><span class="step-clock">14:00–17:30 D1</span><span class="step-ids">OR-3 → OR-5</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="or11"><label for="or11">Migration <code>001_core.sql</code> — all nine entities: projects, commitments, evidence_assets, observations, alerts, investigations, interventions, audit_events, chain_anchors.</label></li>
+              <li><input type="checkbox" id="or12"><label for="or12">Stable IDs, UTC <code>TIMESTAMP WITH TIME ZONE</code>, units, processing versions, source references.</label></li>
+              <li><input type="checkbox" id="or13"><label for="or13"><code>simulation_status</code> CHECK constraint on every evidence-bearing table: <code>real</code> · <code>simulated</code> · <code>mixed</code> · <code>fallback</code>.</label></li>
+              <li><input type="checkbox" id="or14"><label for="or14">Foreign keys, and indexes on project + time + source identifiers.</label></li>
+              <li><input type="checkbox" id="or15"><label for="or15">Project polygon as <code>SDO_GEOMETRY</code>.</label></li>
+              <li><input type="checkbox" id="or16"><label for="or16">Seed <code>010_project.sql</code>: project, polygon, commitment, named reviewer, sample proposal text — all simulated records unmistakably flagged.</label></li>
+              <li><input type="checkbox" id="or17"><label for="or17">Views: <code>v_project_observations</code>, <code>v_project_alerts</code>, <code>v_audit_timeline</code>.</label></li>
+              <li><input type="checkbox" id="or18"><label for="or18">Publish OpenAPI with <strong>every</strong> §6 route returning the committed fixtures, so P1 can point at you by 17:30.</label></li>
+              <li><input type="checkbox" id="or19"><label for="or19">Consistent error envelope: <code>{code, message, request_id, details[]}</code>. No stack traces.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> <code>make db-reset</code> recreates everything from zero and <code>/docs</code> lists every route.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 2 · Real evidence</span><span class="step-clock">17:30–21:00 D1</span><span class="step-ids">OR-6 → OR-8</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="or21"><label for="or21">Idempotent <code>MERGE</code> loader for P2's observation fixture — re-running changes no rows.</label></li>
+              <li><input type="checkbox" id="or22"><label for="or22">Repository layer (<code>oracledb</code>, explicit SQL, <strong>bind variables only</strong>, no string-interpolated SQL anywhere).</label></li>
+              <li><input type="checkbox" id="or23"><label for="or23"><code>GET /api/projects/{id}/observations</code> returns <strong>Oracle rows</strong>, not fixtures.</label></li>
+              <li><input type="checkbox" id="or24"><label for="or24">APEX pages 1–3: project detail, evidence review, observation report — reading the same schema the API reads.</label></li>
+              <li><input type="checkbox" id="or25"><label for="or25">Store imagery <strong>references and hashes</strong>, not binaries, in relational rows.</label></li>
+              <li><input type="checkbox" id="or26"><label for="or26">Verify the ADB connection-string swap works <strong>before Gate 2</strong> — not on Day 2.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> APEX shows the same ten observations the API returns.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 3 · Detect &amp; verify</span><span class="step-clock">21:00–23:00 D1</span><span class="step-ids">OR-9</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="or31"><label for="or31">Persist alerts and investigations; append <code>audit_events</code> rather than overwriting history.</label></li>
+              <li><input type="checkbox" id="or32"><label for="or32">Store P4's anchor metadata against the correct evidence record.</label></li>
+              <li><input type="checkbox" id="or33"><label for="or33">APEX alert-investigation page plus an audit timeline with per-event verification status.</label></li>
+              <li><input type="checkbox" id="or34"><label for="or34">Make the history behind an alert inspectable — click the alert, see its evidence rows.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> APEX shows the alert, its evidence and its anchors.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 4 · Close the loop</span><span class="step-clock">08:00–12:30 D2</span><span class="step-ids">OR-10 · OR-11</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="or41"><label for="or41"><code>POST /api/interventions</code> → append-only insert plus an <code>audit_events</code> row. <strong>A DB-level constraint forcing interventions to <code>simulated</code></strong> — it must be impossible to insert one labelled <code>real</code>.</label></li>
+              <li><input type="checkbox" id="or42"><label for="or42"><code>POST /api/commitments/{id}/approve</code> → writes the baseline and an audit event carrying the reviewer's name.</label></li>
+              <li><input type="checkbox" id="or43"><label for="or43">Validate all incoming data; test both success and error responses.</label></li>
+              <li><input type="checkbox" id="or44"><label for="or44">The "Oracle proof" view we put on stage. <strong>The APEX intervention log is cut</strong> — three APEX pages total.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> the web app and APEX show identical rows, side by side.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 5 · Polish</span><span class="step-clock">12:30–16:30 D2</span><span class="step-ids">OR-12</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="or51"><label for="or51"><code>docs/oracle-setup.md</code> — configuration and run instructions, <strong>no credentials</strong>.</label></li>
+              <li><input type="checkbox" id="or52"><label for="or52">Commit the APEX application export.</label></li>
+              <li><input type="checkbox" id="or53"><label for="or53">ADB swap instructions, so someone else can stand it up.</label></li>
+              <li><input type="checkbox" id="or54"><label for="or54">Confirm every CKB tx reference is stored against the right evidence record.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> someone who has never seen the repo can bring the backend up from your docs.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">P3 is finished when</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="orf1"><label for="orf1">The API/data contract is documented, published and working.</label></li>
+              <li><input type="checkbox" id="orf2"><label for="orf2">Database setup and seed data recreate from zero, repeatably.</label></li>
+              <li><input type="checkbox" id="orf3"><label for="orf3">The frontend loads the whole project story with <strong>no manual database edits</strong>.</label></li>
+              <li><input type="checkbox" id="orf4"><label for="orf4">The APEX view demonstrates real operational monitoring, not a screenshot.</label></li>
+              <li><input type="checkbox" id="orf5"><label for="orf5">Real observations, simulated inputs, audit records and CKB anchors are all distinguishable.</label></li>
+              <li><input type="checkbox" id="orf6"><label for="orf6">Oracle claims in the pitch match exactly what is deployed. On local 23ai Free we say "Oracle Database 23ai Free", never "Autonomous Database".</label></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="p4" class="lane-sec" data-lane="ck">
+        <div class="lane-head"><span class="lane-code">P4 · CK</span><h2>Linnette · CKB &amp; Evidence Integrity</h2></div>
+        <div class="lane-meta">
+          <div><b>Owns</b><code>services/ckb</code> — manifest schema, canonicalization, hashing, anchoring, verification, the trust explanation</div>
+          <div><b>Measured on</b>A judge can verify independently, and can watch verification fail on a tampered record.</div>
+          <div><b>Doesn't touch</b>React, APEX, <code>services/api</code> internals</div>
+          <div><b>Two hats</b>This is Linnette's build lane. Her integration duties are the next section. Day 1 is mostly this one — the chain lane is P0 and front-loaded. Day 2 is mostly the other.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 0 · Unblock</span><span class="step-clock">12:00–14:00 D1</span><span class="step-ids">CK-0 · CK-1</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="ck01"><label for="ck01"><strong>SDK: <code>@ckb-ccc/core</code> (CCC).</strong> Do not start with Lumos — it is no longer actively maintained. Pin the version and record it.</label></li>
+              <li><input type="checkbox" id="ck02"><label for="ck02">Generate a testnet signer; fund from the Nervos testnet faucet. Target ≥300 CKB.</label></li>
+              <li><input type="checkbox" id="ck03"><label for="ck03">Send a minimal testnet transaction — any cell, any data — and paste the tx hash in team chat.</label></li>
+              <li><input type="checkbox" id="ck04"><label for="ck04">Document how a teammate repeats this.</label></li>
+              <li><input type="checkbox" id="ck05"><label for="ck05">Agree with P3 where anchor metadata lives, and with P1 what the verification panel displays.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> a real tx hash is visible on the testnet explorer. <strong>This is the single most important Phase 0 task</strong> — faucet and capacity surprises are the classic 2am blocker.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 1 · Contracts &amp; skeletons</span><span class="step-clock">14:00–17:30 D1</span><span class="step-ids">CK-2 · CK-3</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="ck11"><label for="ck11">Canonicalization: sorted keys, no insignificant whitespace, UTF-8, fixed date format, explicit null handling, numbers as strings.</label></li>
+              <li><input type="checkbox" id="ck12"><label for="ck12"><code>sha256</code> over the canonical bytes.</label></li>
+              <li><input type="checkbox" id="ck13"><label for="ck13"><strong>Golden-file tests:</strong> identical manifests → identical hash across runs; a reordered-key input → the <em>same</em> hash; any changed field → a <em>different</em> hash.</label></li>
+              <li><input type="checkbox" id="ck14"><label for="ck14">Manifest as a Pydantic model plus <code>docs/manifest.schema.json</code>.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> the hash is provably deterministic. <strong>If it is not reproducible, nothing else in this lane matters</strong> — this task is the lane's real deliverable.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 2 · Real evidence</span><span class="step-clock">17:30–21:00 D1</span><span class="step-ids">CK-4 · CK-5</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="ck21"><label for="ck21">Anchor: one output cell, standard lock = our testnet address, cell data = <code>version_byte || sha256(manifest)</code>. <strong>No custom Type Script</strong> — out of scope, and we say so rather than implying a smart contract exists.</label></li>
+              <li><input type="checkbox" id="ck22"><label for="ck22">Keep the payload to the 32-byte hash. A cell needs ~61 CKB capacity plus 1 CKB per data byte — never put the manifest itself on-chain.</label></li>
+              <li><input type="checkbox" id="ck23"><label for="ck23">Persist <code>chain_anchors</code>: network, tx hash, output index, manifest hash, status, anchored_at.</label></li>
+              <li><input type="checkbox" id="ck24"><label for="ck24">Handle pending and unavailable states explicitly; document retry handling so we never create confusing duplicate anchors.</label></li>
+              <li><input type="checkbox" id="ck25"><label for="ck25"><code>GET /api/evidence/{id}/verify</code> → re-fetch, re-canonicalize, re-hash, compare to on-chain data, return the §6 structured result with both hashes.</label></li>
+              <li><input type="checkbox" id="ck26"><label for="ck26">Private key in backend env only. Never in <code>apps/web</code>, never in logs, never in the repo. <code>.env.example</code> lists the variable name only.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> a real confirmed tx hash is stored in Oracle and verify returns <code>verified: true</code>.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 3 · Detect &amp; verify</span><span class="step-clock">21:00–23:00 D1</span><span class="step-ids">CK-6 · CK-7</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="ck31"><label for="ck31"><strong>Tamper demo:</strong> mutate a copy of the manifest, show verification failing with a clear expected-vs-recomputed diff. This is the demo's sharpest moment — make it unambiguous.</label></li>
+              <li><input type="checkbox" id="ck32"><label for="ck32">Anchor the alert and intervention events too, each carrying <code>previous_event_hash</code>.</label></li>
+              <li><input type="checkbox" id="ck33"><label for="ck33">Give P1 sample success <strong>and</strong> failure responses for every one of the five states.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> verify passes on the original, fails on the tampered copy, and three anchors exist on testnet.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 4 · Close the loop</span><span class="step-clock">08:00–12:30 D2</span><span class="step-ids">CK-8</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="ck41"><label for="ck41">Anchor the re-measurement event → a four-link hash chain across observation → alert → intervention → re-measurement.</label></li>
+              <li><input type="checkbox" id="ck42"><label for="ck42">Verify the chain link by link.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> the audit timeline shows four anchored events, each verifiable.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 5 · Polish</span><span class="step-clock">12:30–16:30 D2</span><span class="step-ids">CK-9</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="ck51"><label for="ck51"><code>docs/ckb-integrity.md</code> — the trust explanation, in plain language.</label></li>
+              <li><input type="checkbox" id="ck52"><label for="ck52">State what the anchor <strong>proves</strong>: this exact evidence record existed in this exact form at this time, and anyone can check it.</label></li>
+              <li><input type="checkbox" id="ck53"><label for="ck53">State what it <strong>does not prove</strong>: that the measurement is correct, the sensor calibrated, the field report honest, or the AI right.</label></li>
+              <li><input type="checkbox" id="ck54"><label for="ck54">Note that the event chain is an application-level structure anchored on CKB — <strong>not</strong> enforced by on-chain script.</label></li>
+              <li><input type="checkbox" id="ck55"><label for="ck55">Document independent verification from the public explorer, and key handling.</label></li>
+            </ul>
+            <p class="done-when"><b>Done when</b> P1 can give your trust explanation correctly without you in the room.</p>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">P4 is finished when</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="ckf1"><label for="ckf1">A real confirmed CKB testnet transaction exists and is linked from the UI.</label></li>
+              <li><input type="checkbox" id="ckf2"><label for="ckf2">The original manifest verifies; a modified manifest fails.</label></li>
+              <li><input type="checkbox" id="ckf3"><label for="ckf3">The frontend shows network, tx reference, hash and result for all five states.</label></li>
+              <li><input type="checkbox" id="ckf4"><label for="ckf4">The team can articulate the difference between evidence <strong>integrity</strong> and evidence <strong>truth</strong>.</label></li>
+              <li><input type="checkbox" id="ckf5"><label for="ckf5">Nothing fabricated is ever displayed as an on-chain transaction.</label></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="p5" class="lane-sec" data-lane="ck">
+        <div class="lane-head"><span class="lane-code">P4 · IN</span><h2>Second hat — Integrator &amp; Product Lead</h2></div>
+        <div class="lane-meta">
+          <div><b>Owns</b>Shared contracts, the integration build, the gates, code review, the narrative, the rehearsal</div>
+          <div><b>Measured on</b>No component is presented as integrated until its end-to-end path actually works.</div>
+          <div><b>Protects</b>Scope, and the team's sleep</div>
+          <div><b>Does not own</b>Writing backend, frontend or analytics code. Reviewing it, yes. Writing it, no — that is how integration stops happening.</div>
+        </div>
+        <div class="lane-body">
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phase 0 · Unblock</span><span class="step-clock">12:00–14:00 D1</span><span class="step-ids">IN-0 · IN-1</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="in01"><label for="in01">Post the §15 access-check message to team chat <strong>now</strong>. Answers by 14:00.</label></li>
+              <li><input type="checkbox" id="in02"><label for="in02">Create the repo, the issue board with every task ID, branch protection on <code>main</code>.</label></li>
+              <li><input type="checkbox" id="in03"><label for="in03">Assign real names to P1–P4 and pin it.</label></li>
+              <li><input type="checkbox" id="in04"><label for="in04">Freeze §2 into <code>docs/decisions.md</code>. Publish §6 as <code>docs/api-contracts.md</code>.</label></li>
+              <li><input type="checkbox" id="in05"><label for="in05">Run <strong>Gate 0</strong> at 14:00: seven green/red, and for each red, which kill-switch fires.</label></li>
+            </ul>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phases 1–4 · Build</span><span class="step-clock">14:00 D1 – 12:30 D2</span><span class="step-ids">IN-2 → IN-6</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="in11"><label for="in11">Review P3's FastAPI skeleton and compose/Makefile setup against the §6 contract — <code>IN-2</code> and <code>IN-3</code> are his to build now, yours to approve.</label></li>
+              <li><input type="checkbox" id="in12"><label for="in12">Keep the contracts document current as reality bites. A contract that drifts silently is worse than no contract.</label></li>
+              <li><input type="checkbox" id="in13"><label for="in13"><strong>An integration build at the end of every phase.</strong> Four of them. Each one with issues logged, not "looks fine".</label></li>
+              <li><input type="checkbox" id="in14"><label for="in14">Run Gates 1 → 4. At <strong>Gate 2</strong>, if the vertical slice is red, converge all four lanes on it and postpone Phase 3.</label></li>
+              <li><input type="checkbox" id="in15"><label for="in15">Protect scope: every "what if we also…" goes into <code>docs/post-hackathon.md</code>, not the sprint.</label></li>
+              <li><input type="checkbox" id="in16"><label for="in16">Block any frontend-polish PR before 12:30 Day 2.</label></li>
+              <li><input type="checkbox" id="in17"><label for="in17">Timed nine-beat click-through at Gate 4, driven by someone who did not build that beat.</label></li>
+            </ul>
+          </div>
+          <div class="step">
+            <div class="step-head"><span class="step-phase">Phases 5–6 · Freeze &amp; rehearse</span><span class="step-clock">12:30–18:00 D2</span><span class="step-ids">IN-7 → IN-10</span></div>
+            <ul class="cl">
+              <li><input type="checkbox" id="in21"><label for="in21">Run <code>/code-review</code> over the full diff. Triage into must-fix-now vs documented known issue. Must-fix list empty by 16:30.</label></li>
+              <li><input type="checkbox" id="in22"><label for="in22">Clean-install rehearsal: fresh clone, fresh DB, documented commands only.</label></li>
+              <li><input type="checkbox" id="in23"><label for="in23">Record the fallback walkthrough. Copy to two laptops and a USB stick.</label></li>
+              <li><input type="checkbox" id="in24"><label for="in24">Two consecutive clean rehearsals with Q&amp;A.</label></li>
+              <li><input type="checkbox" id="in25"><label for="in25">Stage roles on one card per person: who drives, who narrates, who answers Oracle, who answers CKB.</label></li>
+              <li><input type="checkbox" id="in26"><label for="in26">Secrets sweep: repo, logs, screenshots, demo data, slide deck.</label></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="closer">
+        <p>A flight recorder doesn't stop the crash. It makes the next one answerable. That's the whole pitch — commitment, observation, deviation, investigation, intervention, re-measurement, integrity check, all of it traceable.</p>
+        <p class="footnote" style="margin-top:18px">Four working beats beat eight half-beats. Credibility beats feature count. On stage, claim exactly what we built — no more, and no less.</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY="cbb-plan-v2";
+  var store={};
+  try{ store=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ store={}; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(store)); }catch(e){} }
+
+  var boxes=[].slice.call(document.querySelectorAll('.cl input[type="checkbox"]'));
+  boxes.forEach(function(b){
+    if(store[b.id]){ b.checked=true; }
+    paint(b);
+    b.addEventListener("change",function(){
+      if(b.checked){ store[b.id]=1; } else { delete store[b.id]; }
+      save(); paint(b); tally();
+    });
+  });
+  function paint(b){
+    var li=b.closest("li");
+    if(li){ li.classList.toggle("ticked", b.checked); }
+  }
+
+  var btns=[].slice.call(document.querySelectorAll(".lanebtn"));
+  function tally(){
+    btns.forEach(function(btn){
+      var lane=btn.getAttribute("data-lane");
+      var el=btn.querySelector(".tally");
+      if(!el||lane==="all"){ return; }
+      var secs=[].slice.call(document.querySelectorAll('.lane-sec[data-lane="'+lane+'"]'));
+      if(!secs.length){ return; }
+      var all=0, hit=0;
+      secs.forEach(function(sec){
+        all+=sec.querySelectorAll('.cl input[type="checkbox"]').length;
+        hit+=sec.querySelectorAll('.cl input[type="checkbox"]:checked').length;
+      });
+      el.textContent=hit+"/"+all;
+    });
+  }
+  tally();
+
+  btns.forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var lane=btn.getAttribute("data-lane");
+      btns.forEach(function(o){ o.setAttribute("aria-pressed", o===btn?"true":"false"); });
+      if(lane==="all"){
+        document.body.classList.remove("filtering");
+      } else {
+        document.body.classList.add("filtering");
+        document.querySelectorAll(".lane-sec").forEach(function(s){
+          s.classList.toggle("lane-on", s.getAttribute("data-lane")===lane);
+        });
+        var target=document.querySelector('.lane-sec[data-lane="'+lane+'"]');
+        if(target){ target.scrollIntoView({behavior:"smooth",block:"start"}); }
+      }
+    });
+  });
+
+  var copy=document.getElementById("copyAccess");
+  if(copy){
+    copy.addEventListener("click",function(){
+      var t=document.getElementById("accessText");
+      var txt=t?t.textContent:"";
+      function done(ok){ copy.textContent=ok?"Copied":"Press Ctrl+C"; setTimeout(function(){copy.textContent="Copy";},1800); }
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){done(true);},function(){done(false);});
+      } else {
+        try{
+          var r=document.createRange(); r.selectNodeContents(t);
+          var s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+          done(document.execCommand("copy"));
+        }catch(e){ done(false); }
+      }
+    });
+  }
+})();
+</script>

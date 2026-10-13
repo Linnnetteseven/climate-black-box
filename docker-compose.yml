@@ -1,0 +1,21 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:23-slim
+    container_name: cbb-oracle
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-change_me_local_only}
+      APP_USER: ${ORACLE_APP_USER:-cbb}
+      APP_USER_PASSWORD: ${ORACLE_APP_PASSWORD:-change_me_local_only}
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+volumes:
+  oracle-data:

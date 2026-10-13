@@ -1,0 +1,18 @@
+# API
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+python-dotenv==1.0.1
+# Oracle
+oracledb==2.5.1
+# analytics
+numpy==2.2.1
+pandas==2.2.3
+httpx==0.28.1
+rasterio==1.4.3
+shapely==2.0.6
+pystac-client==0.8.5
+planetary-computer==1.0.0
+# tests
+pytest==8.3.4
+pytest-asyncio==0.25.0
