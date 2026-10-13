@@ -42,7 +42,16 @@ export function InvestigationPanel({ investigation }: { investigation: Investiga
         >
           {fromModel ? "Model output" : "Deterministic fallback"}
         </span>
-        <span className="mono" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
+        <span
+          className="mono"
+          style={{
+            fontSize: 11.5, color: "var(--ink-muted)",
+            // An OCID is a single 80-character token with no break opportunity,
+            // so on a narrow screen it runs straight off the edge unless it is
+            // told it may break anywhere.
+            overflowWrap: "anywhere", wordBreak: "break-all", minWidth: 0,
+          }}
+        >
           {fromModel ? investigation.model_id : "no model used"} ·{" "}
           {investigation.prompt_version} · grounded in{" "}
           {investigation.evidence_ids.length} evidence records

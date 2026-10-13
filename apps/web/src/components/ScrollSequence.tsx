@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useViewport } from "@/lib/useViewport";
+
 /**
  * A pinned section whose imagery is scrubbed by scroll position.
  *
@@ -49,6 +51,7 @@ export function ScrollSequence({
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
   const reduced = useRef(false);
+  const { compact } = useViewport();
 
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -130,7 +133,14 @@ export function ScrollSequence({
   return (
     <div
       ref={spacerRef}
-      style={{ height: reduced.current ? "100vh" : `${scrollHeightVh}vh`, position: "relative" }}
+      style={{
+        // Narrow screens get roughly half the scrub: the same sequence, far
+        // less thumb-work.
+        height: reduced.current
+          ? "100vh"
+          : `${compact ? Math.round(scrollHeightVh * 0.55) : scrollHeightVh}vh`,
+        position: "relative",
+      }}
     >
       <div
         style={{

@@ -77,7 +77,7 @@ export function Chapter({
       <div
         style={{
           position: "relative", width: "100%", maxWidth: 1120,
-          margin: "0 auto", padding: "0 24px",
+          margin: "0 auto", padding: "0 clamp(20px, 6vw, 24px)",
         }}
       >
         <div

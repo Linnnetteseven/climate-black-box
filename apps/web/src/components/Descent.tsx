@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useViewport } from "@/lib/useViewport";
+
 /**
  * The hand-off from orbit to evidence.
  *
@@ -30,6 +32,7 @@ export function Descent({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [p, setP] = useState(0);
+  const { compact } = useViewport();
 
   useEffect(() => {
     let raf = 0;
@@ -55,7 +58,7 @@ export function Descent({
   const zoom = 1.06 + p * 0.1;
 
   return (
-    <div ref={ref} style={{ height: "300vh", position: "relative" }}>
+    <div ref={ref} style={{ height: compact ? "170vh" : "300vh", position: "relative" }}>
       <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", background: "var(--ground)" }}>
         {/* Real <img> rather than a CSS background: a transformed background
             layer composites unreliably (it rendered blank in capture), and an

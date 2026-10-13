@@ -13,6 +13,7 @@ import { AmbientAudio } from "@/components/AmbientAudio";
 export function AudioDock() {
   return (
     <div
+      className="audio-dock"
       style={{
         position: "fixed", right: 20, bottom: 20, zIndex: 50,
         backdropFilter: "blur(8px)",

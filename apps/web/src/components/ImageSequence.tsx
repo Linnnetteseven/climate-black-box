@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useViewport } from "@/lib/useViewport";
+
 /**
  * A pinned run of photographs that cross-fade as you scroll.
  *
@@ -59,6 +61,7 @@ export function ImageSequence({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [p, setP] = useState(0);
+  const { compact } = useViewport();
 
   useEffect(() => {
     let raf = 0;
@@ -87,7 +90,7 @@ export function ImageSequence({
       ref={ref}
       data-ambience={ambience}
       style={{
-        height: `${heightVh}vh`,
+        height: `${compact ? Math.round(heightVh * 0.5) : heightVh}vh`,
         position: "relative",
         // Break out of the content column. This sits inside <main>, which is
         // capped at a reading width, and without this the photographs render
