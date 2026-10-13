@@ -97,6 +97,9 @@ def search_landsat(
         if not {"red", "nir08", "qa_pixel"} <= set(assets):
             log.debug("skipping %s: missing required bands", item.id)
             continue
+        # green and blue are optional: NDVI does not need them, but the
+        # true-colour renderer does.
+        optional = {k: assets[k].href for k in ("green", "blue") if k in assets}
         scenes.append(
             SceneRef(
                 scene_id=item.id,
@@ -107,6 +110,7 @@ def search_landsat(
                     "red": assets["red"].href,
                     "nir": assets["nir08"].href,
                     "qa": assets["qa_pixel"].href,
+                    **optional,
                 },
             )
         )

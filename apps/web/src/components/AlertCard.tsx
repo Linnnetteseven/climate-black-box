@@ -24,7 +24,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
       >
         {label}
       </div>
-      <div style={{ fontSize: 14.5, color: "var(--ink-2)" }}>{children}</div>
+      <div style={{ fontSize: 15.5, color: "var(--ink-2)" }}>{children}</div>
     </div>
   );
 }
@@ -34,7 +34,8 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
     return (
       <div
         style={{
-          border: "1px solid color-mix(in srgb, var(--status-good) 35%, transparent)",
+          border: 0,
+          borderLeft: "2px solid var(--status-good)",
           background: "color-mix(in srgb, var(--status-good) 7%, transparent)",
           borderRadius: 4, padding: "18px 20px",
         }}
@@ -60,8 +61,8 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
   return (
     <div
       style={{
-        border: `1px solid color-mix(in srgb, ${amber} 40%, transparent)`,
-        borderLeft: `3px solid ${amber}`,
+        border: 0,
+        borderLeft: `2px solid ${amber}`,
         background: `color-mix(in srgb, ${amber} 6%, transparent)`,
         borderRadius: "0 4px 4px 0", padding: "18px 20px",
       }}
@@ -129,7 +130,7 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
       <div
         style={{
           marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--line)",
-          fontSize: 14, color: "var(--ink-2)", maxWidth: "76ch", lineHeight: 1.6,
+          fontSize: 15.5, color: "var(--ink-2)", maxWidth: "72ch", lineHeight: 1.65,
         }}
       >
         {a.explanation}
@@ -138,8 +139,8 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
       <div
         style={{
           marginTop: 14, padding: "12px 14px", borderRadius: 3,
-          background: "var(--surface-1)", border: "1px solid var(--line)",
-          fontSize: 13.5, color: "var(--ink-muted)", maxWidth: "76ch", lineHeight: 1.6,
+          background: "rgba(255,255,255,0.03)", border: 0,
+          fontSize: 14.5, color: "var(--ink-muted)", maxWidth: "72ch", lineHeight: 1.65,
         }}
       >
         <strong

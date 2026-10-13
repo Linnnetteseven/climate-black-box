@@ -1,160 +1,108 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Ambience, type Scene } from "@/lib/ambience";
 
 /**
- * Opt-in ambient audio.
+ * Opt-in ambience, with a scene that follows the page.
  *
- * Two deliberate decisions:
+ * Never autoplays: browsers block it, and unsolicited sound in a shared room
+ * is hostile. Default off, one click on, preference remembered.
  *
- * **It never autoplays.** Browsers block it anyway, but more importantly
- * unsolicited sound in a shared room is hostile. Default off, one click on,
- * one click off, state remembered.
- *
- * **The sound is synthesised, not a file.** Three detuned oscillators through
- * a slow filter sweep. That means no soundtrack to license, nothing to
- * attribute, and no risk of shipping someone's copyrighted ambient track in a
- * hackathon demo. It is a low drone that sits under the room rather than
- * competing with whoever is presenting.
- *
- * Everything is created lazily inside the click handler, because an
- * AudioContext constructed before a user gesture starts suspended.
+ * While it is playing, the scene follows what the reader is looking at. Any
+ * element carrying `data-ambience="forest"` switches the bed to running water
+ * and birdsong as it comes into view, and back to the orbital pad when it
+ * leaves. The sound is not decoration -- it tells you where you are.
  */
 
 const STORAGE_KEY = "cbb-ambient-audio";
-const TARGET_GAIN = 0.045;   // deliberately quiet: presence, not music
-const FADE_SECONDS = 1.6;
 
 export function AmbientAudio() {
   const [playing, setPlaying] = useState(false);
-  const [unsupported, setUnsupported] = useState(false);
-  const context = useRef<AudioContext | null>(null);
-  const master = useRef<GainNode | null>(null);
-  const nodes = useRef<OscillatorNode[]>([]);
+  const [scene, setScene] = useState<Scene>("space");
+  const engine = useRef<Ambience | null>(null);
 
-  // Restore the preference, but never act on it without a gesture.
+  // Follow the page even when muted, so unmuting lands in the right scene.
   useEffect(() => {
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === "on") {
-        // Remembered as "on" only means the control starts inviting; audio
-        // still waits for a click, because browsers require one.
-      }
-    } catch {
-      /* storage unavailable (private window); the toggle still works */
-    }
-  }, []);
-
-  const stop = useCallback(() => {
-    const ctx = context.current;
-    const gain = master.current;
-    if (!ctx || !gain) return;
-    const now = ctx.currentTime;
-    gain.gain.cancelScheduledValues(now);
-    gain.gain.setValueAtTime(gain.gain.value, now);
-    gain.gain.linearRampToValueAtTime(0.0001, now + 0.6);
-    window.setTimeout(() => {
-      nodes.current.forEach((o) => {
-        try {
-          o.stop();
-        } catch {
-          /* already stopped */
+    const targets = document.querySelectorAll("[data-ambience]");
+    if (!targets.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const active = entries.find((e) => e.isIntersecting);
+        if (active) {
+          setScene((active.target as HTMLElement).dataset.ambience as Scene);
+        } else if (entries.every((e) => !e.isIntersecting)) {
+          setScene("space");
         }
-      });
-      nodes.current = [];
-      ctx.close().catch(() => {});
-      context.current = null;
-      master.current = null;
-    }, 700);
+      },
+      // Fire when the band occupies the middle of the screen, not its edge.
+      { rootMargin: "-35% 0px -35% 0px" },
+    );
+    targets.forEach((t) => observer.observe(t));
+    return () => observer.disconnect();
   }, []);
 
-  const start = useCallback(() => {
-    type Ctor = typeof AudioContext;
-    const Ctx: Ctor | undefined =
-      window.AudioContext ?? (window as unknown as { webkitAudioContext?: Ctor }).webkitAudioContext;
-    if (!Ctx) {
-      setUnsupported(true);
+  useEffect(() => {
+    engine.current?.setScene(scene);
+  }, [scene]);
+
+  const toggle = useCallback(() => {
+    if (playing) {
+      engine.current?.stop();
+      engine.current = null;
+      setPlaying(false);
+      try { localStorage.setItem(STORAGE_KEY, "off"); } catch { /* private mode */ }
       return;
     }
-
-    const ctx = new Ctx();
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(TARGET_GAIN, ctx.currentTime + FADE_SECONDS);
-
-    // A gentle low-pass keeps it felt rather than heard.
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(420, ctx.currentTime);
-    filter.Q.setValueAtTime(0.7, ctx.currentTime);
-
-    // Slow sweep so the drone breathes instead of sitting static.
-    const sweep = ctx.createOscillator();
-    const sweepDepth = ctx.createGain();
-    sweep.frequency.setValueAtTime(0.045, ctx.currentTime);
-    sweepDepth.gain.setValueAtTime(120, ctx.currentTime);
-    sweep.connect(sweepDepth).connect(filter.frequency);
-    sweep.start();
-
-    // Detuned fifths: stable, unresolved, not a tune anyone will hum over you.
-    [55, 82.5, 110.3].forEach((hz, i) => {
-      const osc = ctx.createOscillator();
-      osc.type = i === 2 ? "triangle" : "sine";
-      osc.frequency.setValueAtTime(hz, ctx.currentTime);
-      const voice = ctx.createGain();
-      voice.gain.setValueAtTime(i === 0 ? 1 : 0.45, ctx.currentTime);
-      osc.connect(voice).connect(filter);
-      osc.start();
-      nodes.current.push(osc);
-    });
-    nodes.current.push(sweep);
-
-    filter.connect(gain).connect(ctx.destination);
-    context.current = ctx;
-    master.current = gain;
-  }, []);
-
-  function toggle() {
-    if (playing) {
-      stop();
-      setPlaying(false);
-      try {
-        localStorage.setItem(STORAGE_KEY, "off");
-      } catch { /* ignore */ }
-    } else {
-      start();
+    try {
+      // Constructed inside the gesture: an AudioContext made before a user
+      // interaction starts suspended and stays silent.
+      engine.current = new Ambience();
+      engine.current.setScene(scene);
       setPlaying(true);
-      try {
-        localStorage.setItem(STORAGE_KEY, "on");
-      } catch { /* ignore */ }
+      try { localStorage.setItem(STORAGE_KEY, "on"); } catch { /* private mode */ }
+    } catch {
+      setPlaying(false);
     }
-  }
+  }, [playing, scene]);
 
-  useEffect(() => () => stop(), [stop]);
+  useEffect(() => () => { engine.current?.stop(); }, []);
 
-  if (unsupported) return null;
+  const label = !playing ? "Sound" : scene === "forest" ? "Forest" : "Orbit";
 
   return (
     <button
       type="button"
       onClick={toggle}
       aria-pressed={playing}
-      title={
-        playing
-          ? "Mute the ambient tone"
-          : "Play a quiet synthesised ambient tone. Nothing plays until you ask."
-      }
+      title={playing ? "Mute" : "Play ambient sound. Nothing plays until you ask."}
       style={{
-        display: "inline-flex", alignItems: "center", gap: 8,
+        display: "inline-flex", alignItems: "center", gap: 9,
         fontFamily: "var(--font-mono)", fontSize: 11,
         letterSpacing: "0.1em", textTransform: "uppercase",
-        padding: "6px 11px", borderRadius: 2, cursor: "pointer",
-        background: playing ? "var(--surface-3)" : "transparent",
-        color: playing ? "var(--ink-2)" : "var(--ink-muted)",
-        border: `1px solid ${playing ? "var(--line-strong)" : "var(--line)"}`,
+        padding: "7px 12px", borderRadius: 2, cursor: "pointer",
+        background: "transparent",
+        color: playing ? "var(--series-ndvi)" : "var(--ink-muted)",
+        border: "none",
       }}
     >
-      <span aria-hidden style={{ fontSize: 13, lineHeight: 1 }}>{playing ? "◼" : "▶"}</span>
-      {playing ? "Mute ambience" : "Ambient audio"}
+      {/* Three bars that animate only while playing: a mute button that looks
+          muted, and a playing button that visibly is. */}
+      <span aria-hidden style={{ display: "inline-flex", alignItems: "flex-end", gap: 2, height: 12 }}>
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            style={{
+              width: 2,
+              height: playing ? 12 : 4,
+              background: "currentColor",
+              transformOrigin: "bottom",
+              animation: playing ? `bars 1.1s ease-in-out ${i * 0.18}s infinite` : "none",
+            }}
+          />
+        ))}
+      </span>
+      {label}
     </button>
   );
 }

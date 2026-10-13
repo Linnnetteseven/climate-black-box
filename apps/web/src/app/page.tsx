@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { AlertCard } from "@/components/AlertCard";
-import { AmbientAudio } from "@/components/AmbientAudio";
+import { AudioDock } from "@/components/AudioDock";
+import { Chapter } from "@/components/Chapter";
+import { ForestDescent } from "@/components/ForestDescent";
+import { Descent } from "@/components/Descent";
+import { Overture } from "@/components/Overture";
 import { InterventionPanel } from "@/components/InterventionPanel";
 import { InvestigationPanel } from "@/components/InvestigationPanel";
 import { NdviChart } from "@/components/NdviChart";
@@ -60,8 +64,49 @@ export default async function Page({
   const latest = [...usable].sort((a, b) => b.period_start.localeCompare(a.period_start))[0];
   const scenes = new Set(observations.map((o) => o.source_scene_id).filter(Boolean));
 
+  const isMau = PROJECT_ID === "mau-transmara-demo";
+  const site = isMau ? "mau" : "kiambu";
+
   return (
-    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "0 24px 120px" }}>
+    <>
+      <AudioDock />
+      <Overture />
+      {isMau ? (
+        <Descent
+          title="Transmara, South-West Mau"
+          lede="Four hundred hectares of Kenyan highland forest. The same ground, imaged three years apart by the same satellites — nothing here is a stock photograph."
+          before={{
+            src: "/evidence/mau-before-truecolour.webp",
+            caption: "October 2023 — vegetation cover at its baseline",
+            scene: "LC09_L2SP_169061_20231009_02_T1 · 1.6% cloud",
+            stat: "NDVI 0.58 across the frame",
+          }}
+          after={{
+            src: "/evidence/mau-after-truecolour.webp",
+            caption: "September 2026 — the same ground, measurably thinner",
+            scene: "LC08_L2SP_169061_20260907_02_T1 · 0.1% cloud",
+            stat: "NDVI 0.48 across the frame",
+          }}
+        />
+      ) : (
+        <Descent
+          title="Kiambu Highlands"
+          lede="Three hundred hectares on the Kiambu highlands — the control. Same satellites, same method, same three years. This is what a site that held its cover looks like."
+          before={{
+            src: "/evidence/kiambu-before-truecolour.webp",
+            caption: "January 2023 — the start of the baseline window",
+            scene: "LC09_L2SP_168061_20230119_02_T1 · 5.5% cloud",
+            stat: "NDVI 0.67 across the frame",
+          }}
+          after={{
+            src: "/evidence/kiambu-after-truecolour.webp",
+            caption: "September 2026 — seasonal variation, not decline",
+            scene: "LC09_L2SP_168061_20260924_02_T1 · 0.9% cloud",
+            stat: "NDVI 0.54 across the frame",
+          }}
+        />
+      )}
+    <main style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(20px, 4vw, 48px) 120px" }}>
       {/* demo-mode banner: which records are invented, stated before anything else */}
       <div
         style={{
@@ -78,8 +123,7 @@ export default async function Page({
 
       <header
         style={{
-          position: "relative", padding: "84px 0 44px",
-          borderBottom: "1px solid var(--line)", overflow: "hidden",
+          position: "relative", padding: "84px 0 44px", overflow: "hidden",
         }}
       >
         <Starfield />
@@ -93,13 +137,14 @@ export default async function Page({
             Climate Black Box
           </p>
           <h1 style={{ fontSize: "clamp(34px, 5.5vw, 62px)", lineHeight: 1.02, margin: "0 0 18px" }}>
-            Know what happens<br />after the funding ends.
+            Now check it yourself.
           </h1>
-          <p style={{ fontSize: 19, color: "var(--ink-2)", maxWidth: "56ch", margin: "0 0 26px" }}>
-            A final report tells you what happened on reporting day. It cannot tell
-            you what is happening now.
+          <p style={{ fontSize: 19, color: "var(--ink-2)", maxWidth: "58ch", margin: "0 0 26px" }}>
+            Everything below is live. The measurements come from public satellite
+            data, the records sit in Oracle Autonomous Database, and each one is
+            committed to a public blockchain, so any later change to one shows up.
+            Switch sites to see the same method reach a different answer.
           </p>
-          <AmbientAudio />
         </div>
       </header>
 
@@ -193,104 +238,156 @@ export default async function Page({
         </section>
       )}
 
-      <section style={{ padding: "16px 0 56px" }}>
-        <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap", marginBottom: 6 }}>
-          <h2 style={{ fontSize: 22 }}>Vegetation greenness, monthly mean NDVI</h2>
-          <ProvenanceBadge status="real" />
-        </div>
-        <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
-          Landsat Collection 2 Level-2 surface reflectance, cloud and shadow
-          masked per pixel before averaging. NDVI is a greenness indicator — not
-          tree survival, not carbon.
-        </p>
+      <ForestDescent />
 
-        {observationsResult.ok ? (
-          observations.length ? (
-            <NdviChart observations={observations} />
-          ) : (
-            <Empty />
-          )
-        ) : (
-          <Degraded
-            message={observationsResult.error.message}
-            requestId={observationsResult.error.request_id}
-          />
-        )}
+      <section style={{ padding: "56px 0 64px" }}>
+        <div className="evidence split">
+          <div className="rail">
+            <h3>The measurement</h3>
+            <p>
+              Monthly mean NDVI across the project boundary, from Landsat
+              Collection 2 Level-2 surface reflectance.
+            </p>
+            <p>
+              Hollow points fall below 75% valid pixels and are excluded from
+              alerting. Dashed verticals are months with no usable observation —
+              the line breaks rather than guessing across them.
+            </p>
+            <ProvenanceBadge status="real" />
+          </div>
+
+          <div className="panel wide">
+            {observationsResult.ok ? (
+              observations.length ? (
+                <NdviChart observations={observations} />
+              ) : (
+                <Empty />
+              )
+            ) : (
+              <Degraded
+                message={observationsResult.error.message}
+                requestId={observationsResult.error.request_id}
+              />
+            )}
+          </div>
+        </div>
       </section>
 
-      <section style={{ padding: "8px 0 56px" }}>
-        <h2 style={{ fontSize: 22, marginBottom: 6 }}>Detection</h2>
-        <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
-          Each month is compared with the same calendar month in the approved
-          baseline window, so the dry season is not mistaken for decline.
-        </p>
-        {latestAlert ? (
-          <AlertCard latest={latestAlert} />
-        ) : (
-          <Degraded
-            message={alertResult.ok ? "No detector result." : alertResult.error.message}
-            requestId={alertResult.ok ? "—" : alertResult.error.request_id}
-          />
-        )}
+      <section style={{ padding: "8px 0 64px" }}>
+        <div className="evidence split">
+          <div className="rail">
+            <h3>The rule</h3>
+            <p>
+              Robust linear baseline over the approved window, a band of ±1.5
+              residual sigma, and divergence only after two consecutive periods
+              below it.
+            </p>
+            <p>
+              A period under 75% pixel coverage can never raise an alert, and
+              breaks the run rather than extending it — we cannot say a site was
+              behind in a month we could not see.
+            </p>
+          </div>
+          <div className="panel-quiet">
+            {latestAlert ? (
+              <AlertCard latest={latestAlert} />
+            ) : (
+              <Degraded
+                message={alertResult.ok ? "No detector result." : alertResult.error.message}
+                requestId={alertResult.ok ? "—" : alertResult.error.request_id}
+              />
+            )}
+          </div>
+        </div>
       </section>
 
       {investigation && (
-        <section style={{ padding: "8px 0 56px" }}>
-          <h2 style={{ fontSize: 22, marginBottom: 6 }}>Investigation</h2>
-          <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
-            Generated from a bounded packet of the evidence this alert rests on.
-            Every statement cites records that exist; anything citing evidence we
-            did not supply is rejected and the deterministic fallback is used
-            instead.
-          </p>
-          <InvestigationPanel investigation={investigation} />
+        <>
+        <section style={{ padding: "8px 0 64px" }}>
+          <div className="evidence split">
+            <div className="rail">
+              <h3>How this is bounded</h3>
+              <p>
+                The model receives only this alert&apos;s own evidence, capped at
+                four kilobytes, every fact carrying the id of the record it came
+                from.
+              </p>
+              <p>
+                An answer citing evidence we never supplied is rejected, as is one
+                that asserts a cause. When that happens the deterministic
+                fallback is used and labelled as such.
+              </p>
+            </div>
+            <div className="panel-quiet">
+              <InvestigationPanel investigation={investigation} />
+            </div>
+          </div>
         </section>
+        </>
       )}
 
       {latestAlert?.alert && trend && (
-        <section style={{ padding: "8px 0 56px" }}>
-          <h2 style={{ fontSize: 22, marginBottom: 6 }}>Act, re-measure, decide</h2>
-          <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
-            Recording a corrective action appends it to the evidence chain. Later
-            observations are then compared with earlier ones on a seasonally
-            adjusted basis — which is the only comparison across an intervention
-            date that means anything.
-          </p>
+        <>
+        <Chapter
+          ambience="forest"
+          index="04 — Act and re-measure"
+          title="Then go back and look again."
+          lede="A corrective action joins the evidence chain like any measurement. What happened afterwards is compared on a seasonally adjusted basis, and reported honestly even when the honest answer is that nothing has changed yet."
+        />
+
+        <section style={{ padding: "8px 0 64px" }}>
           <InterventionPanel
             projectId={PROJECT_ID}
             alertId={latestAlert.alert.id}
             trend={trend}
           />
         </section>
+        </>
       )}
 
-      <section style={{ padding: "8px 0 56px" }}>
-        <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap", marginBottom: 6 }}>
-          <h2 style={{ fontSize: 22 }}>Integrity</h2>
-          <span className="mono" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
-            {auditEvents.length} evidence records ·{" "}
-            {auditEvents.filter((e) => e.anchor?.status === "confirmed").length} anchored on CKB testnet
-          </span>
+      <Chapter
+        ambience="space"
+        index="05 — Verify"
+        title="Change one record and the check fails."
+        lede="Each evidence record is hashed and committed to a public blockchain, every manifest carrying the hash of the one before it. Press Verify to check it against the chain — then press Tamper and watch the check fail."
+        tone="image"
+        image="/scenery/earth-limb.webp"
+      />
+
+      <section style={{ padding: "56px 0 64px" }}>
+        <div className="evidence split">
+          <div className="rail">
+            <h3>Evidence chain</h3>
+            <p>
+              {auditEvents.length} records ·{" "}
+              {auditEvents.filter((e) => e.anchor?.status === "confirmed").length}{" "}
+              anchored on CKB testnet.
+            </p>
+            <p>
+              Each manifest is hashed and committed on chain, carrying the hash
+              of the one before it.
+            </p>
+            <p>
+              The chain is an application-level structure anchored on CKB. It is
+              not enforced by an on-chain script, and we do not claim it is.
+            </p>
+          </div>
+          <div className="panel-quiet">
+            {auditEvents.length ? (
+              <VerifyPanel events={auditEvents} />
+            ) : (
+              <p style={{ color: "var(--ink-muted)" }}>
+                No evidence chain yet. Run{" "}
+                <span className="mono">scripts/build_evidence_chain.py</span>.
+              </p>
+            )}
+          </div>
         </div>
-        <p style={{ color: "var(--ink-muted)", fontSize: 14, maxWidth: "70ch", marginTop: 0 }}>
-          Each record&apos;s manifest is hashed and committed on chain, with every
-          manifest carrying the hash of the one before it. The chain is an
-          application-level structure anchored on CKB — it is not enforced by an
-          on-chain script.
-        </p>
-        {auditEvents.length ? (
-          <VerifyPanel events={auditEvents} />
-        ) : (
-          <p style={{ color: "var(--ink-muted)" }}>
-            No evidence chain yet. Run{" "}
-            <span className="mono">scripts/build_evidence_chain.py</span>.
-          </p>
-        )}
       </section>
 
       <footer
         style={{
-          borderTop: "1px solid var(--line)", paddingTop: 20,
+          borderTop: "1px solid var(--line)", paddingTop: 20, marginTop: 40,
           fontSize: 12.5, color: "var(--ink-faint)", fontFamily: "var(--font-mono)",
           display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap",
         }}
@@ -299,6 +396,7 @@ export default async function Page({
         <span>NDVI ≠ carbon · rainfall context is ERA5 at ~25 km</span>
       </footer>
     </main>
+    </>
   );
 }
 

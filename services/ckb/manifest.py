@@ -118,7 +118,7 @@ def alert_manifest(
     """A manifest for a raised alert.
 
     The thresholds are part of the commitment: anchoring the band alongside the
-    observation is what stops anyone (us included) from quietly re-tuning the
+    observation is what stops anyone (us included) from re-tuning the
     rule afterwards and claiming the alert always looked like this.
     """
     places = METRIC_PRECISION.get(metric, 6)

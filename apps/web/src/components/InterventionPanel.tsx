@@ -83,8 +83,8 @@ export function InterventionPanel({
         <form
           onSubmit={submit}
           style={{
-            border: "1px solid var(--line)", borderRadius: 4,
-            background: "var(--surface-1)", padding: "18px 20px",
+            borderRadius: 6, padding: "20px 22px",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004))",
           }}
         >
           <div
@@ -165,8 +165,8 @@ export function InterventionPanel({
       {logged && (
         <div
           style={{
-            border: "1px solid var(--line)", borderRadius: 4,
-            background: "var(--surface-1)", padding: "18px 20px",
+            borderRadius: 6, padding: "20px 22px",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004))",
           }}
         >
           <div style={{ display: "flex", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
@@ -199,8 +199,8 @@ export function InterventionPanel({
       {t && d && (
         <div
           style={{
-            border: "1px solid var(--line)", borderRadius: 4,
-            background: "var(--surface-1)", padding: "18px 20px",
+            borderRadius: 6, padding: "20px 22px",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004))",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
@@ -245,7 +245,7 @@ export function InterventionPanel({
             ))}
           </div>
 
-          <p style={{ marginTop: 14, fontSize: 14.5, color: "var(--ink-2)", maxWidth: "76ch", lineHeight: 1.6 }}>
+          <p style={{ marginTop: 14, fontSize: 15.5, color: "var(--ink-2)", maxWidth: "72ch", lineHeight: 1.65 }}>
             {t.note}
           </p>
 
@@ -273,8 +273,8 @@ export function InterventionPanel({
       {trend.recommendation && (
         <div
           style={{
-            border: "1px solid var(--line-strong)", borderLeft: "3px solid var(--series-ndvi)",
-            borderRadius: "0 4px 4px 0", background: "var(--surface-2)", padding: "18px 20px",
+            border: 0, borderLeft: "2px solid var(--series-ndvi)",
+            borderRadius: "0 6px 6px 0", background: "rgba(255,255,255,0.035)", padding: "20px 22px",
           }}
         >
           <div
@@ -294,7 +294,7 @@ export function InterventionPanel({
           >
             {trend.recommendation.action}
           </p>
-          <p style={{ margin: "10px 0 0", fontSize: 14.5, color: "var(--ink-2)", maxWidth: "76ch", lineHeight: 1.6 }}>
+          <p style={{ margin: "10px 0 0", fontSize: 15.5, color: "var(--ink-2)", maxWidth: "72ch", lineHeight: 1.65 }}>
             {trend.recommendation.reasoning}
           </p>
         </div>

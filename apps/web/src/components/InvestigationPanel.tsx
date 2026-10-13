@@ -23,12 +23,11 @@ export function InvestigationPanel({ investigation }: { investigation: Investiga
   const fromModel = investigation.simulation_status === "real";
 
   return (
-    <div style={{ border: "1px solid var(--line)", borderRadius: 4, background: "var(--surface-1)" }}>
+    <div style={{ borderRadius: 6, background: "linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004))" }}>
       <div
         style={{
           display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap",
-          padding: "11px 20px", borderBottom: "1px solid var(--line)",
-          background: "var(--surface-2)",
+          padding: "13px 22px", borderBottom: "1px solid var(--line)",
         }}
       >
         <span
@@ -51,7 +50,7 @@ export function InvestigationPanel({ investigation }: { investigation: Investiga
       </div>
 
       <div style={{ padding: "18px 20px" }}>
-        <p style={{ margin: 0, fontSize: 15.5, color: "var(--ink-2)", maxWidth: "76ch", lineHeight: 1.65 }}>
+        <p style={{ margin: 0, fontSize: 16.5, color: "var(--ink-2)", maxWidth: "72ch", lineHeight: 1.7 }}>
           {investigation.summary}
         </p>
 
@@ -76,7 +75,7 @@ export function InvestigationPanel({ investigation }: { investigation: Investiga
                   maxWidth: "76ch",
                 }}
               >
-                <p style={{ margin: 0, fontSize: 14.5, color: "var(--ink-2)", lineHeight: 1.6 }}>
+                <p style={{ margin: 0, fontSize: 15.5, color: "var(--ink-2)", lineHeight: 1.65 }}>
                   {h.statement}
                 </p>
                 <p
@@ -94,7 +93,7 @@ export function InvestigationPanel({ investigation }: { investigation: Investiga
         <div
           style={{
             marginTop: 20, padding: "12px 14px", borderRadius: 3,
-            background: "var(--surface-2)", border: "1px solid var(--line)",
+            background: "rgba(255,255,255,0.03)", border: 0,
             maxWidth: "76ch",
           }}
         >
@@ -107,7 +106,7 @@ export function InvestigationPanel({ investigation }: { investigation: Investiga
           >
             What would settle it
           </strong>
-          <p style={{ margin: 0, fontSize: 13.5, color: "var(--ink-muted)", lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: 14.5, color: "var(--ink-muted)", lineHeight: 1.65 }}>
             {investigation.missing_evidence}
           </p>
         </div>

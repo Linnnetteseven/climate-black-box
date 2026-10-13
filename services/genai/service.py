@@ -51,7 +51,7 @@ def _load_observations(project_id: str) -> list[dict]:
 
     Rainfall is stored as its own observation rows (metric `precipitation_mm`),
     so each rainfall figure the investigation cites has a real id and real
-    provenance rather than being quietly carried along in a fixture.
+    provenance rather than being carried along unrecorded in a fixture.
     """
     with cursor() as cur:
         cur.execute(

@@ -1,0 +1,20 @@
+{
+  "site": "kiambu",
+  "source": "Landsat Collection 2 Level-2, USGS (public domain)",
+  "frames": {
+    "before": {
+      "requested_period": "2023-01",
+      "period": "2023-01",
+      "scene_id": "LC09_L2SP_168061_20230119_02_T1",
+      "cloud_cover_pct": 5.49,
+      "acquired": "2023-01-19T07:43:29Z"
+    },
+    "after": {
+      "requested_period": "2026-09",
+      "period": "2026-09",
+      "scene_id": "LC09_L2SP_168061_20260924_02_T1",
+      "cloud_cover_pct": 0.91,
+      "acquired": "2026-09-24T07:43:13Z"
+    }
+  }
+}

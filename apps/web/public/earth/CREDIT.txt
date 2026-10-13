@@ -1,0 +1,3 @@
+Earth frames rendered from NASA Blue Marble (surface) and Black Marble
+(night lights), both public domain, courtesy NASA Earth Observatory.
+Orthographic projection and lighting computed by scripts/render_globe.py.

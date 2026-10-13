@@ -87,7 +87,7 @@ export function VerifyPanel({ events }: { events: AuditEvent[] }) {
   const style = result ? STATE_STYLE[result.state] : null;
 
   return (
-    <div style={{ border: "1px solid var(--line)", borderRadius: 4, background: "var(--surface-1)" }}>
+    <div style={{ borderRadius: 6, background: "linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004))" }}>
       <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)" }}>
         <label
           className="mono"
@@ -153,7 +153,7 @@ export function VerifyPanel({ events }: { events: AuditEvent[] }) {
 
       <div style={{ padding: "16px 20px", minHeight: 150 }}>
         {!result && !failed && (
-          <p style={{ color: "var(--ink-muted)", fontSize: 14, margin: 0 }}>
+          <p style={{ color: "var(--ink-muted)", fontSize: 15.5, margin: 0 }}>
             {event?.anchor?.status === "confirmed" ? (
               <>
                 This record is anchored on{" "}
@@ -190,7 +190,7 @@ export function VerifyPanel({ events }: { events: AuditEvent[] }) {
               <Hash label="On chain" value={result.manifest_hash_onchain} />
             </div>
 
-            <p style={{ marginTop: 14, fontSize: 14, color: "var(--ink-2)", maxWidth: "74ch" }}>
+            <p style={{ marginTop: 14, fontSize: 15.5, color: "var(--ink-2)", maxWidth: "70ch" }}>
               {result.detail}
             </p>
 

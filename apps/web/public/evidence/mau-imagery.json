@@ -1,0 +1,20 @@
+{
+  "site": "mau",
+  "source": "Landsat Collection 2 Level-2, USGS (public domain)",
+  "frames": {
+    "before": {
+      "requested_period": "2023-11",
+      "period": "2023-10",
+      "scene_id": "LC09_L2SP_169061_20231009_02_T1",
+      "cloud_cover_pct": 1.64,
+      "acquired": "2023-10-09T07:49:30Z"
+    },
+    "after": {
+      "requested_period": "2026-09",
+      "period": "2026-09",
+      "scene_id": "LC08_L2SP_169061_20260907_02_T1",
+      "cloud_cover_pct": 0.13,
+      "acquired": "2026-09-07T07:49:11Z"
+    }
+  }
+}

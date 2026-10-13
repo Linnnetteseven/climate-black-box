@@ -12,13 +12,19 @@
 --------------------------------------------------------------------------- */
 
 :root {
-  /* surfaces, darkest first -- this design commits to dark */
-  --ground:        #070c0f;
-  --surface-1:     #0d1418;
-  --surface-2:     #131d22;
-  --surface-3:     #1b272d;
-  --line:          #23323a;
-  --line-strong:   #354953;
+  /* Surfaces, darkest first. --ground is sampled from the atmosphere halo in
+     the rendered Earth frames (rgb 12,22,26) so the page the globe sits on is
+     the same colour as the space around it -- otherwise the frame reads as a
+     rectangle pasted onto a different background.
+
+     Surfaces step up only slightly: strong panel contrast is what made the
+     lower half feel boxed-in while the opening felt seamless. */
+  --ground:        #0a1418;
+  --surface-1:     #0e1a1f;
+  --surface-2:     #122026;
+  --surface-3:     #18282f;
+  --line:          #1b2c33;
+  --line-strong:   #273d46;
 
   /* ink */
   --ink:           #eef4f6;
@@ -54,10 +60,21 @@
 
 * { box-sizing: border-box; }
 
-html, body {
+html {
+  /* One atmosphere for the whole document: deep space at the top where the
+     globe is, warming very slightly toward the ground further down. Fixed so
+     it does not slide against the content. */
+  background:
+    radial-gradient(120% 60% at 50% 0%, #112630 0%, rgba(10, 20, 24, 0) 60%),
+    linear-gradient(to bottom, #0a1418 0%, #0b171c 55%, #0a1418 100%);
+  background-attachment: fixed;
+}
+
+body {
   margin: 0;
   padding: 0;
-  background: var(--ground);
+  background: transparent;
+  font-size: 17px;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
@@ -71,6 +88,84 @@ a { color: var(--series-ndvi); text-underline-offset: 3px; }
 h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
 
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------------------
+   Evidence layout.
+
+   The problem being solved: the lower half was one narrow column of bordered
+   cards, which read as a different product from the cinematic opening. The
+   fixes are structural rather than decorative --
+
+     * a wider measure, so a chart is not squeezed into a reading column;
+     * panels defined by surface and space instead of a 1px rule on four sides;
+     * an asymmetric two-column grid, so the page has a spine rather than a
+       stack of equal boxes.
+--------------------------------------------------------------------------- */
+
+.evidence {
+  display: grid;
+  gap: 28px 40px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+/* A narrow rail of context beside a wide panel of evidence. Collapses to one
+   column before the rail gets too thin to read. */
+@media (min-width: 1040px) {
+  .evidence.split {
+    grid-template-columns: minmax(230px, 0.5fr) minmax(0, 1.5fr);
+  }
+}
+
+/* Panels: no outline. A soft surface, a hairline only where one is genuinely
+   needed to separate stacked content, and enough padding that the edge is
+   implied rather than drawn. */
+.panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), rgba(255,255,255,0.004));
+  border: 0;
+  border-radius: 6px;
+  padding: 22px 24px;
+}
+
+.panel-quiet {
+  background: none;
+  padding: 0;
+}
+
+/* The rail: small, muted, set in mono so it reads as apparatus rather than
+   prose competing with the panel beside it. */
+.rail h3 {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 0 0 10px;
+}
+
+.rail p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 36ch;
+  margin: 0 0 14px;
+}
+
+/* Figures that should break out of the reading measure. */
+.wide {
+  margin-inline: calc(-1 * clamp(0px, 3vw, 44px));
+}
+
+@keyframes bars {
+  0%, 100% { transform: scaleY(0.35); }
+  50%      { transform: scaleY(1); }
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
 
 /* Section rhythm.
 

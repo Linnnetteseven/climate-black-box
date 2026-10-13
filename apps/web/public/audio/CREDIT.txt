@@ -1,0 +1,11 @@
+orbit.mp3 -- supplied by the project team for this piece.
+  Played on the opening and on chapter 05 (Verify).
+  If this file is missing or will not decode, services fall back to the
+  synthesised pad in src/lib/ambience.ts, so the page is never silent.
+
+Forest ambience (chapters 01-04) is synthesised at runtime -- filtered
+noise shaped into running water and canopy wind, with frequency-swept
+bursts for birdsong. Nothing to license.
+
+NOTE: if orbit.mp3 is licensed rather than original or royalty-free,
+record the source and terms here before the work is shown publicly.

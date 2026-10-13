@@ -25,7 +25,7 @@ class SimulationStatus(StrEnum):
 
     A boolean would not be enough: `fallback` records the case where an AI
     summary came from the deterministic template rather than the model, which
-    is exactly the kind of thing we must not quietly round off to "real".
+    is exactly the kind of thing we must not round off to "real".
     """
 
     REAL = "real"

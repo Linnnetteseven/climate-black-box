@@ -1,0 +1,11 @@
+forest-1-mist.webp     -- AI-generated, supplied by the project team.
+forest-2-canopy.webp   -- AI-generated, supplied by the project team.
+forest-3-light.webp    -- AI-generated, supplied by the project team.
+                          These three are illustrative atmosphere, NOT evidence.
+                          Every image that carries a measurement is rendered
+                          from public satellite data; see ../evidence/.
+earth-limb.webp        -- NASA ISS023E057948, Expedition 23 crew. Public domain.
+../earth/*.webp        -- rendered from NASA Blue Marble and Black Marble,
+                          public domain, by scripts/render_globe.py.
+../evidence/*.webp     -- rendered from USGS Landsat Collection 2 Level-2,
+                          public domain, by scripts/render_imagery.py.

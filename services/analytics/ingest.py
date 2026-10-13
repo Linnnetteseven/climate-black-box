@@ -6,7 +6,7 @@ and the processing version -- so any number on screen can be traced back to a
 public Landsat scene and recomputed by someone who does not trust us.
 
 Run it with ``make ingest``. The committed fixture is regenerated and diffed;
-if the numbers move, the command says so loudly rather than quietly rewriting
+if the numbers move, the command says so rather than overwriting
 history.
 
 Design notes:

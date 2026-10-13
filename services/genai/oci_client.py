@@ -125,7 +125,7 @@ def list_chat_models(compartment_id: str | None = None) -> list[tuple[str, str]]
     """Return (display_name, model_id) for chat-capable models in the region.
 
     Model availability changes, so we read it rather than hard-coding an id
-    that will quietly 404 in a month.
+    that will 404 in a month with no warning.
     """
     import oci
 
