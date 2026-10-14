@@ -53,6 +53,15 @@ export default async function Page({
   const auditEvents = auditResult.ok ? auditResult.data : [];
   const trend = trendResult.ok ? trendResult.data : null;
 
+  // Set APEX_URL to surface the APEX console in the footer. Unset, the link
+  // simply does not render -- a dead link to an internal tool is worse than no
+  // link at all.
+  //
+  // Deliberately not NEXT_PUBLIC_: that prefix is inlined at build time, which
+  // would mean rebuilding the image to change a URL. This page renders on the
+  // server, so a plain runtime variable works and a restart is enough.
+  const apexUrl = process.env.APEX_URL?.trim() || null;
+
   // Beat 5 only exists when there is something to investigate. On the control
   // site there is no alert, and that absence is the point.
   const alertId = latestAlert?.alert?.id;
@@ -393,6 +402,19 @@ export default async function Page({
         }}
       >
         <span>{health ? `system of record: ${health.backend}` : "backend unreachable"}</span>
+        {/* The operator console reads the same rows through Oracle APEX. Linked
+            rather than embedded: it is a separate application on the database,
+            and pretending otherwise would misrepresent the architecture. */}
+        {apexUrl && (
+          <a
+            href={apexUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--accent)", textDecoration: "none", borderBottom: "1px solid var(--line-strong)" }}
+          >
+            operator console (Oracle APEX) →
+          </a>
+        )}
         <span>NDVI ≠ carbon · rainfall context is ERA5 at ~25 km</span>
       </footer>
     </main>

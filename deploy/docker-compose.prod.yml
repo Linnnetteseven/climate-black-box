@@ -41,6 +41,8 @@ services:
       # browser only ever sees same-origin /api, proxied by nginx.
       API_INTERNAL_URL: http://api:8001
       NEXT_PUBLIC_API_BASE_URL: ""
+      # Footer link to the APEX operator console; blank hides it.
+      APEX_URL: ${CBB_APEX_URL:-}
     depends_on:
       api:
         condition: service_healthy
