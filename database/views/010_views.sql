@@ -8,6 +8,11 @@ SELECT o.id,
        o.metric,
        o.value,
        o.unit,
+       -- period_key was added to observations when the unique key had to move
+       -- off TIMESTAMP WITH TIME ZONE (ORA-02329). It belongs here too: it is
+       -- the column anything reporting by month actually wants to group and
+       -- sort on, and leaving it out broke the APEX evidence report.
+       o.period_key,
        o.period_start,
        o.period_end,
        o.valid_pixel_fraction,

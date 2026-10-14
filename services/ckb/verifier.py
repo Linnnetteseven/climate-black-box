@@ -59,6 +59,38 @@ def _load_event(event_id: str) -> dict | None:
     )
 
 
+#: Fields that describe the record's position in the chain rather than its
+#: content. Altering one of these would still break the hash, but it would not
+#: demonstrate the thing the button exists to demonstrate: that a changed
+#: *measurement* is detectable.
+STRUCTURAL_FIELDS = frozenset({
+    "schema_version", "event_id", "event_type", "project_id",
+    "previous_event_hash", "created_at",
+})
+
+
+def pick_tamper_field(manifest: dict, requested: str | None) -> str | None:
+    """Choose a field to alter, preferring the caller's choice.
+
+    The caller cannot know what is in every manifest -- an observation has
+    `metric_value`, an alert has `observed_value`, an intervention has neither.
+    Previously a request naming an absent field silently changed nothing and
+    the response came back `verified`, which made the tamper button look like
+    proof of the opposite of what it proves.
+
+    So: use the requested field when it exists, otherwise the first substantive
+    one, and tell the caller which was actually used.
+    """
+    if requested and requested in manifest:
+        return requested
+    for key in sorted(manifest):
+        if key in STRUCTURAL_FIELDS:
+            continue
+        if isinstance(manifest[key], (str, list, dict)) and manifest[key]:
+            return key
+    return None
+
+
 def _ask_chain(tx_hash: str, index: int, expected_hex: str) -> dict:
     try:
         result = subprocess.run(
@@ -84,9 +116,25 @@ def verify_event(event_id: str, tamper_field: str | None = None) -> Verification
 
     manifest = dict(event["manifest"])
     tampered = False
-    if tamper_field and tamper_field in manifest:
-        before = manifest[tamper_field]
-        manifest[tamper_field] = "0.000000" if isinstance(before, str) else "tampered"
+    altered_field: str | None = None
+
+    if tamper_field is not None:
+        altered_field = pick_tamper_field(manifest, tamper_field)
+        if altered_field is None:
+            # Nothing substantive to change. Say so rather than returning a
+            # pass, which would read as "tampering did not break it".
+            return VerificationResult(
+                evidence_id=event_id,
+                verified=False,
+                state=VerificationState.NOT_ANCHORED,
+                detail="This record has no substantive field to alter, so the "
+                       "tamper demonstration cannot run against it.",
+            )
+        before = manifest[altered_field]
+        manifest[altered_field] = (
+            "0.000000" if isinstance(before, str) and before.replace(".", "").replace("-", "").isdigit()
+            else "TAMPERED"
+        )
         tampered = True
 
     recomputed = manifest_hash(manifest)
@@ -107,7 +155,11 @@ def verify_event(event_id: str, tamper_field: str | None = None) -> Verification
 
     detail = chain.get("detail")
     if tampered:
-        detail = (f"Field {tamper_field!r} was altered before verifying. "
+        note = ""
+        if altered_field != tamper_field:
+            note = (f" (this record has no {tamper_field!r} field, so "
+                    f"{altered_field!r} was altered instead)")
+        detail = (f"Field {altered_field!r} was altered before verifying{note}. "
                   "The recomputed hash no longer matches the commitment made on chain.")
 
     return VerificationResult(

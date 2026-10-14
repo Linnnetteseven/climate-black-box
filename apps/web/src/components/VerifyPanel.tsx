@@ -67,12 +67,22 @@ export function VerifyPanel({ events }: { events: AuditEvent[] }) {
     setFailed(null);
     setResult(null);
     try {
+      // The most telling field differs per record: an observation's measured
+      // value, an alert's observed anomaly, an intervention's described action.
+      // The server falls back if one of these is absent, but naming the right
+      // field makes the failure message read as something a reader cares
+      // about rather than an internal id.
+      const TAMPER_FIELD: Record<string, string> = {
+        observation_recorded: "metric_value",
+        alert_raised: "observed_value",
+        intervention_logged: "action",
+        remeasurement_recorded: "metric_value",
+      };
+      const field = TAMPER_FIELD[event?.event_type ?? ""] ?? "metric_value";
       const url =
         mode === "verify"
           ? `/api/evidence/${selected}/verify`
-          : `/api/evidence/${selected}/tamper-check?field=${
-              event?.event_type === "alert_raised" ? "observed_value" : "metric_value"
-            }`;
+          : `/api/evidence/${selected}/tamper-check?field=${field}`;
       const response = await fetch(url, { method: mode === "verify" ? "GET" : "POST" });
       if (!response.ok) throw new Error(`verification request failed (${response.status})`);
       setResult((await response.json()) as VerificationResult);

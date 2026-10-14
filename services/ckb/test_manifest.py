@@ -127,3 +127,39 @@ def test_evidence_id_order_does_not_matter():
     one = manifest_hash(alert_manifest(**args, evidence_ids=["b", "a", "c"]))
     two = manifest_hash(alert_manifest(**args, evidence_ids=["c", "a", "b"]))
     assert one == two
+
+
+# --- the tamper demonstration ----------------------------------------------
+
+def test_tamper_falls_back_when_the_requested_field_is_absent():
+    """Regression: the UI asked to alter 'metric_value' on an intervention
+    manifest, which has no such field. Nothing changed, so verification
+    passed and the tamper button appeared to prove the opposite of its
+    purpose."""
+    from services.ckb.verifier import pick_tamper_field
+
+    intervention = {
+        "schema_version": "1.0", "event_id": "evt_1", "event_type": "intervention_logged",
+        "project_id": "p", "action": "Replanting", "actor": "Team",
+        "previous_event_hash": None, "created_at": "2026-10-13T09:00:00Z",
+        "simulation_status": "simulated",
+    }
+    chosen = pick_tamper_field(intervention, "metric_value")
+    assert chosen is not None
+    assert chosen not in ("schema_version", "event_id", "event_type",
+                          "project_id", "previous_event_hash", "created_at")
+
+
+def test_tamper_prefers_the_requested_field_when_present():
+    from services.ckb.verifier import pick_tamper_field
+
+    observation = {"schema_version": "1.0", "metric_value": "0.42", "unit": "index"}
+    assert pick_tamper_field(observation, "metric_value") == "metric_value"
+
+
+def test_tamper_returns_none_when_there_is_nothing_substantive():
+    from services.ckb.verifier import pick_tamper_field
+
+    bare = {"schema_version": "1.0", "event_id": "e", "event_type": "t",
+            "project_id": "p", "previous_event_hash": None, "created_at": "x"}
+    assert pick_tamper_field(bare, "metric_value") is None
