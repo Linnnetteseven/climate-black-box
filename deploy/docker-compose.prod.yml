@@ -56,7 +56,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Which config to serve is a per-deployment choice, not a code change:
+      # set CBB_NGINX_CONF=./nginx-tls.conf in deploy/.env once a certificate
+      # exists. Editing this file in place made every `git pull` on the server
+      # conflict with itself.
+      - ${CBB_NGINX_CONF:-./nginx.conf}:/etc/nginx/conf.d/default.conf:ro
       - certbot-conf:/etc/letsencrypt
       - certbot-www:/var/www/certbot
     depends_on:

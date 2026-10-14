@@ -209,7 +209,7 @@ exits. Then switch nginx to the TLS config:
 
 ```bash
 sed -i "s|CBB_DOMAIN|$CBB_DOMAIN|g" nginx-tls.conf
-sed -i 's|./nginx.conf:|./nginx-tls.conf:|' docker-compose.prod.yml
+echo 'CBB_NGINX_CONF=./nginx-tls.conf' >> .env
 docker compose -f docker-compose.prod.yml up -d --force-recreate nginx
 docker compose -f docker-compose.prod.yml logs --tail 20 nginx
 ```
@@ -268,6 +268,7 @@ location / {
 | Verify returns `chain_unavailable` | the instance cannot reach `testnet.ckb.dev`; check egress |
 
 | Compose refuses every command with `CBB_WALLET_DIR is missing` | `deploy/.env` not written — see step 5 |
+| `git pull` aborts: *local changes would be overwritten* | a tracked file was edited on the server; `git checkout -- <file>`, then set the equivalent in `deploy/.env` |
 | SSH session freezes mid-command | the client connection, not the instance; press Enter then `~.`, and reconnect with `-o ServerAliveInterval=30` |
 
 Logs: `docker compose -f docker-compose.prod.yml logs -f api`
