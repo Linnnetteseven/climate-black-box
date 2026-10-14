@@ -1,0 +1,18 @@
+# Runtime dependencies for SERVING only.
+#
+# The full requirements.txt carries the geospatial stack -- rasterio, pystac,
+# shapely, pandas -- which exists to build the observation fixture. That work
+# happens on a workstation and its output is committed. The server only reads
+# what is already in Oracle, verifies hashes and calls the model, so it does
+# not need any of it.
+#
+# This matters on an Ampere A1 instance: the heavy wheels either build from
+# source on aarch64 or pull a large toolchain, turning a two-minute image into
+# a twenty-minute one.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+python-dotenv==1.0.1
+oracledb==2.5.1
+numpy==2.2.1
+oci==2.138.1

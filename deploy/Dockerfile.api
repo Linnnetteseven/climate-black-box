@@ -1,0 +1,33 @@
+# Climate Black Box API.
+#
+# Node is in here alongside Python because the CKB layer is a Node CLI the API
+# shells out to -- verification and anchoring run through @ckb-ccc/core. One
+# image keeps them on the same filesystem and avoids a second service whose
+# only job is to run two scripts.
+FROM python:3.12-slim
+
+# Node 22 for the CKB signer, plus the certs oracledb and OCI need.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl ca-certificates gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements-serve.txt .
+RUN pip install --no-cache-dir -r requirements-serve.txt
+
+# CKB dependencies first, so a code change does not reinstall them.
+COPY services/ckb/package.json services/ckb/pnpm-workspace.yaml ./services/ckb/
+RUN npm install --prefix services/ckb --omit=dev
+
+COPY services ./services
+COPY scripts ./scripts
+
+# Non-root: this process holds database credentials and a signing key.
+RUN useradd --create-home --shell /usr/sbin/nologin cbb && chown -R cbb:cbb /app
+USER cbb
+
+EXPOSE 8001
+CMD ["uvicorn", "services.api.main:app", "--host", "0.0.0.0", "--port", "8001"]

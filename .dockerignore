@@ -1,0 +1,40 @@
+# The build context is 1.5 GB without this, almost all of it things the image
+# must not contain: a host virtualenv with x86 wheels, pnpm's symlinked
+# node_modules (which also collides with the npm install inside the image),
+# and build output that gets regenerated anyway.
+.venv
+venv
+**/node_modules
+**/.next
+**/__pycache__
+**/*.pyc
+.git
+.gitignore
+.pytest_cache
+.ruff_cache
+.mypy_cache
+
+# Secrets. These reach the instance over scp and get mounted at runtime --
+# baking them into a layer would make them readable from the image forever.
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.p12
+**/*.sso
+wallet/
+*wallet*.zip
+
+# Local-only working data.
+data/raster_cache
+data/*.tif
+data/*.TIF
+*.db
+*.sqlite3
+
+# Nothing the running service reads.
+docs
+tests
+notebooks
+*.md
+!deploy/README.md

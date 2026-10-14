@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Standalone bundles only what the server imports, so the production image
+  // does not have to carry node_modules.
+  output: "standalone",
   // The API is a separate service. Proxying through /api keeps the browser on
   // one origin, which avoids CORS entirely in development and means the
   // deployed build only needs one hostname.

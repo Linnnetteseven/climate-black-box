@@ -1,0 +1,81 @@
+# Production stack for one Always Free Ampere A1 instance.
+#
+# Everything talks to Autonomous Database; nothing persists on the VM except
+# the credentials it is given. That means the instance is disposable -- if it
+# is lost, rebuild it and the evidence is untouched, because the evidence lives
+# in Oracle and on CKB.
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      ORACLE_MODE: adb
+      # Paths inside the container, not on the host.
+      TNS_ADMIN: /secrets/wallet
+      OCI_CONFIG_FILE: /secrets/oci/config
+    volumes:
+      # Read-only: the app never needs to modify its own credentials.
+      - ${CBB_WALLET_DIR:?set CBB_WALLET_DIR}:/secrets/wallet:ro
+      - ${CBB_OCI_DIR:?set CBB_OCI_DIR}:/secrets/oci:ro
+    expose:
+      - "8001"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys;sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8001/api/health',timeout=5).status==200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+    restart: unless-stopped
+    environment:
+      # Server-side rendering reaches the API over the compose network; the
+      # browser only ever sees same-origin /api, proxied by nginx.
+      API_INTERNAL_URL: http://api:8001
+      NEXT_PUBLIC_API_BASE_URL: ""
+    depends_on:
+      api:
+        condition: service_healthy
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot-conf:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    depends_on:
+      - web
+
+  # Not started by `up`: run it once, by name, when a domain exists.
+  #   docker compose -f docker-compose.prod.yml run --rm certbot
+  # nginx:alpine has no certbot binary, so the certificate is issued by the
+  # official image writing into the volumes nginx already reads.
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ["tls"]
+    volumes:
+      - certbot-conf:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: >
+      certbot certonly --webroot -w /var/www/certbot
+      -d ${CBB_DOMAIN}
+      --email ${CBB_EMAIL}
+      --agree-tos --no-eff-email --non-interactive
+
+volumes:
+  certbot-conf:
+  certbot-www:

@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 import os
 import uuid
+from hmac import compare_digest
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -214,7 +215,11 @@ def get_trend(project_id: str):
 
 
 @api.get("/alerts/{alert_id}/investigation", tags=["alerts"])
-def get_investigation(alert_id: str, request: Request, refresh: bool = Query(default=False)):
+def get_investigation(
+    alert_id: str,
+    request: Request,
+    refresh: bool = Query(default=False),
+):
     """Evidence-grounded investigation for an alert.
 
     `simulation_status` tells you where it came from: `real` means the model
@@ -222,6 +227,20 @@ def get_investigation(alert_id: str, request: Request, refresh: bool = Query(def
     deterministic template did, because the model was unavailable or its answer
     cited evidence we never supplied.
     """
+    # Regenerating calls the model, which costs money on the tenancy that owns
+    # the key. Reading the stored investigation is free and is what every
+    # visitor needs; only a caller holding the shared key may force a new one.
+    # Without this, a public URL is a public spend button.
+    #
+    # The key travels in a header, not the query string: nginx writes full
+    # request lines to its access log, and a secret in a URL also survives in
+    # browser history and referrers.
+    if refresh:
+        expected = os.getenv("API_SHARED_KEY")
+        presented = request.headers.get("x-api-key")
+        if not expected or not presented or not compare_digest(presented, expected):
+            refresh = False
+
     result = investigation_for(alert_id, refresh=refresh)
     if result is None:
         return _error(request, "not_found", f"No alert {alert_id!r}.", 404)
