@@ -1,16 +1,18 @@
-# Swap this in for nginx.conf after certbot has issued a certificate:
+# The TLS config, used once certbot has issued a certificate:
 #
-#   cd ~/climate-black-box/deploy
-#   sed -i 's|CBB_DOMAIN|yourdomain.com|g' nginx-tls.conf
-#   echo 'CBB_NGINX_CONF=./nginx-tls.conf' >> .env
+#   echo 'CBB_NGINX_CONF=./nginx-tls.conf.template' >> .env
 #   docker compose -f docker-compose.prod.yml up -d --force-recreate nginx
+#
+# ${CBB_DOMAIN} is substituted by the nginx image's own envsubst pass at
+# container start, reading deploy/.env. Nothing here is edited on the server,
+# so a later `git pull` cannot conflict with the running deployment.
 
 upstream cbb_web { server web:3000; }
 upstream cbb_api { server api:8001; }
 
 server {
     listen 80;
-    server_name CBB_DOMAIN;
+    server_name ${CBB_DOMAIN};
 
     # Renewals need this to stay reachable over plain HTTP.
     location /.well-known/acme-challenge/ { root /var/www/certbot; }
@@ -20,10 +22,10 @@ server {
 server {
     listen 443 ssl;
     http2 on;
-    server_name CBB_DOMAIN;
+    server_name ${CBB_DOMAIN};
 
-    ssl_certificate     /etc/letsencrypt/live/CBB_DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/CBB_DOMAIN/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/${CBB_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${CBB_DOMAIN}/privkey.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
     ssl_session_cache   shared:SSL:10m;

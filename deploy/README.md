@@ -208,11 +208,18 @@ of the stack — it runs once, writes into the volumes nginx already mounts, and
 exits. Then switch nginx to the TLS config:
 
 ```bash
-sed -i "s|CBB_DOMAIN|$CBB_DOMAIN|g" nginx-tls.conf
-echo 'CBB_NGINX_CONF=./nginx-tls.conf' >> .env
+echo 'CBB_NGINX_CONF=./nginx-tls.conf.template' >> .env
 docker compose -f docker-compose.prod.yml up -d --force-recreate nginx
 docker compose -f docker-compose.prod.yml logs --tail 20 nginx
 ```
+
+No file is edited. The nginx configs are mounted as templates into
+`/etc/nginx/templates/`, and the image's own envsubst pass fills `${CBB_DOMAIN}`
+in from `deploy/.env` at container start; `CBB_NGINX_CONF` selects which one.
+
+Both halves matter: every value the deployment needs lives in `deploy/.env`,
+and no tracked file is modified on the server — so a later `git pull` cannot
+abort with *local changes would be overwritten*.
 
 A bare `up -d nginx` can decide the service is unchanged and skip the restart,
 since only a mounted file moved — hence `--force-recreate`.
