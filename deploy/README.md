@@ -19,8 +19,36 @@ rebuild it and nothing is gone.
 | Name | `climate-black-box` |
 | Image | Canonical Ubuntu 22.04 |
 | Shape | **VM.Standard.A1.Flex**, 2 OCPU, 12 GB *(Always Free)* |
-| Networking | Assign a public IPv4 address |
+| Networking | See below — the defaults are not enough |
 | SSH keys | Generate a key pair and **download the private key** |
+
+### Networking, in detail
+
+Two settings here decide whether the instance is reachable at all, and neither
+announces itself if you get it wrong.
+
+**Primary network.** On a fresh tenancy pick **Create new virtual cloud
+network** — OCI builds the VCN, an internet gateway and the route rule in one
+step. With an existing VCN, select it instead.
+
+**Subnet.** It must be **public**. A private subnet has no route to the
+internet: the instance builds fine and is then unreachable, with nothing in the
+console flagging it.
+
+**Assign a public IPv4 address: yes.** Easy to miss, and it cannot be added
+afterwards without detaching the VNIC.
+
+**SSH keys.** Choose *Generate a key pair for me* and save **both** keys before
+leaving the page. Oracle generates the private key in your browser and never
+stores it — skip the download and the only fix is rebuilding the instance.
+
+```bash
+mkdir -p ~/.ssh && mv ~/Downloads/ssh-key-*.key ~/.ssh/cbb-oracle.key
+chmod 600 ~/.ssh/cbb-oracle.key
+```
+
+**Storage.** Defaults are fine; images and build cache come to roughly 6 GB of
+the 47 GB boot volume.
 
 Note the public IP when it finishes provisioning.
 
@@ -28,8 +56,9 @@ Note the public IP when it finishes provisioning.
 
 The default security list only allows SSH.
 
-**Networking → Virtual Cloud Networks →** your VCN **→ Security Lists →**
-Default → **Add Ingress Rules**, twice:
+**Networking → Virtual Cloud Networks →** your VCN **→ Subnets →** your subnet
+**→** its Security List **→ Add Ingress Rules**, twice (leave *Stateless*
+unchecked):
 
 | Source CIDR | Protocol | Destination port |
 |---|---|---|
@@ -45,7 +74,9 @@ sudo netfilter-persistent save
 ```
 
 Forgetting this is the single most common reason a correctly configured OCI
-instance appears unreachable.
+instance appears unreachable. To tell the two failures apart, run
+`curl -I http://<public-ip>` from your laptop: a hang means the security list,
+an instant refusal means nothing is listening yet — expected until step 5.
 
 ## 3. Install Docker
 
