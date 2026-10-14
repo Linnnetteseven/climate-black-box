@@ -54,8 +54,7 @@ month under 75% valid coverage can never raise an alert.
 
 <img src="docs/screenshots/03-landsat.jpg" width="100%" alt="Real Landsat imagery of the Transmara forest block with its scene identifier">
 
-*Real imagery, with the scene ID and cloud fraction on screen. Nothing here is
-a stock photograph.*
+*Real imagery, with the scene ID and cloud fraction on screen.*
 
 <img src="docs/screenshots/08-chart.png" width="100%" alt="Forty-five months of monthly mean NDVI, with gaps left as gaps">
 

@@ -83,7 +83,7 @@ export default async function Page({
       {isMau ? (
         <Descent
           title="Transmara, South-West Mau"
-          lede="Four hundred hectares of Kenyan highland forest. The same ground, imaged three years apart by the same satellites — nothing here is a stock photograph."
+          lede="Four hundred hectares of Kenyan highland forest. The same ground, imaged three years apart by the same satellites."
           before={{
             src: "/evidence/mau-before-truecolour.webp",
             caption: "October 2023 — vegetation cover at its baseline",
