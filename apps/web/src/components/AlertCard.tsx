@@ -14,8 +14,9 @@ import type { Alert, LatestAlert } from "@/lib/api";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", gap: 12, padding: "7px 0", borderTop: "1px solid var(--line)" }}>
+    <div className="alert-row" style={{ display: "flex", gap: 12, padding: "7px 0", borderTop: "1px solid var(--line)" }}>
       <div
+        className="alert-row-label"
         style={{
           fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.1em",
           textTransform: "uppercase", color: "var(--ink-muted)",
@@ -24,7 +25,9 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
       >
         {label}
       </div>
-      <div style={{ fontSize: 15.5, color: "var(--ink-2)" }}>{children}</div>
+      {/* minWidth:0 lets this shrink below its content width; without it a long
+          value pushes the row wider than the viewport instead of wrapping. */}
+      <div style={{ fontSize: 15.5, color: "var(--ink-2)", minWidth: 0 }}>{children}</div>
     </div>
   );
 }
@@ -108,17 +111,19 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
           <span className="mono">{a.rule_version}</span> — {a.method}
         </Row>
         <Row label="Data quality">
-          {a.quality_flags.map((f) => (
-            <span
-              key={f} className="mono"
-              style={{
-                fontSize: 11, marginRight: 6, padding: "2px 7px", borderRadius: 2,
-                border: "1px solid var(--line-strong)", color: "var(--ink-muted)",
-              }}
-            >
-              {f}
-            </span>
-          ))}
+          <span style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {a.quality_flags.map((f) => (
+              <span
+                key={f} className="mono"
+                style={{
+                  fontSize: 11, padding: "2px 7px", borderRadius: 2,
+                  border: "1px solid var(--line-strong)", color: "var(--ink-muted)",
+                }}
+              >
+                {f}
+              </span>
+            ))}
+          </span>
         </Row>
         <Row label="Evidence">
           <span className="mono" style={{ fontSize: 12.5 }}>

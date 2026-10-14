@@ -253,3 +253,11 @@ h2 { text-wrap: balance; }
   .audio-dock { right: 12px !important; bottom: max(14px, env(safe-area-inset-bottom)) !important; }
   .audio-dock button { padding: 10px 14px !important; }
 }
+
+/* The alert card's label column is 150px of a 390px phone, which squeezed the
+   values into three-word ribbons and pushed the data-quality chips off the
+   right edge. On a narrow screen the label reads better above its value. */
+@media (max-width: 560px) {
+  .alert-row { flex-direction: column !important; gap: 3px !important; }
+  .alert-row-label { width: auto !important; padding-top: 0 !important; }
+}
