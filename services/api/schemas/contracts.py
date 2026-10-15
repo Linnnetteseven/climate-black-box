@@ -251,4 +251,17 @@ class ErrorResponse(Base):
     details: list[dict] = Field(default_factory=list)
 
 
+class WaitlistJoin(Base):
+    """A request to be told when a project diverges.
+
+    Only the number. No name, no email: this is a waitlist for an alert that
+    does not exist yet, and the less of someone's data it holds, the better.
+    """
+
+    phone: str = Field(
+        min_length=8, max_length=20,
+        description="International format, e.g. +254712345678",
+    )
+
+
 AuditEvent.model_rebuild()

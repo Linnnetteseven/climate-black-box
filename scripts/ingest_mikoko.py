@@ -192,7 +192,8 @@ def main():
                 "id": row_id,
                 "project_id": PROJECT_ID,
                 "metric": "ndvi_mean",
-                "obs_value": None,
+                "value": None,
+                "unit": "index",
                 "period_key": month_key,
                 "period_start": p_start,
                 "period_end": p_end,
@@ -200,8 +201,13 @@ def main():
                 "valid_pixels": 0,
                 "total_pixels": 0,
                 "source_scene_id": None,
-                "cloud_cover_pct": None,
+                "cloud_cover_scene_pct": None,
                 "source_uri": None,
+                "source_dataset": "Landsat Collection 2 Level-2 (landsat-c2-l2)",
+                "platform": None,
+                "observed_at": None,
+                "processing_version": "ndvi-v1",
+                "quality_flags": ["no_usable_scene"],
                 "simulation_status": "real"
             })
             print(f"  [{month_key}] No usable scene -> null observation recorded.")
@@ -280,7 +286,8 @@ def main():
                 "id": row_id,
                 "project_id": PROJECT_ID,
                 "metric": "ndvi_mean",
-                "obs_value": mean_val,
+                "value": mean_val,
+                "unit": "index",
                 "period_key": month_key,
                 "period_start": p_start,
                 "period_end": p_end,
@@ -291,8 +298,13 @@ def main():
                 # without it the loader cannot build an evidence id and the row
                 # is dropped, so it travels with the measurement.
                 "source_scene_id": candidate["scene_id"],
-                "cloud_cover_pct": round(candidate["cloud_cover"], 2),
+                "cloud_cover_scene_pct": round(candidate["cloud_cover"], 2),
                 "source_uri": f"{STAC_API_URL}/collections/{COLLECTION}/items/{candidate['scene_id']}",
+                "source_dataset": "Landsat Collection 2 Level-2 (landsat-c2-l2)",
+                "platform": candidate["scene_id"][:4],
+                "observed_at": candidate.get("datetime"),
+                "processing_version": "ndvi-v1",
+                "quality_flags": ["cloud_masked", "shadow_masked", "water_masked"],
                 "simulation_status": "real"
             })
 
@@ -305,7 +317,8 @@ def main():
                 "id": row_id,
                 "project_id": PROJECT_ID,
                 "metric": "ndvi_mean",
-                "obs_value": None,
+                "value": None,
+                "unit": "index",
                 "period_key": month_key,
                 "period_start": p_start,
                 "period_end": p_end,
@@ -313,8 +326,13 @@ def main():
                 "valid_pixels": 0,
                 "total_pixels": 0,
                 "source_scene_id": None,
-                "cloud_cover_pct": None,
+                "cloud_cover_scene_pct": None,
                 "source_uri": None,
+                "source_dataset": "Landsat Collection 2 Level-2 (landsat-c2-l2)",
+                "platform": None,
+                "observed_at": None,
+                "processing_version": "ndvi-v1",
+                "quality_flags": ["no_usable_scene"],
                 "simulation_status": "real"
             })
 

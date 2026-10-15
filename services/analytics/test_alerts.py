@@ -176,3 +176,43 @@ def test_missing_value_is_treated_as_unusable():
 def test_coverage_floor_is_inclusive():
     p = Period("edge", 0, 0.4, valid_fraction=MIN_VALID_FRACTION)
     assert p.usable
+
+
+def test_a_tiny_dip_below_a_tight_band_is_not_divergence():
+    """A very stable site narrows its own band; noise must not then fire it.
+
+    This is the Mikoko Pamoja case. Its baseline fits so tightly that the band
+    came out 0.022 wide, and a 0.05 dip that recovered within four months
+    breached it for three periods. Statistically unusual, ecologically
+    meaningless -- without an effect floor the rule punishes consistency.
+    """
+    baseline = [
+        Period(period_id=f"2023-{m:02d}", index=i, value=0.900 + (0.009 if i % 2 else -0.009),
+               valid_fraction=1.0)
+        for i, m in enumerate(range(1, 13))
+    ]
+    # Sits below the band, but only by about 0.02: unusual for this site,
+    # far too small to be a loss of cover.
+    observed = [
+        Period(period_id=f"2024-{m:02d}", index=12 + i, value=0.865, valid_fraction=1.0)
+        for i, m in enumerate(range(1, 5))
+    ]
+    decision = evaluate(baseline, observed)
+    assert decision.fired is False
+    assert any("below the expected band" in r for r in decision.reasons)
+
+
+def test_a_real_loss_still_fires_through_the_effect_floor():
+    """The floor must not deafen the detector: a genuine collapse still fires."""
+    baseline = [
+        Period(period_id=f"2023-{m:02d}", index=i, value=0.900 + (0.009 if i % 2 else -0.009),
+               valid_fraction=1.0)
+        for i, m in enumerate(range(1, 13))
+    ]
+    observed = [
+        Period(period_id=f"2024-{m:02d}", index=12 + i, value=0.560, valid_fraction=1.0)
+        for i, m in enumerate(range(1, 5))
+    ]
+    decision = evaluate(baseline, observed)
+    assert decision.fired is True
+    assert decision.consecutive_periods >= REQUIRED_CONSECUTIVE

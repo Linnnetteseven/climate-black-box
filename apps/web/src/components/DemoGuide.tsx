@@ -14,6 +14,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * the page, not a tour nagging at them.
  */
 
+// Step zero is picking a site: setup, not a beat. Numbering it 00 keeps the
+// guide's 1-5 aligned with the five beats the page itself names.
 type Step = {
   anchor: string;
   label: string;
@@ -126,14 +128,14 @@ export function DemoGuide() {
             type="button"
             className={n === i ? "demo-dot on" : "demo-dot"}
             onClick={() => goTo(n)}
-            aria-label={`Step ${n + 1}: ${s.label}`}
+            aria-label={`Step ${n}: ${s.label}`}
           />
         ))}
       </div>
 
       <div className="demo-body">
         <p className="demo-step mono">
-          {String(i + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
+          {String(i).padStart(2, "0")} / {String(STEPS.length - 1).padStart(2, "0")}
           <span className="demo-label">{step.label}</span>
         </p>
         <p className="demo-say">{step.say}</p>

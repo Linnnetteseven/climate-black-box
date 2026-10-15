@@ -9,6 +9,7 @@ Two rules, both load-bearing:
 
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import datetime
 from typing import Any
@@ -212,3 +213,24 @@ def list_audit_events(project_id: str) -> list[AuditEvent]:
                 )
             )
         return events
+
+
+def join_alert_waitlist(project_id: str, phone: str) -> bool:
+    """Record a waitlist entry. True if new, False if it was already there.
+
+    Re-submitting is deliberately not an error: someone who types their number
+    twice has not done anything wrong, and telling them so would be noise.
+    """
+    sub_id = "sub-" + hashlib.sha256(f"{project_id}|{phone}".encode()).hexdigest()[:16]
+    with cursor() as cur:
+        cur.execute(
+            "SELECT 1 FROM alert_subscriptions WHERE id = :id", {"id": sub_id}
+        )
+        if cur.fetchone():
+            return False
+        cur.execute(
+            """INSERT INTO alert_subscriptions (id, project_id, phone)
+               VALUES (:id, :p, :ph)""",
+            {"id": sub_id, "p": project_id, "ph": phone},
+        )
+    return True

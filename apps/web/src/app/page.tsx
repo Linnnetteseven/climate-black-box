@@ -11,6 +11,8 @@ import { InterventionPanel } from "@/components/InterventionPanel";
 import { InvestigationPanel } from "@/components/InvestigationPanel";
 import { NdviChart } from "@/components/NdviChart";
 import { ProvenanceBadge } from "@/components/ProvenanceBadge";
+import { Reveal } from "@/components/Reveal";
+import { AlertWaitlist } from "@/components/AlertWaitlist";
 import { Starfield } from "@/components/Starfield";
 import { VerifyPanel } from "@/components/VerifyPanel";
 
@@ -19,11 +21,7 @@ export const dynamic = "force-dynamic";
 const SITES = [
   { id: "mau-transmara-demo", short: "Transmara, SW Mau" },
   { id: "kiambu-restoration-demo", short: "Kiambu (control)" },
-  // Mikoko Pamoja is seeded and the loader knows its fixture, but it is held
-  // out of the switcher until the boundary is corrected: the polygon as drawn
-  // covers the tidal channel, so a third of its readings are open water and
-  // the series does not support the stable-canopy baseline the seed describes.
-  // Put this line back once the ingest is re-run on a corrected polygon.
+  { id: "mikoko-pamoja-demo", short: "Mikoko Pamoja (mangrove)" },
 ];
 
 export default async function Page({
@@ -131,6 +129,7 @@ export default async function Page({
         />
       )}
       </div>
+    <ForestDescent />
     <main style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(20px, 4vw, 48px) 120px" }}>
       {/* demo-mode banner: which records are invented, stated before anything else */}
       <div
@@ -263,7 +262,6 @@ export default async function Page({
         </section>
       )}
 
-      <ForestDescent />
 
       <section id="beat-measure" style={{ padding: "56px 0 72px" }}>
         <div className="evidence split">
@@ -320,6 +318,7 @@ export default async function Page({
           </div>
 
           <div className="panel wide">
+            <Reveal label="Measure this site" working="Reading Landsat…">
             {observationsResult.ok ? (
               observations.length ? (
                 <NdviChart
@@ -336,6 +335,7 @@ export default async function Page({
                 requestId={observationsResult.error.request_id}
               />
             )}
+            </Reveal>
           </div>
         </div>
       </section>
@@ -354,14 +354,21 @@ export default async function Page({
             </p>
           </div>
           <div className="panel-quiet">
+            <Reveal label="Run the detector" working="Comparing to baseline…">
             {latestAlert ? (
+              <>
               <AlertCard latest={latestAlert} />
+              <div style={{ marginTop: 24 }}>
+                <AlertWaitlist projectId={PROJECT_ID} />
+              </div>
+              </>
             ) : (
               <Degraded
                 message={alertResult.ok ? "No detector result." : alertResult.error.message}
                 requestId={alertResult.ok ? "—" : alertResult.error.request_id}
               />
             )}
+            </Reveal>
           </div>
         </div>
       </section>
@@ -383,7 +390,9 @@ export default async function Page({
               </p>
             </div>
             <div className="panel-quiet">
-              <InvestigationPanel investigation={investigation} />
+              <Reveal label="Analyse with AI" working="Asking the model…">
+                <InvestigationPanel investigation={investigation} />
+              </Reveal>
             </div>
           </div>
         </section>

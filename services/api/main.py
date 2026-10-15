@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import uuid
 from hmac import compare_digest
 from contextlib import asynccontextmanager
@@ -30,6 +31,7 @@ from services.genai.service import investigation_for
 from services.api.db import repository
 from services.api.db.connection import DatabaseUnavailable, describe_backend
 from services.api.schemas.contracts import (
+    WaitlistJoin,
     Alert,
     Intervention,
     InterventionCreate,
@@ -245,6 +247,47 @@ def get_investigation(
     if result is None:
         return _error(request, "not_found", f"No alert {alert_id!r}.", 404)
     return result
+
+
+@api.post("/projects/{project_id}/alert-waitlist", tags=["alerts"])
+def post_alert_waitlist(project_id: str, payload: WaitlistJoin, request: Request):
+    """Record interest in SMS alerts for a project.
+
+    This is a waitlist and nothing more. No message is sent, because no SMS
+    provider is configured; the endpoint exists so that interest lands in the
+    same database as everything else rather than being thrown away by a form
+    that only looks like it works.
+
+    Re-submitting the same number is not an error and not a second subscriber:
+    the row is left as it is and the same acknowledgement comes back.
+    """
+    phone = payload.phone.strip().replace(" ", "")
+    if not re.fullmatch(r"\+[1-9][0-9]{7,14}", phone):
+        return _error(
+            request, "invalid_phone",
+            "Use international format, digits only after the country code, "
+            "for example +254712345678.", 422,
+        )
+
+    try:
+        existing = repository.get_project(project_id)
+    except DatabaseUnavailable:
+        raise
+    if existing is None:
+        return _error(request, "not_found", f"No project {project_id!r}.", 404)
+
+    created = repository.join_alert_waitlist(project_id, phone)
+    return {
+        "project_id": project_id,
+        "status": "waitlisted",
+        "already_registered": not created,
+        # Said in the response as well as the interface, so an integrator
+        # reading only the API cannot mistake this for a delivery guarantee.
+        "provider": "africastalking",
+        "provider_status": "not_configured",
+        "notice": "No SMS is sent yet. Delivery will run on Africa's Talking; "
+                  "this records interest only.",
+    }
 
 
 @api.get("/evidence/{event_id}/verify", tags=["integrity"])

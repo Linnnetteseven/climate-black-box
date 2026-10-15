@@ -53,6 +53,24 @@ REQUIRED_CONSECUTIVE = 2
 #: measurement noise alone is comfortably above 0.005. A different metric needs
 #: a different floor; it is not dimensionless.
 MIN_RESIDUAL_SIGMA = 0.005
+#: Smallest deviation below the band that counts as divergence, in metric units.
+#:
+#: The sigma floor stops a degenerate baseline firing on rounding error, but it
+#: does not stop a *well-behaved* one firing on noise. A site that is genuinely
+#: stable fits tightly, so its band narrows; at one real site the band came out
+#: 0.022 NDVI wide, which means any month more than about two percent off its
+#: seasonal normal reads as divergence. The dip that breached it was 0.054 and
+#: recovered completely within four months.
+#:
+#: Statistically that detector was right. Ecologically it was wrong: a 0.05
+#: NDVI wobble on closed canopy is weather. Without this floor the rule
+#: punishes consistency -- the better a project is run, the less room it has to
+#: breathe before being accused.
+#:
+#: Like MIN_RESIDUAL_SIGMA this is in metric units and tuned for NDVI, where a
+#: real loss of cover moves the index by more than this and seasonal noise does
+#: not. A different metric needs a different value.
+MIN_EFFECT_SIZE = 0.05
 
 
 @dataclass(frozen=True)
@@ -189,7 +207,12 @@ def evaluate(
             run = []
             continue
         band = expected_band(slope, intercept, sigma, period.index)
-        if period.value < band.low:
+        # Two independent tests, and a breach has to pass both: below the band
+        # says "unusual for this site", below the effect floor says "large
+        # enough to matter". A tight band alone is not evidence of loss.
+        below_band = period.value < band.low
+        big_enough = (band.low - period.value) >= MIN_EFFECT_SIZE
+        if below_band and big_enough:
             run.append((period, band))
             if len(run) > len(best):
                 best = list(run)
@@ -206,8 +229,8 @@ def evaluate(
     if len(best) < REQUIRED_CONSECUTIVE:
         reasons.insert(
             0,
-            f"No run of {REQUIRED_CONSECUTIVE} consecutive usable periods below the "
-            f"expected band (longest run: {len(best)}).",
+            f"No run of {REQUIRED_CONSECUTIVE} consecutive usable periods more than "
+            f"{MIN_EFFECT_SIZE} below the expected band (longest run: {len(best)}).",
         )
         return AlertDecision(
             fired=False,

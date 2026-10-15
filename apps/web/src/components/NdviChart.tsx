@@ -24,8 +24,9 @@ const W = 960;
 const H = 320;
 const PAD = { top: 24, right: 20, bottom: 40, left: 52 };
 
-const Y_MIN = 0.3;
-const Y_MAX = 0.9;
+//: Fallback window, used when a series is too sparse to scale from.
+const Y_FALLBACK_MIN = 0.3;
+const Y_FALLBACK_MAX = 0.9;
 
 //: Below this, a monthly mean is not trustworthy and the alert rule ignores it.
 const COVERAGE_FLOOR = 0.75;
@@ -54,6 +55,19 @@ export function NdviChart({
 }) {
   const [hover, setHover] = useState<number | null>(null);
 
+  // The y window follows the data. A fixed 0.3-0.9 fitted the two forest sites
+  // and clipped the mangrove one at both ends -- a chart that silently crops
+  // its own measurements is worse than no chart.
+  const [Y_MIN, Y_MAX] = useMemo(() => {
+    const vals = observations.map((o) => o.value).filter((v): v is number => v != null);
+    if (vals.length < 2) return [Y_FALLBACK_MIN, Y_FALLBACK_MAX];
+    const lo = Math.min(...vals), hi = Math.max(...vals);
+    const pad = Math.max((hi - lo) * 0.08, 0.03);
+    // Round outward to a twentieth: enough to keep labels round without
+    // throwing away a fifth of the plot to empty space.
+    return [Math.floor((lo - pad) * 20) / 20, Math.ceil((hi + pad) * 20) / 20];
+  }, [observations]);
+
   const points = useMemo<Point[]>(() => {
     const sorted = [...observations].sort((a, b) =>
       a.period_start.localeCompare(b.period_start),
@@ -76,7 +90,7 @@ export function NdviChart({
         date: o.period_start.slice(0, 10),
       };
     });
-  }, [observations]);
+  }, [observations, Y_MIN, Y_MAX]);
 
   // Rainfall shares the x axis but not the y: it is context for the NDVI line,
   // so it sits as low bars against its own maximum rather than competing for
@@ -117,7 +131,7 @@ export function NdviChart({
       seg.push({ x: p.x, y: toY(vals.reduce((a, b) => a + b, 0) / vals.length) });
     });
     return seg.length > 1 ? seg : null;
-  }, [points, baselineCount]);
+  }, [points, baselineCount, Y_MIN, Y_MAX]);
 
   // Break the path wherever a month has no usable value.
   const segments = useMemo(() => {
@@ -135,7 +149,16 @@ export function NdviChart({
     return out;
   }, [points]);
 
-  const ticks = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+  const ticks = useMemo(() => {
+    // A wide window -- a mangrove site runs 0.04 to 0.95 -- would otherwise
+    // draw thirteen gridlines and bury the series behind them.
+    const step = Y_MAX - Y_MIN > 0.75 ? 0.2 : 0.1;
+    const out: number[] = [];
+    for (let t = Math.ceil(Y_MIN / step) * step; t <= Y_MAX + 1e-9; t += step) {
+      out.push(Math.round(t * 100) / 100);
+    }
+    return out;
+  }, [Y_MIN, Y_MAX]);
   const active = hover === null ? null : points[hover];
 
   return (
@@ -259,6 +282,19 @@ export function NdviChart({
           />
         ))}
       </svg>
+
+      <div className="chart-key">
+        <span className="chart-key-item">
+          <span className="chart-swatch is-ndvi" aria-hidden /> Mean NDVI, measured
+        </span>
+        <span className="chart-key-item">
+          <span className="chart-swatch is-expected" aria-hidden /> Approved trajectory
+        </span>
+        <span className="chart-key-item">
+          <span className="chart-swatch is-rain" aria-hidden /> Rainfall, mm &mdash; scaled
+          to the wettest month, not to the NDVI axis
+        </span>
+      </div>
 
       <figcaption
         style={{
