@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { ScrollSequence } from "@/components/ScrollSequence";
 
 /**
@@ -93,6 +95,21 @@ export function Overture() {
       {(p) => (
         <>
           <Line opacity={at(p, 0.0, 0.20)}>
+            {/* The opening shot is the one frame everyone sees. A recorder
+                housing over the earth states the premise before the headline
+                does. The shadow is doing real work: the mark is nearly black
+                and the planet behind it is too. */}
+            <Image
+              src="/brand/cbb-logo.png"
+              alt=""
+              width={66}
+              height={66}
+              priority
+              style={{
+                display: "block", margin: "0 0 18px",
+                filter: "drop-shadow(0 6px 34px rgba(0,0,0,0.95))",
+              }}
+            />
             <p
               className="mono"
               style={{

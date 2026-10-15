@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { AlertCard } from "@/components/AlertCard";
@@ -152,14 +153,31 @@ export default async function Page({
       >
         <Starfield />
         <div style={{ position: "relative" }}>
-          <p
+          {/* The name is a metaphor; the mark makes it literal before anyone
+              has read a word. Priority-loaded because it sits above the fold
+              and a late-arriving logo reads as a broken page on a projector. */}
+          <div
             style={{
-              fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em",
-              textTransform: "uppercase", color: "var(--ink-muted)", margin: "0 0 18px",
+              display: "flex", alignItems: "center", gap: 12, margin: "0 0 18px",
             }}
           >
-            Climate Black Box
-          </p>
+            <Image
+              src="/brand/cbb-logo.png"
+              alt=""
+              width={44}
+              height={44}
+              priority
+              style={{ display: "block", flex: "0 0 auto" }}
+            />
+            <p
+              style={{
+                fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.18em",
+                textTransform: "uppercase", color: "var(--ink-muted)", margin: 0,
+              }}
+            >
+              Climate Black Box
+            </p>
+          </div>
           <h1 style={{ fontSize: "clamp(34px, 5.5vw, 62px)", lineHeight: 1.02, margin: "0 0 18px" }}>
             Now check it yourself.
           </h1>

@@ -1,9 +1,14 @@
 /* Climate Black Box -- APEX operator console theme.
  *
- * Paste into Shared Components > Themes > Vita > Edit > CSS > Inline. It lives
- * in APEX metadata from then on and travels with the application export, but
- * the source of truth is this file: APEX's own editor has no history, so a
- * change made only in the builder is a change nobody can review.
+ * Apply via Theme Roller: run the app, Developer Toolbar > Customize > Theme
+ * Roller > Custom CSS, paste, then Save As a named style and make it current.
+ * Not as a static application file -- that route needs the upload name and the
+ * #APP_FILES# path to agree, and when they silently disagree the page renders
+ * unstyled with no error anywhere. Theme Roller has no path to get wrong.
+ *
+ * It lives in APEX metadata from then on and travels with the application
+ * export, but the source of truth is this file: APEX's own editor has no
+ * history, so a change made only in the builder is a change nobody can review.
  *
  * Values are the product's tokens from apps/web/src/app/globals.css, so the
  * console and the public site read as one system. */
@@ -38,7 +43,10 @@ body, .t-Body { background: var(--cbb-ground); color: var(--cbb-ink); }
   border-radius: 6px;
 }
 .cbb-kpi b {
-  font-size: 34px; line-height: 1;
+  /* nowrap because a four-decimal NDVI was breaking mid-number across two
+     lines -- ".466" above "8" does not read as a measurement. 30px is the
+     largest size at which 0.8873 still clears the tile at its flex basis. */
+  font-size: 30px; line-height: 1; white-space: nowrap;
   font-family: ui-monospace, "IBM Plex Mono", monospace;
   color: var(--cbb-accent);
 }
@@ -60,3 +68,24 @@ body, .t-Body { background: var(--cbb-ground); color: var(--cbb-ink); }
 .cbb-quiet { color: var(--cbb-accent); border-color: var(--cbb-accent); }
 .cbb-conf  { color: var(--cbb-accent); border-color: var(--cbb-accent); }
 .cbb-fail  { color: var(--cbb-crit);   border-color: var(--cbb-crit); }
+
+/* The whole card body, built in one HTML expression rather than APEX's Title /
+   Subtitle / Body slots. Those slots are where this got stuck: the KPI markup
+   landed in Title, so APEX rendered it into the hidden aria-label span as well
+   as the body, and the project name had nowhere left to go. One expression has
+   one place to look when it is wrong. */
+.cbb-card      { display: flex; flex-direction: column; gap: 14px; }
+.cbb-card-head { display: flex; flex-direction: column; gap: 3px; }
+.cbb-card-head b    { font-size: 15px; color: var(--cbb-ink); font-weight: 600; }
+.cbb-card-head span { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase;
+                      color: var(--cbb-muted); }
+.cbb-kpi-row   { display: flex; gap: 10px; flex-wrap: wrap; }
+.cbb-kpi-row .cbb-kpi { flex: 1 1 110px; }
+
+/* Provenance chips for the home report. These two columns carry the claim the
+   whole project rests on -- the measurements are real, the restoration project
+   around them is not -- and as bare lowercase words in a table they read as
+   filler. Named for the values themselves so the class follows the data
+   rather than a hand-maintained mapping. */
+.cbb-real      { color: var(--cbb-accent); border-color: var(--cbb-accent); }
+.cbb-simulated { color: var(--cbb-muted);  border-color: var(--cbb-muted); }
