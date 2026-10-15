@@ -47,6 +47,7 @@ db-migrate: ## apply migrations (drop first; errors on a clean db are expected)
 db-seed: ## load the demo projects and derive spatial geometry
 	@$(PY) scripts/run_sql.py database/seed/010_project.sql
 	@$(PY) scripts/run_sql.py database/seed/020_mau_project.sql
+	@$(PY) scripts/run_sql.py database/seed/040_mikoko_project.sql
 	@$(PY) scripts/run_sql.py database/seed/030_spatial_backfill.sql --tolerant
 
 genai-check: ## report which OCI Generative AI models this tenancy can use
@@ -85,3 +86,6 @@ tamper: ## demonstrate that verification fails on an altered manifest
 clean:
 	rm -rf .venv apps/web/node_modules apps/web/.next .pytest_cache
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
+
+build-web: ## production build of the frontend, into .next-build so `make web` keeps serving
+	cd apps/web && NEXT_DIST_DIR=.next-build pnpm build

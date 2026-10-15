@@ -1,0 +1,62 @@
+/* Climate Black Box -- APEX operator console theme.
+ *
+ * Paste into Shared Components > Themes > Vita > Edit > CSS > Inline. It lives
+ * in APEX metadata from then on and travels with the application export, but
+ * the source of truth is this file: APEX's own editor has no history, so a
+ * change made only in the builder is a change nobody can review.
+ *
+ * Values are the product's tokens from apps/web/src/app/globals.css, so the
+ * console and the public site read as one system. */
+
+:root {
+  --cbb-ground: #0a1418;
+  --cbb-s1:     #0e1a1f;
+  --cbb-s2:     #122026;
+  --cbb-line:   #273d46;
+  --cbb-ink:    #eef4f6;
+  --cbb-ink-2:  #b9c8ce;
+  --cbb-muted:  #7b8f98;
+  --cbb-accent: #199e70;
+  --cbb-warn:   #fab219;
+  --cbb-crit:   #d03b3b;
+}
+
+body, .t-Body { background: var(--cbb-ground); color: var(--cbb-ink); }
+.t-Region     { background: var(--cbb-s1); border: 1px solid var(--cbb-line); border-radius: 6px; }
+.t-Region-title { color: var(--cbb-ink); }
+.a-IRR-table td, .a-IRR-table th { border-color: var(--cbb-line); }
+.a-IRR-table th { color: var(--cbb-muted); }
+
+/* A KPI tile. The important fact on the home page is 1 open alert versus 0 --
+   as a digit in a report column nobody reads it, so it gets size and a rail. */
+.cbb-kpi {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 18px 20px;
+  background: var(--cbb-s1);
+  border: 1px solid var(--cbb-line);
+  border-left: 3px solid var(--cbb-accent);
+  border-radius: 6px;
+}
+.cbb-kpi b {
+  font-size: 34px; line-height: 1;
+  font-family: ui-monospace, "IBM Plex Mono", monospace;
+  color: var(--cbb-accent);
+}
+.cbb-kpi span {
+  font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--cbb-muted);
+}
+.cbb-kpi.is-alert { border-left-color: var(--cbb-warn); }
+.cbb-kpi.is-alert b { color: var(--cbb-warn); }
+
+/* Status chips. Colour alone is not the signal -- the word stays readable. */
+.cbb-pill {
+  display: inline-block; padding: 2px 9px; border-radius: 2px;
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: ui-monospace, "IBM Plex Mono", monospace;
+  border: 1px solid;
+}
+.cbb-open  { color: var(--cbb-warn);   border-color: var(--cbb-warn); }
+.cbb-quiet { color: var(--cbb-accent); border-color: var(--cbb-accent); }
+.cbb-conf  { color: var(--cbb-accent); border-color: var(--cbb-accent); }
+.cbb-fail  { color: var(--cbb-crit);   border-color: var(--cbb-crit); }

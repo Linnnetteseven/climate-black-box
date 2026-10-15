@@ -41,7 +41,17 @@ interface Point {
   date: string;
 }
 
-export function NdviChart({ observations }: { observations: Observation[] }) {
+export function NdviChart({
+  observations,
+  rainfall = [],
+  baselineCount = 0,
+}: {
+  observations: Observation[];
+  /** Same periods, precipitation in mm. Drawn as bars on their own scale. */
+  rainfall?: Observation[];
+  /** How many leading periods form the approved baseline window. */
+  baselineCount?: number;
+}) {
   const [hover, setHover] = useState<number | null>(null);
 
   const points = useMemo<Point[]>(() => {
@@ -67,6 +77,47 @@ export function NdviChart({ observations }: { observations: Observation[] }) {
       };
     });
   }, [observations]);
+
+  // Rainfall shares the x axis but not the y: it is context for the NDVI line,
+  // so it sits as low bars against its own maximum rather than competing for
+  // the same scale.
+  const rain = useMemo(() => {
+    if (!rainfall.length) return [];
+    const byKey = new Map(
+      rainfall.map((o) => [o.period_start.slice(0, 7), o.value ?? 0]),
+    );
+    const max = Math.max(...Array.from(byKey.values()), 1);
+    const floor = H - PAD.bottom;
+    return points.map((p) => {
+      const mm = byKey.get(p.key) ?? 0;
+      const h = (mm / max) * (H - PAD.top - PAD.bottom) * 0.28;
+      return { x: p.x, h, mm, y: floor - h };
+    });
+  }, [rainfall, points]);
+
+  // The approved trajectory: the per-calendar-month mean over the baseline
+  // window, which is exactly what the detector compares each month against.
+  // The alert's own band cannot be drawn here -- it is in seasonally adjusted
+  // anomaly units, and this axis is raw NDVI.
+  const promised = useMemo(() => {
+    if (baselineCount < 12) return null;
+    const byMonth = new Map<string, number[]>();
+    points.slice(0, baselineCount).forEach((p) => {
+      if (p.value == null) return;
+      const m = p.key.slice(5, 7);
+      byMonth.set(m, [...(byMonth.get(m) ?? []), p.value]);
+    });
+    if (byMonth.size < 6) return null;
+    const toY = (v: number) =>
+      PAD.top + (1 - (v - Y_MIN) / (Y_MAX - Y_MIN)) * (H - PAD.top - PAD.bottom);
+    const seg: { x: number; y: number }[] = [];
+    points.forEach((p) => {
+      const vals = byMonth.get(p.key.slice(5, 7));
+      if (!vals?.length) return;
+      seg.push({ x: p.x, y: toY(vals.reduce((a, b) => a + b, 0) / vals.length) });
+    });
+    return seg.length > 1 ? seg : null;
+  }, [points, baselineCount]);
 
   // Break the path wherever a month has no usable value.
   const segments = useMemo(() => {
@@ -96,6 +147,34 @@ export function NdviChart({ observations }: { observations: Observation[] }) {
         aria-label="Monthly mean NDVI for the project area, with gaps where no usable observation exists."
         onMouseLeave={() => setHover(null)}
       >
+        {/* The approved trajectory, drawn under the measurement so divergence
+            reads as the gap between the two lines. */}
+        {promised && (
+          <g>
+            <polyline
+              points={promised.map((q) => `${q.x},${q.y}`).join(" ")}
+              fill="none" stroke="var(--series-ndvi)" strokeWidth={1.5}
+              strokeDasharray="7 5" opacity={0.6}
+            />
+            <text
+              x={W - PAD.right} y={PAD.top - 8} textAnchor="end"
+              fill="var(--series-ndvi)" fontSize={11}
+              fontFamily="var(--font-mono)" opacity={0.85}
+            >
+              - - -  approved trajectory
+            </text>
+          </g>
+        )}
+
+        {/* Rainfall, as low bars on their own scale -- context, not a rival. */}
+        {rain.map((r, i) => (
+          <rect
+            key={`rain-${i}`}
+            x={r.x - 3} y={r.y} width={6} height={Math.max(0, r.h)}
+            fill="var(--series-rain)" opacity={0.42}
+          />
+        ))}
+
         {/* recessive grid */}
         {ticks.map((t) => {
           const y = PAD.top + (1 - (t - Y_MIN) / (Y_MAX - Y_MIN)) * (H - PAD.top - PAD.bottom);

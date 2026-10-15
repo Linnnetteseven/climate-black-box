@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { AlertCard } from "@/components/AlertCard";
 import { AudioDock } from "@/components/AudioDock";
+import { DemoGuide } from "@/components/DemoGuide";
 import { Chapter } from "@/components/Chapter";
 import { ForestDescent } from "@/components/ForestDescent";
 import { Descent } from "@/components/Descent";
@@ -18,6 +19,11 @@ export const dynamic = "force-dynamic";
 const SITES = [
   { id: "mau-transmara-demo", short: "Transmara, SW Mau" },
   { id: "kiambu-restoration-demo", short: "Kiambu (control)" },
+  // Mikoko Pamoja is seeded and the loader knows its fixture, but it is held
+  // out of the switcher until the boundary is corrected: the polygon as drawn
+  // covers the tidal channel, so a third of its readings are open water and
+  // the series does not support the stable-canopy baseline the seed describes.
+  // Put this line back once the ingest is re-run on a corrected polygon.
 ];
 
 export default async function Page({
@@ -30,12 +36,15 @@ export default async function Page({
     ? params.project!
     : SITES[0].id;
 
-  const [projectResult, commitmentsResult, observationsResult, healthResult,
+  const [projectResult, commitmentsResult, observationsResult,
+         rainfallResult, soilResult, healthResult,
          alertResult, auditResult, trendResult] =
     await Promise.all([
       api.project(PROJECT_ID),
       api.commitments(PROJECT_ID),
       api.observations(PROJECT_ID),
+      api.observations(PROJECT_ID, "precipitation_mm"),
+      api.observations(PROJECT_ID, "soil_moisture_pct"),
       api.health(),
       api.latestAlert(PROJECT_ID),
       api.audit(PROJECT_ID),
@@ -48,6 +57,8 @@ export default async function Page({
   const project = projectResult.ok ? projectResult.data : null;
   const commitments = commitmentsResult.ok ? commitmentsResult.data : [];
   const observations = observationsResult.ok ? observationsResult.data : [];
+  const rainfall = rainfallResult.ok ? rainfallResult.data : [];
+  const soil = soilResult.ok ? soilResult.data : [];
   const health = healthResult.ok ? healthResult.data : null;
   const latestAlert = alertResult.ok ? alertResult.data : null;
   const auditEvents = auditResult.ok ? auditResult.data : [];
@@ -79,7 +90,11 @@ export default async function Page({
   return (
     <>
       <AudioDock />
+      <DemoGuide />
       <Overture />
+      {/* Switching sites lands here rather than at the top: the satellite
+          imagery of the new site is the thing you switched to look at. */}
+      <div id="site-imagery">
       {isMau ? (
         <Descent
           title="Transmara, South-West Mau"
@@ -115,6 +130,7 @@ export default async function Page({
           }}
         />
       )}
+      </div>
     <main style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(20px, 4vw, 48px) 120px" }}>
       {/* demo-mode banner: which records are invented, stated before anything else */}
       <div
@@ -175,7 +191,7 @@ export default async function Page({
           return (
             <Link
               key={s.id}
-              href={`/?project=${s.id}`}
+              href={`/?project=${s.id}#site-imagery`}
               style={{
                 fontFamily: "var(--font-mono)", fontSize: 12.5, padding: "6px 12px",
                 borderRadius: 2, textDecoration: "none",
@@ -195,7 +211,7 @@ export default async function Page({
       )}
 
       {project && (
-        <section style={{ padding: "40px 0" }}>
+        <section id="beat-site" style={{ padding: "40px 0" }}>
           <div style={{ display: "flex", gap: 14, alignItems: "baseline", flexWrap: "wrap" }}>
             <h2 style={{ fontSize: 27 }}>{project.name}</h2>
             <ProvenanceBadge status={project.simulation_status} />
@@ -249,7 +265,7 @@ export default async function Page({
 
       <ForestDescent />
 
-      <section style={{ padding: "56px 0 64px" }}>
+      <section id="beat-measure" style={{ padding: "56px 0 72px" }}>
         <div className="evidence split">
           <div className="rail">
             <h3>The measurement</h3>
@@ -257,18 +273,60 @@ export default async function Page({
               Monthly mean NDVI across the project boundary, from Landsat
               Collection 2 Level-2 surface reflectance.
             </p>
-            <p>
-              Hollow points fall below 75% valid pixels and are excluded from
-              alerting. Dashed verticals are months with no usable observation —
-              the line breaks rather than guessing across them.
-            </p>
             <ProvenanceBadge status="real" />
+
+            {/* The other metrics on the record. They are not evidence that a
+                promise was kept -- they are the alternative explanations an
+                investigation has to weigh, so they belong beside the line. */}
+            {(rainfall.length > 0 || soil.length > 0) && (
+              <div className="metric-strip">
+                <div>
+                  <p className="metric-label mono">NDVI</p>
+                  <p className="metric-value mono">
+                    {latest?.value != null ? latest.value.toFixed(3) : "—"}
+                  </p>
+                  <p className="metric-note">Landsat, 30 m, monthly</p>
+                </div>
+                {rainfall.length > 0 && (
+                  <div>
+                    <p className="metric-label mono">Rainfall</p>
+                    <p className="metric-value mono">
+                      {(() => {
+                        const r = [...rainfall]
+                          .filter((o) => o.value != null)
+                          .sort((a, b) => b.period_start.localeCompare(a.period_start))[0];
+                        return r?.value != null ? `${r.value.toFixed(0)} mm` : "—";
+                      })()}
+                    </p>
+                    <p className="metric-note">ERA5, ~25 km, district scale</p>
+                  </div>
+                )}
+                {soil.length > 0 && (
+                  <div>
+                    <p className="metric-label mono">Soil moisture</p>
+                    <p className="metric-value mono">
+                      {(() => {
+                        const r = [...soil]
+                          .filter((o) => o.value != null)
+                          .sort((a, b) => b.period_start.localeCompare(a.period_start))[0];
+                        return r?.value != null ? `${r.value.toFixed(1)}%` : "—";
+                      })()}
+                    </p>
+                    <p className="metric-note">ERA5-Land, ~9 km, 0&ndash;7 cm</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="panel wide">
             {observationsResult.ok ? (
               observations.length ? (
-                <NdviChart observations={observations} />
+                <NdviChart
+                  observations={observations}
+                  rainfall={rainfall}
+                  baselineCount={24}
+                />
               ) : (
                 <Empty />
               )
@@ -282,19 +340,17 @@ export default async function Page({
         </div>
       </section>
 
-      <section style={{ padding: "8px 0 64px" }}>
+      <section id="beat-rule" style={{ padding: "48px 0 72px" }}>
         <div className="evidence split">
           <div className="rail">
             <h3>The rule</h3>
             <p>
-              Robust linear baseline over the approved window, a band of ±1.5
-              residual sigma, and divergence only after two consecutive periods
-              below it.
+              A robust baseline, a band of ±1.5 residual sigma, and divergence
+              only after two consecutive periods below it.
             </p>
             <p>
-              A period under 75% pixel coverage can never raise an alert, and
-              breaks the run rather than extending it — we cannot say a site was
-              behind in a month we could not see.
+              A month we could not see cannot raise an alert — it breaks the run
+              rather than extending it.
             </p>
           </div>
           <div className="panel-quiet">
@@ -312,19 +368,18 @@ export default async function Page({
 
       {investigation && (
         <>
-        <section style={{ padding: "8px 0 64px" }}>
+        <section id="beat-investigate" style={{ padding: "48px 0 72px" }}>
           <div className="evidence split">
             <div className="rail">
               <h3>How this is bounded</h3>
               <p>
-                The model receives only this alert&apos;s own evidence, capped at
-                four kilobytes, every fact carrying the id of the record it came
-                from.
+                The model sees only this alert&apos;s own evidence — four
+                kilobytes, every fact carrying the id it came from.
               </p>
               <p>
-                An answer citing evidence we never supplied is rejected, as is one
-                that asserts a cause. When that happens the deterministic
-                fallback is used and labelled as such.
+                An answer that asserts a cause, or cites evidence we never
+                supplied, is rejected and replaced by the template. The label
+                below says which you are reading.
               </p>
             </div>
             <div className="panel-quiet">
@@ -344,7 +399,7 @@ export default async function Page({
           lede="A corrective action joins the evidence chain like any measurement. What happened afterwards is compared on a seasonally adjusted basis, and reported honestly even when the honest answer is that nothing has changed yet."
         />
 
-        <section style={{ padding: "8px 0 64px" }}>
+        <section id="beat-act" style={{ padding: "48px 0 72px" }}>
           <InterventionPanel
             projectId={PROJECT_ID}
             alertId={latestAlert.alert.id}
@@ -363,7 +418,7 @@ export default async function Page({
         image="/scenery/earth-limb.webp"
       />
 
-      <section style={{ padding: "56px 0 64px" }}>
+      <section id="beat-verify" style={{ padding: "56px 0 72px" }}>
         <div className="evidence split">
           <div className="rail">
             <h3>Evidence chain</h3>
@@ -391,6 +446,23 @@ export default async function Page({
               </p>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* What this runs on. Named in text rather than with Oracle's logo marks:
+          crediting the technology needs the names, and reproducing a trademark
+          holder's artwork on a public page is their call to grant, not ours. */}
+      <section className="builton">
+        <p className="builton-label mono">Built on</p>
+        <div className="builton-row">
+          <span className="builton-chip mono">Oracle Autonomous Database</span>
+          <span className="builton-chip mono">Oracle APEX</span>
+          <span className="builton-chip mono">Oracle Spatial</span>
+          <span className="builton-chip mono">OCI Generative AI</span>
+          <span className="builton-chip mono">OCI Compute &middot; Ampere A1</span>
+          <span className="builton-chip mono alt">Nervos CKB</span>
+          <span className="builton-chip mono alt">Landsat C2 L2</span>
+          <span className="builton-chip mono alt">ERA5 &middot; ERA5-Land</span>
         </div>
       </section>
 

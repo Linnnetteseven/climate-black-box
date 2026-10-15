@@ -53,11 +53,8 @@ OUTPUT_PATH = os.path.normpath(os.path.join(OUTPUT_DIR, "observations_mikoko_ndv
 POLYGON_GEOM = {
     "type": "Polygon",
     "coordinates": [[
-        [39.5080, -4.4360],
-        [39.5190, -4.4360],
-        [39.5190, -4.4260],
-        [39.5080, -4.4260],
-        [39.5080, -4.4360]
+        [39.5144, -4.4205], [39.5225, -4.4205], [39.5225, -4.4123],
+        [39.5144, -4.4123], [39.5144, -4.4205]
     ]]
 }
 
@@ -76,7 +73,9 @@ SR_MAX_DN = 43636
 # QA_PIXEL bit positions (Landsat 8/9 OLI-TIRS Collection 2 L2):
 # Bit 0: Fill, 1: Dilated Cloud, 2: Cirrus, 3: Cloud, 4: Cloud Shadow, 5: Snow
 # If any of these bits are set, the pixel must not be used for canopy estimation.
-REJECT_BITS = (0, 1, 2, 3, 4, 5)
+QA_WATER = 7
+
+REJECT_BITS = (0, 1, 2, 3, 4, 5, QA_WATER)
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +85,10 @@ REJECT_BITS = (0, 1, 2, 3, 4, 5)
 def build_qa_mask(qa_array):
     """
     Returns a boolean mask: True for valid/usable pixels, False for bad ones.
-    We drop fill, clouds, cloud shadows, cirrus, and dilated cloud edges.
+    We drop fill, clouds, cloud shadows, cirrus, dilated cloud edges -- and
+    water. Water matters here and nowhere else in the project: this is a tidal
+    bay, so a pixel that is sea at high tide and mud at low tide produces a
+    number that describes the tide, not the canopy.
     We don't strictly require the CLEAR bit (bit 6) because healthy mangrove
     fringes next to tidal water channels can be slightly hazy without degrading
     the surface reflectance signal.
@@ -191,9 +193,15 @@ def main():
                 "project_id": PROJECT_ID,
                 "metric": "ndvi_mean",
                 "obs_value": None,
+                "period_key": month_key,
                 "period_start": p_start,
                 "period_end": p_end,
                 "valid_pixel_fraction": 0.0,
+                "valid_pixels": 0,
+                "total_pixels": 0,
+                "source_scene_id": None,
+                "cloud_cover_pct": None,
+                "source_uri": None,
                 "simulation_status": "real"
             })
             print(f"  [{month_key}] No usable scene -> null observation recorded.")
@@ -273,9 +281,18 @@ def main():
                 "project_id": PROJECT_ID,
                 "metric": "ndvi_mean",
                 "obs_value": mean_val,
+                "period_key": month_key,
                 "period_start": p_start,
                 "period_end": p_end,
                 "valid_pixel_fraction": round(fraction, 4),
+                "valid_pixels": int(surviving_pixels.sum()),
+                "total_pixels": int(surviving_pixels.size),
+                # The scene id is what makes this re-derivable by a stranger:
+                # without it the loader cannot build an evidence id and the row
+                # is dropped, so it travels with the measurement.
+                "source_scene_id": candidate["scene_id"],
+                "cloud_cover_pct": round(candidate["cloud_cover"], 2),
+                "source_uri": f"{STAC_API_URL}/collections/{COLLECTION}/items/{candidate['scene_id']}",
                 "simulation_status": "real"
             })
 
@@ -289,9 +306,15 @@ def main():
                 "project_id": PROJECT_ID,
                 "metric": "ndvi_mean",
                 "obs_value": None,
+                "period_key": month_key,
                 "period_start": p_start,
                 "period_end": p_end,
                 "valid_pixel_fraction": 0.0,
+                "valid_pixels": 0,
+                "total_pixels": 0,
+                "source_scene_id": None,
+                "cloud_cover_pct": None,
+                "source_uri": None,
                 "simulation_status": "real"
             })
 
@@ -299,7 +322,12 @@ def main():
     print("\n[4/4] Writing fixture to disk...")
     try:
         with open(OUTPUT_PATH, "w", encoding="utf-8") as out_f:
-            json.dump(observations, out_f, indent=2)
+            json.dump({
+                "project_id": PROJECT_ID,
+                "metric": "ndvi_mean",
+                "processing_version": "ndvi-v1",
+                "observations": observations,
+            }, out_f, indent=2)
         print(f"  Successfully wrote {len(observations)} observation records to {OUTPUT_PATH}")
     except Exception as exc:
         print(f"ERROR writing output file: {exc}", file=sys.stderr)

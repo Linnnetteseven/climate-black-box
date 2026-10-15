@@ -87,7 +87,28 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
         </span>
       </div>
 
-      <div style={{ marginTop: 14 }}>
+      {/* The finding leads. Six equal rows made the reader hunt for which
+          number was the point; the supporting values are reference, and read
+          better once they are visibly secondary to it. */}
+      <div style={{ marginTop: 18, marginBottom: 20 }}>
+        <div
+          className="mono"
+          style={{
+            fontSize: "clamp(1.9rem, 4.5vw, 2.6rem)", lineHeight: 1.05,
+            color: amber, letterSpacing: "-0.02em",
+          }}
+        >
+          {a.deviation_abs! > 0 ? "+" : ""}{a.deviation_abs?.toFixed(4)} NDVI
+        </div>
+        <div style={{ marginTop: 6, fontSize: 15.5, color: "var(--ink-2)" }}>
+          below the expected band, over{" "}
+          <strong style={{ color: "var(--ink)" }}>
+            {a.consecutive_periods} consecutive periods
+          </strong>
+        </div>
+      </div>
+
+      <div>
         <Row label="Observed">
           <span className="mono" style={{ color: "var(--ink)", fontSize: 16 }}>
             {a.observed_value?.toFixed(4)}
@@ -99,13 +120,6 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
             [{a.expected_low?.toFixed(4)}, {a.expected_high?.toFixed(4)}]
           </span>{" "}
           around <span className="mono">{a.expected_value?.toFixed(4)}</span>
-        </Row>
-        <Row label="Deviation">
-          <span className="mono" style={{ color: amber }}>
-            {a.deviation_abs! > 0 ? "+" : ""}{a.deviation_abs?.toFixed(4)} NDVI
-          </span>
-          {" over "}
-          <strong style={{ color: "var(--ink)" }}>{a.consecutive_periods} consecutive periods</strong>
         </Row>
         <Row label="Rule">
           <span className="mono">{a.rule_version}</span> — {a.method}
@@ -141,24 +155,35 @@ export function AlertCard({ latest }: { latest: LatestAlert }) {
         {a.explanation}
       </div>
 
-      <div
-        style={{
-          marginTop: 14, padding: "12px 14px", borderRadius: 3,
-          background: "rgba(255,255,255,0.03)", border: 0,
-          fontSize: 14.5, color: "var(--ink-muted)", maxWidth: "72ch", lineHeight: 1.65,
-        }}
-      >
-        <strong
-          className="mono"
-          style={{
-            display: "block", fontSize: 10, letterSpacing: "0.12em",
-            textTransform: "uppercase", color: "var(--ink-2)", marginBottom: 5,
-          }}
-        >
-          What this does not establish
-        </strong>
-        {a.limitations}
-      </div>
+      {/* The caveats ran to ninety words and buried the finding they sit under.
+          The headline limit stays on screen -- hiding it entirely would
+          contradict the whole point of the product -- and the rest opens on a
+          click for anyone who wants the full statement. */}
+      <Limitations text={a.limitations} />
+    </div>
+  );
+}
+
+/**
+ * The first sentence of a limitation is the headline: it names the thing the
+ * measurement cannot establish. The remainder qualifies it, and is what made
+ * the block unreadable at a glance.
+ */
+function Limitations({ text }: { text: string }) {
+  const stop = text.indexOf(". ");
+  const headline = stop === -1 ? text : text.slice(0, stop + 1);
+  const rest = stop === -1 ? "" : text.slice(stop + 2).trim();
+
+  return (
+    <div className="limits">
+      <strong className="mono limits-label">What this does not establish</strong>
+      <p className="limits-headline">{headline}</p>
+      {rest && (
+        <details>
+          <summary>The full statement</summary>
+          <p>{rest}</p>
+        </details>
+      )}
     </div>
   );
 }

@@ -49,11 +49,16 @@ INSERT INTO projects (
   'Kwale County, Gazi Bay',
   'Mikoko Pamoja Community Organization / KMFRI',
   'active',
-  -- ~135 ha polygon covering the Gazi Bay mangrove channel (EPSG:4326)
+  
+  -- ~82 ha of dense canopy on the Gazi Bay tideline. The first boundary ran
+  -- over the tidal channel: a third of its readings were open water and two
+  -- were negative, so the series described the tide rather than the canopy.
+  -- This one was chosen from a twelve-scene median composite -- median NDVI
+  -- 0.881, tenth percentile 0.844, within 120 m of persistent water.
   '{"type":"Polygon","coordinates":[[
-      [39.5080,-4.4360],[39.5190,-4.4360],[39.5190,-4.4260],
-      [39.5080,-4.4260],[39.5080,-4.4360]]]}',
-  1,  -- Surveyed community co-management boundary
+      [39.5144,-4.4205],[39.5225,-4.4205],[39.5225,-4.4123],
+      [39.5144,-4.4123],[39.5144,-4.4205]]]}',
+  0,  -- Drawn from imagery, not surveyed
   DATE '2023-01-01',
   DATE '2026-12-31',
   'simulated'

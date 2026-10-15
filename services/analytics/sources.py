@@ -158,3 +158,52 @@ def fetch_rainfall(lat: float, lon: float, start: date, end: date) -> list[Rainf
         monthly[day[:7]] = monthly.get(day[:7], 0.0) + float(value)
 
     return [RainfallMonth(k, round(v, 2)) for k, v in sorted(monthly.items())]
+
+
+@dataclass(frozen=True)
+class SoilMoistureMonth:
+    period_key: str
+    soil_moisture_pct: float
+
+
+def fetch_soil_moisture(lat: float, lon: float, start: date, end: date) -> list[SoilMoistureMonth]:
+    """Monthly mean surface soil moisture for the site centroid, from ERA5-Land.
+
+    The API returns volumetric water content in m3/m3; we carry it as a
+    percentage because that is how anyone reading the number will say it.
+    Months are averaged, not summed -- unlike rainfall, a monthly total of a
+    volume fraction would be meaningless.
+
+    Same caveat as rainfall: this is a reanalysis grid at roughly 9 km, so it
+    is regional context, not a measurement at the site.
+    """
+    params = {
+        "latitude": round(lat, 4),
+        "longitude": round(lon, 4),
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "daily": "soil_moisture_0_to_7cm_mean",
+        "timezone": "UTC",
+    }
+    try:
+        response = httpx.get(OPEN_METEO_ARCHIVE, params=params, timeout=60.0)
+        response.raise_for_status()
+        payload = response.json()
+    except Exception as exc:
+        raise SourceUnavailable(f"Open-Meteo request failed: {exc}") from exc
+
+    daily = payload.get("daily") or {}
+    days = daily.get("time") or []
+    values = daily.get("soil_moisture_0_to_7cm_mean") or []
+
+    buckets: dict[str, list[float]] = {}
+    for day, value in zip(days, values):
+        if value is None:
+            continue
+        buckets.setdefault(day[:7], []).append(float(value))
+
+    return [
+        SoilMoistureMonth(k, round(sum(v) / len(v) * 100.0, 2))
+        for k, v in sorted(buckets.items())
+        if v
+    ]

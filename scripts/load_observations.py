@@ -30,6 +30,7 @@ log = logging.getLogger("cbb.load")
 FIXTURES = {
     "kiambu-restoration-demo": Path("data/sample/observations_ndvi-v1.json"),
     "mau-transmara-demo": Path("data/sample/observations_mau_ndvi-v1.json"),
+    "mikoko-pamoja-demo": Path("data/sample/observations_mikoko_ndvi-v1.json"),
 }
 
 
