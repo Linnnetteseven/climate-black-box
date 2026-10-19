@@ -34,3 +34,28 @@ def test_unknown_event_type_is_refused():
 
 def test_out_of_sequence_is_a_distinct_verification_state():
     assert VerificationState("out_of_sequence") is VerificationState.OUT_OF_SEQUENCE
+
+
+def test_json_columns_are_read_however_oracle_returns_them():
+    assert ledger_client._json_list(["a", "b"]) == ["a", "b"]
+    assert ledger_client._json_list('["a"]') == ["a"]
+    assert ledger_client._json_list(None) == []
+
+
+class _FakeCursor:
+    def __init__(self, evidence):
+        self.evidence, self.calls = evidence, 0
+
+    def execute(self, *_a, **_k):
+        self.calls += 1
+
+    def fetchone(self):
+        return (self.evidence,) if self.calls == 1 else ("2025-02",)
+
+
+def test_alert_period_from_the_months_the_rule_recorded():
+    assert ledger_client._alert_period(_FakeCursor(["2026-05", "2026-09", "2026-07"]), "a") == "2026-09"
+
+
+def test_alert_period_falls_back_to_observation_ids():
+    assert ledger_client._alert_period(_FakeCursor(["obs-1", "obs-2"]), "a") == "2025-02"

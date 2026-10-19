@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -85,16 +86,28 @@ def project_ledger(project_id: str) -> dict | None:
         type_id=row[0], type_hash=row[1], recorder_lock_hash=row[2], recorder_address=row[3], create_tx_hash=row[4])
 
 
+def _json_list(raw) -> list:
+    """A JSON column as a list: Oracle may hand it back parsed, as a LOB, or as text."""
+    if isinstance(raw, list):
+        return raw
+    if hasattr(raw, "read"):
+        raw = raw.read()
+    return json.loads(raw or "[]")
+
+
 def _alert_period(cur, alert_id: str) -> str | None:
     """Latest observed month an alert rests on."""
     cur.execute("SELECT evidence_ids FROM alerts WHERE id = :a", a=alert_id)
     row = cur.fetchone()
     if not row:
         return None
-    raw = row[0].read() if hasattr(row[0], "read") else row[0]
-    ids = json.loads(raw or "[]")
+    ids = _json_list(row[0])
     if not ids:
         return None
+    # The alert rule records the months it rests on (YYYY-MM); older rows may hold observation ids
+    months = [i for i in ids if isinstance(i, str) and re.fullmatch(r"\d{4}-\d{2}", i)]
+    if months:
+        return max(months)
     binds = {f"i{n}": v for n, v in enumerate(ids)}
     cur.execute(f"SELECT MAX(period_key) FROM observations WHERE id IN ({', '.join(':' + k for k in binds)})", **binds)
     return cur.fetchone()[0]

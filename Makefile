@@ -42,6 +42,7 @@ db-migrate: ## apply migrations (drop first; errors on a clean db are expected)
 	@$(PY) scripts/run_sql.py database/migrations/000_drop.sql --tolerant
 	@$(PY) scripts/run_sql.py database/migrations/001_core.sql
 	@$(PY) scripts/run_sql.py database/migrations/002_spatial.sql --tolerant
+	@$(PY) scripts/run_sql.py database/migrations/003_alert_subscriptions.sql
 	@$(PY) scripts/run_sql.py database/migrations/004_evidence_ledger.sql
 	@$(PY) scripts/run_sql.py database/views/010_views.sql
 
