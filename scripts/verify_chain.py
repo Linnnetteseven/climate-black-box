@@ -47,6 +47,43 @@ def verify_onchain(tx_hash: str, index: int, expected: str) -> dict:
         return {"state": "chain_unavailable", "verified": False, "detail": str(exc)}
 
 
+def verify_ledger(project_id: str) -> int:
+    """Read the project's whole ledger history from the chain and check it against our records."""
+    from services.ckb import ledger_client
+    ledger = ledger_client.project_ledger(project_id)
+    if ledger is None:
+        log.error("%s has no on-chain ledger (make ledger-create)", project_id)
+        return 1
+    with cursor() as cur:
+        cur.execute(
+            """SELECT e.id, e.event_type, e.subject_id, e.canonical_manifest, a.ledger_seq
+                 FROM audit_events e JOIN chain_anchors a ON a.event_id = e.id AND a.anchor_kind = 'ledger'
+                WHERE e.project_id = :p ORDER BY a.ledger_seq""", p=project_id)
+        rows = cur.fetchall()
+        held = []
+        for event_id, etype, subject_id, raw, _seq in rows:
+            manifest = _manifest(raw)
+            # Re-hash what we hold now, so a changed manifest shows as "modified"
+            alert_period = ledger_client._alert_period(cur, subject_id) if etype in ("alert_raised", "alert_resolved") else None
+            held.append({"event_id": event_id, **ledger_client.entry_for(etype, manifest, manifest_hash(manifest), alert_period)})
+
+    result = ledger_client.run("verify", ledger["type_id"], ledger["recorder_lock_hash"], stdin=held)
+    if not result.get("ok"):
+        log.error("could not verify: %s", result.get("detail") or result.get("message"))
+        return 1
+    log.info("project: %s   ledger type %s", project_id, ledger["type_hash"])
+    log.info("  on chain: %s entries · open alerts %s · history %s\n", result["onchain_seq"], result["open_alerts"],
+             "intact" if result["chain_intact"] else "BROKEN")
+    ok = result["chain_intact"]
+    for r in result["results"]:
+        mark = "ok " if r["state"] == "verified" else "!! "
+        ok = ok and r["state"] == "verified"
+        log.info("  %s #%-4s %-16s %s", mark, r["seq"], r["state"], r["event_id"])
+    log.info("\n%s", "every record verified, in order, against an intact on-chain history" if ok else "VERIFICATION FAILED")
+    log.info("(Integrity is not truth: this proves the records haven't changed, not that the measurements are right.)")
+    return 0 if ok else 2
+
+
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     ap = argparse.ArgumentParser()
@@ -54,7 +91,12 @@ def main() -> int:
     ap.add_argument("--tamper", metavar="FIELD",
                     help="mutate this manifest field on the LAST event before verifying, "
                          "to demonstrate that verification fails")
+    ap.add_argument("--ledger", action="store_true",
+                    help="re-fold the project's whole on-chain Evidence Ledger and check every event's position")
     args = ap.parse_args()
+
+    if args.ledger:
+        return verify_ledger(args.project)
 
     with cursor() as cur:
         cur.execute(

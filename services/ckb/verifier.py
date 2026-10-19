@@ -43,10 +43,13 @@ def _load_event(event_id: str) -> dict | None:
     with cursor() as cur:
         cur.execute(
             """SELECT e.id, e.canonical_manifest, e.manifest_sha256,
-                      a.tx_hash, a.output_index, a.status, a.explorer_url, a.anchored_at
+                      a.tx_hash, a.output_index, a.status, a.explorer_url, a.anchored_at,
+                      a.anchor_kind, a.ledger_seq, e.event_type, e.subject_id, e.project_id
                  FROM audit_events e
                  LEFT JOIN chain_anchors a ON a.event_id = e.id
-                WHERE e.id = :eid""",
+                WHERE e.id = :eid
+                -- a ledger record, when there is one, is the stronger commitment
+                ORDER BY CASE a.anchor_kind WHEN 'ledger' THEN 0 ELSE 1 END""",
             eid=event_id,
         )
         row = cur.fetchone()
@@ -55,8 +58,23 @@ def _load_event(event_id: str) -> dict | None:
     return dict(
         id=row[0], manifest=_manifest_of(row[1]), stored_sha=row[2],
         tx_hash=row[3], output_index=row[4], anchor_status=row[5],
-        explorer_url=row[6], anchored_at=row[7],
+        explorer_url=row[6], anchored_at=row[7], anchor_kind=row[8], ledger_seq=row[9],
+        event_type=row[10], subject_id=row[11], project_id=row[12],
     )
+
+
+def _ask_ledger(event: dict, recomputed: str) -> dict:
+    """Ask the chain whether this manifest sits at its position in the project's ledger."""
+    from services.ckb import ledger_client
+    ledger = ledger_client.project_ledger(event["project_id"])
+    if ledger is None:
+        return {"state": "not_anchored", "verified": False, "detail": "This project has no on-chain ledger."}
+    alert_period = None
+    if event["event_type"] in ("alert_raised", "alert_resolved"):
+        with cursor() as cur:
+            alert_period = ledger_client._alert_period(cur, event["subject_id"])
+    return ledger_client.check_event(ledger, int(event["ledger_seq"]), event["event_type"],
+                                     event["manifest"], recomputed, alert_period)
 
 
 #: Fields that describe the record's position in the chain rather than its
@@ -150,7 +168,10 @@ def verify_event(event_id: str, tamper_field: str | None = None) -> Verification
                     "This event has not been anchored on CKB."),
         )
 
-    chain = _ask_chain(event["tx_hash"], event["output_index"], recomputed)
+    if event.get("anchor_kind") == "ledger":
+        chain = _ask_ledger(event, recomputed)
+    else:
+        chain = _ask_chain(event["tx_hash"], event["output_index"], recomputed)
     state = VerificationState(chain.get("state", "chain_unavailable"))
 
     detail = chain.get("detail")

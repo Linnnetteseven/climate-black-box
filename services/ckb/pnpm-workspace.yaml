@@ -2,3 +2,6 @@
 # must run or signing falls back to an unavailable binding.
 allowBuilds:
   secp256k1: true
+# cadencepay is our own package (ckbuilders); newer than pnpm's minimum release age
+minimumReleaseAgeExclude:
+  - cadencepay@0.3.0

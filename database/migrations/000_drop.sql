@@ -1,5 +1,6 @@
 -- Tear-down for `make db-reset`. Reverse dependency order.
 -- Errors are expected on a clean database; the Makefile tolerates them.
+DROP TABLE ckb_ledgers CASCADE CONSTRAINTS;
 DROP TABLE chain_anchors CASCADE CONSTRAINTS;
 DROP TABLE audit_events CASCADE CONSTRAINTS;
 DROP TABLE interventions CASCADE CONSTRAINTS;

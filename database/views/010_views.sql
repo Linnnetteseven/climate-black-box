@@ -63,6 +63,14 @@ SELECT ae.id            AS event_id,
        ca.output_index,
        ca.status         AS anchor_status,
        ca.explorer_url,
-       ca.anchored_at
+       ca.anchored_at,
+       ca.anchor_kind,
+       ca.ledger_seq
 FROM audit_events ae
-LEFT JOIN chain_anchors ca ON ca.event_id = ae.id;
+-- One anchor per event: a ledger entry (enforced on chain) wins over a loose cell
+LEFT JOIN (
+  SELECT a.*, ROW_NUMBER() OVER (
+           PARTITION BY a.event_id
+           ORDER BY CASE a.anchor_kind WHEN 'ledger' THEN 0 ELSE 1 END, a.created_at DESC) AS rn
+    FROM chain_anchors a
+) ca ON ca.event_id = ae.id AND ca.rn = 1;

@@ -33,6 +33,7 @@ from services.analytics.seasonal import build_climatology, deseasonalise, descri
 from services.api.db.connection import cursor  # noqa: E402
 from services.ckb.canonical import manifest_hash  # noqa: E402
 from services.ckb.manifest import alert_manifest, observation_manifest  # noqa: E402
+from services.ckb import ledger_client  # noqa: E402
 
 load_dotenv()
 log = logging.getLogger("cbb.chain")
@@ -95,6 +96,14 @@ def persist_alert(project_id: str, decision, clim) -> str | None:
         return None
 
     alert_id = _id("alert", project_id, decision.rule_version, decision.breaching_period_ids[-1])
+    if ledger_client.project_ledger(project_id):
+        # Ledger mode: an alert already on record keeps its status (it may have been resolved)
+        with cursor() as cur:
+            cur.execute("SELECT status FROM alerts WHERE id = :a", a=alert_id)
+            found = cur.fetchone()
+        if found:
+            log.info("  alert %s already on record (%s), left as is", alert_id, found[0])
+            return alert_id
     explanation = " ".join(decision.reasons)
     limitations = (
         "NDVI is a vegetation greenness indicator, not tree survival, canopy cover or "
@@ -173,13 +182,28 @@ def main() -> int:
 
     previous_hash: str | None = None
     created = 0
-    with cursor() as cur:
-        cur.execute("DELETE FROM chain_anchors WHERE event_id IN "
-                    "(SELECT id FROM audit_events WHERE project_id = :p)", p=args.project)
-        cur.execute("DELETE FROM audit_events WHERE project_id = :p", p=args.project)
+    ledgered = ledger_client.project_ledger(args.project) is not None
+    existing: set[str] = set()
+    if ledgered:
+        # Append-only: once a project has an on-chain ledger its history can't be
+        # rebuilt (the ledger's type script would refuse), so only new events are written.
+        with cursor() as cur:
+            cur.execute("SELECT id, manifest_sha256 FROM audit_events WHERE project_id = :p "
+                        "ORDER BY created_at, id", p=args.project)
+            rows_existing = cur.fetchall()
+        existing = {r[0] for r in rows_existing}
+        previous_hash = rows_existing[-1][1] if rows_existing else None
+        log.info("  ledger mode: %d events already recorded, appending only new ones", len(existing))
+    else:
+        with cursor() as cur:
+            cur.execute("DELETE FROM chain_anchors WHERE event_id IN "
+                        "(SELECT id FROM audit_events WHERE project_id = :p)", p=args.project)
+            cur.execute("DELETE FROM audit_events WHERE project_id = :p", p=args.project)
 
     for row in subjects:
         event_id = _id("evt", args.project, row["id"])
+        if event_id in existing:
+            continue
         manifest = observation_manifest(
             project_id=args.project, event_id=event_id, observation_id=row["id"],
             metric="ndvi_mean", value=float(row["value"]) if row["value"] is not None else None,
@@ -194,7 +218,7 @@ def main() -> int:
                                      "observations", row["id"], manifest)
         created += 1
 
-    if alert_id:
+    if alert_id and _id("evt", args.project, alert_id) not in existing:
         event_id = _id("evt", args.project, alert_id)
         manifest = alert_manifest(
             project_id=args.project, event_id=event_id, alert_id=alert_id,
@@ -215,6 +239,11 @@ def main() -> int:
         log.info("  --no-anchor: skipping CKB")
         return 0
 
+    if ledgered:
+        result = ledger_client.append_pending(args.project)
+        if not result.get("ok"):
+            log.warning("  ledger append failed (%s): %s", result.get("code"), str(result.get("message"))[:160])
+        return 0
     _anchor_pending(args.project)
     return 0
 

@@ -11,6 +11,9 @@ importers:
       '@ckb-ccc/core':
         specifier: ^1.23.0
         version: 1.23.0(typescript@7.0.2)
+      cadencepay:
+        specifier: 0.3.0
+        version: 0.3.0(@ckb-ccc/core@1.23.0(typescript@7.0.2))
 
 packages:
 
@@ -207,6 +210,12 @@ packages:
 
   bs58check@4.0.0:
     resolution: {integrity: sha512-FsGDOnFg9aVI9erdriULkd/JjEWONV/lQE5aYziB5PoBsXRind56lh8doIZIc9X4HoxT5x4bLjMWN1/NB8Zp5g==}
+
+  cadencepay@0.3.0:
+    resolution: {integrity: sha512-pzsj8gXUc2zUERd5vyFHJdpbDkkHSj49TZKeWdi33sRkImUUlOnnRzK8mwatx0sgvhG3/bPm9MwjXwgUleFwyw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@ckb-ccc/core': ^1.22.0
 
   cross-fetch@4.0.0:
     resolution: {integrity: sha512-e4a5N8lVvuLgAWgnCrLr2PP0YyDOTHa9H/Rj54dirp61qXnNq46m82bRhNqIA5VccJtWBvPTFRV3TtvHUKPB1g==}
@@ -462,6 +471,10 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.8.0
       bs58: 6.0.0
+
+  cadencepay@0.3.0(@ckb-ccc/core@1.23.0(typescript@7.0.2)):
+    dependencies:
+      '@ckb-ccc/core': 1.23.0(typescript@7.0.2)
 
   cross-fetch@4.0.0:
     dependencies:

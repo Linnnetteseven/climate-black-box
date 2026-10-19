@@ -92,8 +92,12 @@ deterministic template, and the response says which of the two you are reading.
 
 ### 4 — Verify
 
-Every evidence record is canonicalised, hashed, and committed to Nervos CKB,
-each manifest carrying the hash of the one before it.
+Every evidence record is canonicalised, hashed, and committed to Nervos CKB.
+Each project keeps one **Evidence Ledger** cell whose type script recomputes a
+running hash over every event appended to it, so the history can't be
+rewritten, reordered, skipped, forked or deleted, not even by us. Anyone can
+read the whole history back from the chain and re-check it (`make ledger-verify`).
+See [docs/ckb-integrity.md](docs/ckb-integrity.md).
 
 <table>
 <tr>
@@ -114,6 +118,14 @@ real time.
 > since it was anchored. It does not prove the measurement was correct, the
 > sensor calibrated, or any interpretation of it right. The UI says so on the
 > same screen.
+
+### 5 — Fund, only while the evidence holds
+
+Donors give monthly through [CadencePay](https://www.npmjs.com/package/cadencepay)
+(the `cadencepay` npm package). Each payment lands in an **Evidence Gate**, a
+lock that reads the project's ledger on chain: the project can collect while
+there is no open alert; while one is open the money is held, and the donor can
+take it back. Nothing in that rule depends on our servers.
 
 ### On a phone
 
@@ -160,8 +172,16 @@ Stated here because they are stated in the product too:
 
 - **NDVI is greenness, not carbon.** It does not measure tree survival or canopy.
 - **Rainfall is ERA5 at ~25 km** — district-level context, not site conditions.
-- **The chain is application-level.** Manifests are anchored on CKB; this is
-  not enforced by an on-chain script, and we do not claim it is.
+- **The ledger enforces order and permanence, not truth.** Projects with an
+  on-chain Evidence Ledger get a history the chain itself keeps append-only.
+  Projects without one still use loose anchor cells, which are application-level,
+  and the UI says which a record uses.
+- **The gate trusts the ledger's alerts.** Evidence-gated funding holds money
+  while an alert is open; an alert is a divergence in satellite data, not proof
+  of wrongdoing, and the recorder (the operator) decides when one is resolved,
+  on the record.
+- **Testnet, unaudited.** The ledger and gate scripts have 31 attack tests and a
+  live testnet run, but no external audit.
 - **Sites are demonstrators.** Real boundaries, real imagery, real measurements
   — but interventions are flagged `simulated` in the database, and the UI says so.
 
@@ -191,6 +211,10 @@ The site is on `localhost:3000`, the API on `localhost:8000`.
 
 | Command | What it does |
 |---|---|
+| `make ledger-create` | Create the project's on-chain Evidence Ledger (once) |
+| `make ledger-verify` | Read the whole ledger back from the chain, re-fold it, check every record's position |
+| `make keeper` | Collect due donations into their Evidence Gates |
+| `make collect` | The project withdraws released donations (refused while an alert is open) |
 | `make ingest` | Re-run the Landsat + rainfall pipeline and diff against the fixture |
 | `make anchor` | Anchor unanchored evidence to CKB testnet |
 | `make verify` | Verify every anchored record against the chain |

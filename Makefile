@@ -9,7 +9,7 @@ PYTEST:= .venv/bin/pytest
 -include .env
 export
 
-.PHONY: help setup up down db-wait db-reset db-migrate db-seed test test-unit api web ingest anchor verify fmt clean
+.PHONY: help setup up down db-wait db-reset db-migrate db-seed test test-unit api web ingest anchor verify ledger-create ledger-verify keeper collect fmt clean
 
 help:
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "};{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -42,6 +42,7 @@ db-migrate: ## apply migrations (drop first; errors on a clean db are expected)
 	@$(PY) scripts/run_sql.py database/migrations/000_drop.sql --tolerant
 	@$(PY) scripts/run_sql.py database/migrations/001_core.sql
 	@$(PY) scripts/run_sql.py database/migrations/002_spatial.sql --tolerant
+	@$(PY) scripts/run_sql.py database/migrations/004_evidence_ledger.sql
 	@$(PY) scripts/run_sql.py database/views/010_views.sql
 
 db-seed: ## load the demo projects and derive spatial geometry
@@ -79,6 +80,18 @@ anchor: ## anchor any unanchored evidence to CKB testnet
 
 verify: ## verify every anchored evidence record against the chain
 	$(PY) scripts/verify_chain.py --project $${PROJECT:-mau-transmara-demo}
+
+ledger-create: ## create the project's on-chain Evidence Ledger (once per project)
+	$(PY) scripts/create_ledger.py --project $${PROJECT:-mau-transmara-demo}
+
+ledger-verify: ## re-fold the project's whole ledger history from the chain and check every event
+	$(PY) scripts/verify_chain.py --project $${PROJECT:-mau-transmara-demo} --ledger
+
+keeper: ## collect due donations into the project's Evidence Gates (CKB_KEEPER_PRIVATE_KEY)
+	$(PY) scripts/funding.py keep --project $${PROJECT:-mau-transmara-demo}
+
+collect: ## the project withdraws released donations; refused while an alert is open (CKB_PROJECT_PRIVATE_KEY)
+	$(PY) scripts/funding.py collect --project $${PROJECT:-mau-transmara-demo}
 
 tamper: ## demonstrate that verification fails on an altered manifest
 	$(PY) scripts/verify_chain.py --project $${PROJECT:-mau-transmara-demo} --tamper observed_value

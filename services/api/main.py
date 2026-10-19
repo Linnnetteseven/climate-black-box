@@ -167,6 +167,15 @@ def get_audit(project_id: str) -> list[AuditEvent]:
     return repository.list_audit_events(project_id)
 
 
+@api.get("/projects/{project_id}/ledger", tags=["integrity"])
+def get_ledger(project_id: str, request: Request):
+    """The project's on-chain Evidence Ledger: what donations' Evidence Gates read."""
+    ledger = repository.project_ledger(project_id)
+    if ledger is None:
+        return _error(request, "no_ledger", "This project has no on-chain ledger yet.", 404)
+    return ledger
+
+
 @api.get("/alerts", response_model=list[Alert], tags=["alerts"])
 def get_alerts(project_id: str | None = Query(default=None)) -> list[Alert]:
     return repository.list_alerts(project_id)

@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Evidence anchoring on Nervos CKB testnet.",
   "dependencies": {
-    "@ckb-ccc/core": "^1.23.0"
+    "@ckb-ccc/core": "^1.23.0",
+    "cadencepay": "0.3.0"
   }
 }

@@ -26,6 +26,7 @@ from dotenv import load_dotenv
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from services.api.db.connection import cursor  # noqa: E402
+from services.ckb import ledger_client  # noqa: E402
 
 load_dotenv()
 log = logging.getLogger("cbb.anchor")
@@ -37,6 +38,15 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--project", default="mau-transmara-demo")
     args = ap.parse_args()
+
+    # A project with an on-chain ledger records there: append-only and in order
+    if ledger_client.project_ledger(args.project):
+        result = ledger_client.append_pending(args.project)
+        if not result.get("ok"):
+            log.error("ledger append failed (%s): %s", result.get("code"), result.get("message"))
+            return 1
+        log.info(result.get("message") or f"appended {result['appended']} event(s): {result['explorer_url']}")
+        return 0
 
     with cursor() as cur:
         cur.execute(

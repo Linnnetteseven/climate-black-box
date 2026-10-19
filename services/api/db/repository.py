@@ -21,6 +21,7 @@ from services.api.schemas.contracts import (
     AuditEvent,
     AnchorRef,
     Commitment,
+    LedgerInfo,
     Observation,
     Project,
     SimulationStatus,
@@ -189,7 +190,7 @@ def list_audit_events(project_id: str) -> list[AuditEvent]:
             """SELECT event_id, project_id, event_type, subject_table, subject_id,
                       actor, manifest_sha256, previous_event_sha256, created_at,
                       simulation_status, network, tx_hash, output_index,
-                      anchor_status, explorer_url, anchored_at
+                      anchor_status, explorer_url, anchored_at, anchor_kind, ledger_seq
                  FROM v_audit_timeline
                 WHERE project_id = :pid
                 ORDER BY created_at""",
@@ -201,6 +202,7 @@ def list_audit_events(project_id: str) -> list[AuditEvent]:
                 AnchorRef(
                     network=r[10], tx_hash=r[11], output_index=r[12],
                     status=r[13], explorer_url=r[14], anchored_at=r[15],
+                    kind=r[16] or "cell", ledger_seq=r[17],
                 )
                 if r[10] else None
             )
@@ -234,3 +236,20 @@ def join_alert_waitlist(project_id: str, phone: str) -> bool:
             {"id": sub_id, "p": project_id, "ph": phone},
         )
     return True
+
+
+def project_ledger(project_id: str) -> LedgerInfo | None:
+    """The project's on-chain Evidence Ledger, if it has one."""
+    with cursor() as cur:
+        cur.execute(
+            """SELECT network, type_id, type_hash, recorder_lock_hash, recorder_address,
+                      payout_address, create_tx_hash
+                 FROM ckb_ledgers WHERE project_id = :p""", p=project_id)
+        r = cur.fetchone()
+    if r is None:
+        return None
+    return LedgerInfo(
+        project_id=project_id, network=r[0], type_id=r[1], type_hash=r[2], recorder_lock_hash=r[3],
+        recorder_address=r[4], payout_address=r[5] or r[4], create_tx_hash=r[6],
+        explorer_url=f"https://pudge.explorer.nervos.org/transaction/{r[6]}",
+    )

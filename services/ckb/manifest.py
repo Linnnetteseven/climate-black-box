@@ -141,3 +141,35 @@ def alert_manifest(
         "created_at": _utc(created_at or datetime.now(timezone.utc)),
         "simulation_status": simulation_status,
     }
+
+
+def resolution_manifest(
+    *,
+    project_id: str,
+    event_id: str,
+    alert_id: str,
+    resolution: str,
+    note: str,
+    resolved_by: str,
+    simulation_status: str,
+    previous_event_hash: str | None,
+    created_at: datetime | None = None,
+) -> dict[str, Any]:
+    """A manifest for an alert being resolved or dismissed.
+
+    Resolution is evidence too: it is what lets held funding flow again, so who
+    resolved it, how, and why are committed alongside the alert it closes.
+    """
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "project_id": project_id,
+        "event_id": event_id,
+        "event_type": "alert_resolved",
+        "alert_id": alert_id,
+        "resolution": resolution,
+        "note": note,
+        "resolved_by": resolved_by,
+        "previous_event_hash": previous_event_hash,
+        "created_at": _utc(created_at or datetime.now(timezone.utc)),
+        "simulation_status": simulation_status,
+    }

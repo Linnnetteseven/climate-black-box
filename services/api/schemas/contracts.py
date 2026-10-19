@@ -40,6 +40,8 @@ class VerificationState(StrEnum):
     NOT_ANCHORED = "not_anchored"
     PENDING = "pending"
     CHAIN_UNAVAILABLE = "chain_unavailable"
+    #: On the ledger, but not at the position our database says: history was reordered
+    OUT_OF_SEQUENCE = "out_of_sequence"
 
 
 class Base(BaseModel):
@@ -225,6 +227,25 @@ class AnchorRef(Base):
     status: Literal["pending", "confirmed", "failed"]
     explorer_url: str | None = None
     anchored_at: datetime | None = None
+    #: "ledger": an entry in the project's on-chain Evidence Ledger; "cell": a loose anchor cell
+    kind: Literal["cell", "ledger"] = "cell"
+    #: position in the project's ledger history (1-based), for ledger entries
+    ledger_seq: int | None = None
+
+
+class LedgerInfo(Base):
+    """A project's on-chain Evidence Ledger, and where its funding is paid."""
+
+    project_id: str
+    network: str
+    type_id: str
+    type_hash: str
+    recorder_lock_hash: str
+    recorder_address: str | None = None
+    #: where released donations go (the project's own wallet)
+    payout_address: str | None = None
+    create_tx_hash: str
+    explorer_url: str
 
 
 class VerificationResult(Base):

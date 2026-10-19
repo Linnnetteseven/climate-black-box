@@ -64,10 +64,23 @@ body, .t-Body { background: var(--cbb-ground); color: var(--cbb-ink); }
   font-family: ui-monospace, "IBM Plex Mono", monospace;
   border: 1px solid;
 }
-.cbb-open  { color: var(--cbb-warn);   border-color: var(--cbb-warn); }
 .cbb-quiet { color: var(--cbb-accent); border-color: var(--cbb-accent); }
 .cbb-conf  { color: var(--cbb-accent); border-color: var(--cbb-accent); }
 .cbb-fail  { color: var(--cbb-crit);   border-color: var(--cbb-crit); }
+
+/* Page 3, severity and status. One class per value the contract allows --
+   services/api/schemas/contracts.py, Alert.severity and Alert.status -- not
+   per value that happens to be in the table today. A chip whose class does
+   not exist renders as bare bordered text, which looks like nothing is wrong
+   precisely when an urgent alert has appeared for the first time. */
+.cbb-info          { color: var(--cbb-muted);  border-color: var(--cbb-muted); }
+.cbb-review        { color: var(--cbb-warn);   border-color: var(--cbb-warn); }
+.cbb-urgent        { color: var(--cbb-crit);   border-color: var(--cbb-crit); }
+
+.cbb-open          { color: var(--cbb-warn);   border-color: var(--cbb-warn); }
+.cbb-investigating { color: var(--cbb-ink-2);  border-color: var(--cbb-ink-2); }
+.cbb-resolved      { color: var(--cbb-accent); border-color: var(--cbb-accent); }
+.cbb-dismissed     { color: var(--cbb-muted);  border-color: var(--cbb-muted); }
 
 /* The whole card body, built in one HTML expression rather than APEX's Title /
    Subtitle / Body slots. Those slots are where this got stuck: the KPI markup
