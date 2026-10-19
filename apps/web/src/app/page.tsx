@@ -16,6 +16,7 @@ import { Reveal } from "@/components/Reveal";
 import { AlertWaitlist } from "@/components/AlertWaitlist";
 import { Starfield } from "@/components/Starfield";
 import { VerifyPanel } from "@/components/VerifyPanel";
+import { FundPanel } from "@/components/fund/FundPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,8 @@ export default async function Page({
   // site there is no alert, and that absence is the point.
   const alertId = latestAlert?.alert?.id;
   const investigationResult = alertId ? await api.investigation(alertId) : null;
+  const ledgerResult = await api.ledger(PROJECT_ID);
+  const ledger = ledgerResult.ok ? ledgerResult.data : null;
   const investigation =
     investigationResult?.ok ? investigationResult.data : null;
 
@@ -458,10 +461,18 @@ export default async function Page({
               Each manifest is hashed and committed on chain, carrying the hash
               of the one before it.
             </p>
-            <p>
-              The chain is an application-level structure anchored on CKB. It is
-              not enforced by an on-chain script, and we do not claim it is.
-            </p>
+            {ledger ? (
+              <p>
+                This project keeps an on-chain Evidence Ledger: its type script
+                recomputes the history on every append, so records can&apos;t be
+                rewritten, reordered or deleted, by anyone, including us.
+              </p>
+            ) : (
+              <p>
+                The chain is an application-level structure anchored on CKB. It is
+                not enforced by an on-chain script, and we do not claim it is.
+              </p>
+            )}
           </div>
           <div className="panel-quiet">
             {auditEvents.length ? (
@@ -475,6 +486,30 @@ export default async function Page({
           </div>
         </div>
       </section>
+
+      {ledger && (
+        <>
+          <Chapter
+            ambience="forest"
+            index="06 — Fund"
+            title="Money that follows the evidence."
+            lede="Donate monthly through CadencePay. Each payment waits in a gate that reads this forest's ledger: it reaches the project while the evidence holds, and is held, and yours to take back, while an alert is open."
+          />
+          <section id="beat-fund" style={{ padding: "48px 0 72px" }}>
+            <div className="evidence split">
+              <div className="rail">
+                <h3>Evidence-gated funding</h3>
+                <p>Your donation is a CadencePay subscription: it pays a fixed amount once per period, never more, and you can stop it whenever you like.</p>
+                <p>Each payment lands in an Evidence Gate, a lock that checks this project&apos;s ledger on chain before letting anyone spend it.</p>
+                <p>Integrity is not truth: the gate trusts the ledger&apos;s alerts, and an alert is a divergence in satellite data, not proof of wrongdoing.</p>
+              </div>
+              <div className="panel-quiet">
+                <FundPanel ledger={ledger} />
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       {/* What this runs on. Named in text rather than with Oracle's logo marks:
           crediting the technology needs the names, and reproducing a trademark

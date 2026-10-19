@@ -94,6 +94,21 @@ export interface AnchorRef {
   status: "pending" | "confirmed" | "failed";
   explorer_url: string | null;
   anchored_at: string | null;
+  /** "ledger": an entry in the project's on-chain Evidence Ledger; "cell": a loose anchor cell */
+  kind?: "cell" | "ledger";
+  ledger_seq?: number | null;
+}
+
+export interface LedgerInfo {
+  project_id: string;
+  network: string;
+  type_id: string;
+  type_hash: string;
+  recorder_lock_hash: string;
+  recorder_address: string | null;
+  payout_address: string | null;
+  create_tx_hash: string;
+  explorer_url: string;
 }
 
 export interface AuditEvent {
@@ -111,7 +126,7 @@ export interface AuditEvent {
 }
 
 export type VerificationState =
-  | "verified" | "modified" | "not_anchored" | "pending" | "chain_unavailable";
+  | "verified" | "modified" | "not_anchored" | "pending" | "chain_unavailable" | "out_of_sequence";
 
 export interface VerificationResult {
   evidence_id: string;
@@ -255,4 +270,5 @@ export const api = {
     get<Investigation>(`/api/alerts/${alertId}/investigation`),
   trend: (id: string) => get<TrendResult>(`/api/projects/${id}/trend`),
   verify: (eventId: string) => get<VerificationResult>(`/api/evidence/${eventId}/verify`),
+  ledger: (id: string) => get<LedgerInfo>(`/api/projects/${id}/ledger`),
 };

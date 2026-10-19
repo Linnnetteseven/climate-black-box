@@ -26,6 +26,7 @@ const STATE_STYLE: Record<VerificationState, { color: string; label: string; mar
   not_anchored:      { color: "var(--ink-muted)",      label: "Not anchored",       mark: "—" },
   pending:           { color: "var(--status-warning)", label: "Anchor pending",     mark: "◷" },
   chain_unavailable: { color: "var(--status-serious)", label: "Chain unreachable",  mark: "?" },
+  out_of_sequence:   { color: "var(--status-critical)", label: "Out of sequence",   mark: "⇅" },
 };
 
 function Hash({ value, label }: { value: string | null; label: string }) {
@@ -165,12 +166,21 @@ export function VerifyPanel({ events }: { events: AuditEvent[] }) {
         {!result && !failed && (
           <p style={{ color: "var(--ink-muted)", fontSize: 15.5, margin: 0 }}>
             {event?.anchor?.status === "confirmed" ? (
-              <>
-                This record is anchored on{" "}
-                <span className="mono">{event.anchor.network}</span>. Press Verify
-                to re-hash the stored manifest and compare it with the commitment
-                on chain.
-              </>
+              event.anchor.kind === "ledger" ? (
+                <>
+                  This record is entry <span className="mono">#{event.anchor.ledger_seq}</span> in the
+                  project&apos;s on-chain Evidence Ledger on <span className="mono">{event.anchor.network}</span>.
+                  Press Verify to re-hash it and check it sits at that exact position in a history
+                  the chain itself keeps append-only.
+                </>
+              ) : (
+                <>
+                  This record is anchored on{" "}
+                  <span className="mono">{event.anchor.network}</span>. Press Verify
+                  to re-hash the stored manifest and compare it with the commitment
+                  on chain.
+                </>
+              )
             ) : (
               <>This record has no confirmed anchor yet.</>
             )}

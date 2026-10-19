@@ -3,4 +3,9 @@
 # image optimisation; this app does not use next/image, so its native build is
 # not needed and skipping it keeps installs non-interactive on a fresh clone.
 allowBuilds:
+  # core-js (via the CKB wallet connector) only prints a banner on install
+  core-js: false
   sharp: false
+# cadencepay is our own package (ckbuilders); newer than pnpm's minimum release age
+minimumReleaseAgeExclude:
+  - cadencepay@0.3.0
