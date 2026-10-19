@@ -51,7 +51,12 @@ const STEPS: Step[] = [
   {
     anchor: "beat-verify",
     label: "Verify, then tamper",
-    say: "Press Verify — the hashes match the chain. Then press Tamper and watch the same check fail. Nothing stored changes.",
+    say: "Press Verify: the record matches its place in this forest's on-chain ledger. Then press Tamper and watch the same check fail. Nothing stored changes.",
+  },
+  {
+    anchor: "beat-fund",
+    label: "Fund, gated by evidence",
+    say: "Donations stream through CadencePay into a gate that reads the ledger. While an alert is open, payments are held and the donor can take them back.",
   },
 ];
 
@@ -60,12 +65,15 @@ const HIGHLIGHT_MS = 1800;
 export function DemoGuide() {
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
+  // Only the beats this page actually shows: a quiet site has no alert to act on,
+  // and only projects with an on-chain ledger have a funding beat.
+  const [steps, setSteps] = useState<Step[]>(STEPS);
   // Stepping faster than the highlight lasts used to let an earlier timer
   // clear a later step's outline, so the beat you just jumped to looked unlit.
   const litTimer = useRef<number | null>(null);
 
-  const goTo = useCallback((index: number) => {
-    const step = STEPS[index];
+  const goTo = useCallback((index: number, list: Step[] = steps) => {
+    const step = list[index];
     if (!step) return;
     const el = document.getElementById(step.anchor);
     if (!el) return;
@@ -82,7 +90,7 @@ export function DemoGuide() {
       litTimer.current = null;
     }, HIGHLIGHT_MS);
     setI(index);
-  }, []);
+  }, [steps]);
 
   // On a phone the open guide spans the full width at the bottom, which lands
   // on top of the audio dock. Flag it on <body> so the dock can step aside.
@@ -97,32 +105,37 @@ export function DemoGuide() {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-      if (e.key === "ArrowRight") { e.preventDefault(); goTo(Math.min(i + 1, STEPS.length - 1)); }
+      if (e.key === "ArrowRight") { e.preventDefault(); goTo(Math.min(i + 1, steps.length - 1)); }
       if (e.key === "ArrowLeft")  { e.preventDefault(); goTo(Math.max(i - 1, 0)); }
       if (e.key === "Escape")     { setOpen(false); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, i, goTo]);
+  }, [open, i, goTo, steps.length]);
 
   if (!open) {
     return (
       <button
         type="button"
         className="demo-open"
-        onClick={() => { setOpen(true); goTo(0); }}
+        onClick={() => {
+          const present = STEPS.filter((s) => document.getElementById(s.anchor));
+          setSteps(present);
+          setOpen(true);
+          goTo(0, present);
+        }}
       >
         Guided demo
       </button>
     );
   }
 
-  const step = STEPS[i];
+  const step = steps[i] ?? steps[0];
 
   return (
     <div className="demo-guide" role="region" aria-label="Guided demo">
       <div className="demo-dots" aria-hidden>
-        {STEPS.map((s, n) => (
+        {steps.map((s, n) => (
           <button
             key={s.anchor}
             type="button"
@@ -135,7 +148,7 @@ export function DemoGuide() {
 
       <div className="demo-body">
         <p className="demo-step mono">
-          {String(i).padStart(2, "0")} / {String(STEPS.length - 1).padStart(2, "0")}
+          {String(i).padStart(2, "0")} / {String(steps.length - 1).padStart(2, "0")}
           <span className="demo-label">{step.label}</span>
         </p>
         <p className="demo-say">{step.say}</p>
@@ -148,8 +161,8 @@ export function DemoGuide() {
         <button
           type="button"
           className="demo-next"
-          onClick={() => goTo(Math.min(i + 1, STEPS.length - 1))}
-          disabled={i === STEPS.length - 1}
+          onClick={() => goTo(Math.min(i + 1, steps.length - 1))}
+          disabled={i === steps.length - 1}
         >
           Next
         </button>
